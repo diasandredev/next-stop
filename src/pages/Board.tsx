@@ -5,19 +5,12 @@ import { Button } from '@/components/ui/button';
 import { DayColumn } from '@/components/DayColumn';
 import { ExtraColumn } from '@/components/ExtraColumn';
 import { SyncStatus } from '@/components/SyncStatus';
+import { Sidebar } from '@/components/Sidebar';
 
-import { ChevronLeft, ChevronRight, LogOut, Settings } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Loader2 } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Card, Calendar as CalendarType } from '@/types/kanban';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Calendar, Plus, User, Loader2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { NewCalendarDialog } from '@/components/NewCalendarDialog';
 import { CalendarSettingsDialog } from '@/components/CalendarSettingsDialog';
@@ -168,6 +161,9 @@ const Board = () => {
 
   const currentCalendar = calendars.find(c => c.id === currentCalendarId);
 
+  // ... existing code ...
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+
   if (isLoading) {
     return (
       <div className="min-h-screen w-full bg-black flex items-center justify-center">
@@ -182,128 +178,68 @@ const Board = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Header */}
-      <header className="px-6 py-4 flex-shrink-0 sticky top-0 z-10 bg-background/80 backdrop-blur-sm">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4 w-full md:w-auto justify-center md:justify-start">
-            <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight text-center md:text-left">
-              {monthYear}
-              {currentCalendar && (
-                <span className="text-xl md:text-2xl font-normal text-muted-foreground ml-2 md:ml-4">
-                  {currentCalendar.name}
-                </span>
-              )}
-            </h1>
+    <div className="min-h-screen bg-background text-foreground flex overflow-hidden">
+      {/* Sidebar */}
+      <Sidebar
+        isExpanded={isSidebarExpanded}
+        toggleSidebar={() => setIsSidebarExpanded(!isSidebarExpanded)}
+        calendars={calendars}
+        currentCalendarId={currentCalendarId}
+        setCurrentCalendarId={setCurrentCalendarId}
+        user={user}
+        logout={logout}
+        onOpenAccountSettings={() => setShowAccountSettingsDialog(true)}
+        onOpenCalendarSettings={() => {
+          // calendarToEdit is set by the sidebar before calling this, or we can handle it there
+          setShowCalendarSettingsDialog(true);
+        }}
+        setCalendarToEdit={setCalendarToEdit}
+        onOpenNewCalendar={() => setShowNewCalendarDialog(true)}
+      />
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        {/* Header */}
+        <header className="px-6 py-4 flex-shrink-0 sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/50">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4 w-full md:w-auto justify-center md:justify-start">
+              <h1 className="text-3xl md:text-3xl font-bold text-foreground tracking-tight text-center md:text-left">
+                {monthYear}
+                {currentCalendar && (
+                  <span className="text-xl md:text-2xl font-normal text-muted-foreground ml-2 md:ml-4">
+                    {currentCalendar.name}
+                  </span>
+                )}
+              </h1>
+            </div>
+            <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
+              <SyncStatus />
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="icon" className="rounded-full w-9 h-9 border-muted-foreground/20" onClick={goToCurrentWeek}>
+                    <Calendar className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Today</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <div className="w-px h-6 bg-border mx-2" />
+
+              <Button variant="outline" size="icon" className="rounded-full w-9 h-9 border-muted-foreground/20" onClick={goToPreviousWeek}>
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" size="icon" className="rounded-full w-9 h-9 border-muted-foreground/20" onClick={goToNextWeek}>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
-            <SyncStatus />
+        </header>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-full w-10 h-10 border-muted-foreground/20" onClick={goToCurrentWeek}>
-                  <Calendar className="w-5 h-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Today</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-full w-10 h-10 border-muted-foreground/20">
-                  <User className="w-5 h-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 p-2">
-                <div className="flex flex-col items-center justify-center py-4 gap-2">
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center border border-border">
-                    <span className="text-lg font-medium">
-                      {user?.displayName
-                        ? user.displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
-                        : user?.email?.substring(0, 2).toUpperCase() || 'U'}
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <span className="font-medium">{user?.displayName || 'User'}</span>
-                    <span className="text-xs text-muted-foreground">{user?.email}</span>
-                  </div>
-                </div>
-
-                <DropdownMenuSeparator />
-
-                <div className="py-2">
-                  {calendars.map(calendar => (
-                    <DropdownMenuItem
-                      key={calendar.id}
-                      className="gap-2 cursor-pointer justify-between group"
-                      onClick={() => setCurrentCalendarId(calendar.id)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        <span className={currentCalendarId === calendar.id ? "font-bold" : ""}>
-                          {calendar.name}
-                        </span>
-                        {currentCalendarId === calendar.id && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                        )}
-                      </div>
-                      <div
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCalendarToEdit(calendar);
-                          setShowCalendarSettingsDialog(true);
-                        }}
-                      >
-                        <Settings className="w-3 h-3 text-muted-foreground" />
-                      </div>
-                    </DropdownMenuItem>
-                  ))}
-                </div>
-
-                <Button
-                  className="w-full justify-center gap-2 my-2"
-                  variant="secondary"
-                  onClick={() => setShowNewCalendarDialog(true)}
-                >
-                  <Plus className="w-4 h-4" />
-                  New calendar
-                </Button>
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem
-                  className="gap-2 cursor-pointer"
-                  onClick={() => setShowAccountSettingsDialog(true)}
-                >
-                  <Settings className="w-4 h-4" />
-                  <span>Account settings</span>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem className="gap-2 cursor-pointer text-red-500 focus:text-red-500" onClick={logout}>
-                  <LogOut className="w-4 h-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <div className="w-px h-6 bg-border mx-2" />
-
-            <Button variant="outline" size="icon" className="rounded-full w-10 h-10 border-muted-foreground/20" onClick={goToPreviousWeek}>
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <Button variant="outline" size="icon" className="rounded-full w-10 h-10 border-muted-foreground/20" onClick={goToNextWeek}>
-              <ChevronRight className="w-5 h-5" />
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Board */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-x-auto overflow-y-hidden">
+        {/* Board Content */}
+        <main className="flex-1 overflow-x-auto overflow-y-hidden bg-background/50">
           <div className="h-full w-full md:min-w-[1024px] flex flex-col p-4 gap-8 overflow-y-auto">
             <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
               {/* Week Days - Takes remaining space */}
@@ -461,8 +397,8 @@ const Board = () => {
               </DragOverlay>
             </DndContext>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
 
       <NewCalendarDialog
         open={showNewCalendarDialog}
@@ -479,7 +415,7 @@ const Board = () => {
         open={showAccountSettingsDialog}
         onOpenChange={setShowAccountSettingsDialog}
       />
-    </div >
+    </div>
   );
 };
 
