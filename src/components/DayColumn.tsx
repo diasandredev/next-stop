@@ -134,13 +134,35 @@ export const DayColumn = ({
         )}
 
         {/* Empty slots - Invisible but clickable */}
-        {Array.from({ length: Math.max(0, Math.max(MIN_SLOTS, rootCards.length + 1) - rootCards.length - (isAdding ? 1 : 0)) }).map((_, i) => (
-          <div
-            key={`slot-${i}`}
-            onClick={() => setIsAdding(true)}
-            className="h-12 border-b border-border/40 rounded-none cursor-pointer hover:bg-accent/5 transition-colors"
-          />
-        ))}
+        {(() => {
+          // Calculate used slots based on visual height
+          let usedSlots = 0;
+          rootCards.forEach(card => {
+            if (card.type === 'options') {
+              const children = childCards.filter(c => c.parentId === card.id);
+              const count1 = children.filter(c => c.optionId === '1').length;
+              const count2 = children.filter(c => c.optionId === '2').length;
+              // 2 slots (Header + Footer) + max children. 
+              // If empty, max(0,0)=0, so just 2 slots for header+footer+buttons.
+              // Note: Visual counting must match DashboardView logic
+              usedSlots += 2 + Math.max(count1, count2);
+            } else {
+              usedSlots += 1;
+            }
+          });
+
+          if (isAdding) usedSlots += 1;
+
+          const slotsToRender = Math.max(0, MIN_SLOTS - usedSlots);
+
+          return Array.from({ length: slotsToRender }).map((_, i) => (
+            <div
+              key={`slot-${i}`}
+              onClick={() => setIsAdding(true)}
+              className="h-12 border-b border-border/40 rounded-none cursor-pointer hover:bg-accent/5 transition-colors"
+            />
+          ));
+        })()}
       </div>
     </div>
   );

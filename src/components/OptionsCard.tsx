@@ -91,7 +91,7 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
                     {/* Option 1 */}
                     <div ref={setRef1} className={`flex-1 flex flex-col min-w-0 transition-colors ${isOver1 ? 'bg-accent/10' : ''}`}>
 
-                        <div className="flex flex-col h-full p-0 min-h-[48px] space-y-0 text-sm">
+                        <div className={`flex flex-col h-full p-0 space-y-0 text-sm ${option1Cards.length > 0 ? 'min-h-[48px]' : ''}`}>
                             <div className="flex-1">
                                 <SortableContext items={option1Cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
                                     {option1Cards.map(c => <KanbanCard key={c.id} card={c} isNested />)}
@@ -128,7 +128,7 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
                     {/* Option 2 */}
                     <div ref={setRef2} className={`flex-1 flex flex-col min-w-0 transition-colors ${isOver2 ? 'bg-accent/10' : ''}`}>
 
-                        <div className="flex flex-col h-full p-0 min-h-[48px] space-y-0 text-sm">
+                        <div className={`flex flex-col h-full p-0 space-y-0 text-sm ${option2Cards.length > 0 ? 'min-h-[48px]' : ''}`}>
                             <div className="flex-1">
                                 <SortableContext items={option2Cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
                                     {option2Cards.map(c => <KanbanCard key={c.id} card={c} isNested />)}
