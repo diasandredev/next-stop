@@ -74,16 +74,18 @@ const Board = () => {
     const card = cards.find(c => c.id === cardId);
     if (!card) return;
 
-    // Determine drop target (could be a DayColumn or ExtractColumn in a Dashboard)
-    const overData = over.data.current as { type?: string; date?: string; columnId?: string; dashboardId?: string } | undefined;
+    // Determine drop target
+    const overData = over.data.current as { type?: string; date?: string; columnId?: string; dashboardId?: string; parentId?: string; optionId?: string } | undefined;
     const overId = over.id as string;
     const overCard = cards.find(c => c.id === overId);
 
     // Determine Destination properties
-    let destType: 'day' | 'extra' | null = null;
+    let destType: 'day' | 'extra' | 'option' | null = null;
     let destDate: string | undefined;
     let destExtraId: string | undefined;
     let destDashboardId: string | undefined;
+    let destParentId: string | undefined;
+    let destOptionId: string | undefined;
 
     if (overData?.type === 'day') {
       destType = 'day';
@@ -92,34 +94,63 @@ const Board = () => {
     } else if (overData?.type === 'extra') {
       destType = 'extra';
       destExtraId = overData.columnId;
-      // ExtraColumn should have dashboardId now? Or we need to look it up from column
-      // ExtraColumn component droppable data should ideally include dashboardId?
-      // Wait, 'extra-columnId' droppable.
-      // In ExtraColumn.tsx I didn't update droppable data to include dashboardId explicitly, 
-      // but I can look up the column from 'extraColumns' array.
       const col = extraColumns.find(c => c.id === overData.columnId);
       destDashboardId = col?.dashboardId;
+    } else if (overData?.type === 'option') {
+      destType = 'option';
+      destDashboardId = overData.dashboardId;
+      destParentId = overData.parentId;
+      destOptionId = overData.optionId;
+      // Inherit date from parent if possible, but actually OptionsCard is in a DayColumn, so date matches
+      // We can find the parent card to get the date
+      const parentCard = cards.find(c => c.id === destParentId);
+      destDate = parentCard?.date;
     } else if (overCard) {
+      // If dropping ONTO a card
       destType = overCard.columnType ?? null;
       destDate = overCard.date;
       destExtraId = overCard.extraColumnId;
       destDashboardId = overCard.dashboardId;
+
+      // Check if the card we are dropping onto is INSIDE an option
+      if (overCard.parentId) {
+        destType = 'option';
+        destParentId = overCard.parentId;
+        destOptionId = overCard.optionId;
+      }
     }
 
     if (!destType || !destDashboardId) return;
 
     // Filter cards for the destination list (sorted)
-    const destList = cards
-      .filter(c =>
+    let destList: Card[] = [];
+
+    if (destType === 'day') {
+      destList = cards.filter(c =>
         c.dashboardId === destDashboardId &&
-        (destType === 'day' ? (c.columnType === 'day' && c.date === destDate) : (c.columnType === 'extra' && c.extraColumnId === destExtraId))
-      )
-      .sort((a, b) => {
-        const ao = a.order ?? Number.MAX_SAFE_INTEGER;
-        const bo = b.order ?? Number.MAX_SAFE_INTEGER;
-        if (ao !== bo) return ao - bo;
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      });
+        c.columnType === 'day' &&
+        c.date === destDate &&
+        !c.parentId // Only root cards
+      );
+    } else if (destType === 'extra') {
+      destList = cards.filter(c =>
+        c.dashboardId === destDashboardId &&
+        c.columnType === 'extra' &&
+        c.extraColumnId === destExtraId
+      );
+    } else if (destType === 'option') {
+      destList = cards.filter(c =>
+        c.parentId === destParentId &&
+        c.optionId === destOptionId
+      );
+    }
+
+    destList = destList.sort((a, b) => {
+      const ao = a.order ?? Number.MAX_SAFE_INTEGER;
+      const bo = b.order ?? Number.MAX_SAFE_INTEGER;
+      if (ao !== bo) return ao - bo;
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    });
 
     // Determine target index
     const overIndex = overCard ? destList.findIndex(c => c.id === overCard.id) : destList.length;
@@ -136,34 +167,82 @@ const Board = () => {
       // Move across lists: update properties
       const updates: Partial<Card> = {
         dashboardId: destDashboardId,
-        order: overIndex // Start at dragged position, logic below fixes subsequent orders
+        order: overIndex
       };
 
       if (destType === 'day') {
         updates.columnType = 'day';
         updates.date = destDate;
-        updates.extraColumnId = undefined; // Clear extra column
-      } else {
+        updates.extraColumnId = undefined;
+        updates.parentId = undefined; // Clear option parents
+        updates.optionId = undefined;
+      } else if (destType === 'extra') {
         updates.columnType = 'extra';
         updates.extraColumnId = destExtraId;
-        updates.date = undefined; // Clear date
+        updates.date = undefined;
+        updates.parentId = undefined;
+        updates.optionId = undefined;
+      } else if (destType === 'option') {
+        updates.columnType = 'day'; // Options are usually in day columns
+        updates.date = destDate;
+        updates.parentId = destParentId;
+        updates.optionId = destOptionId;
+        updates.extraColumnId = undefined;
       }
 
       // Update the moved card
       updateCard(cardId, updates);
 
-      // Update orders for other cards in dest list
-      // Insert visually logic is handled by optimistic UI usually, here we just save.
-      // Ideally we reindex everyone.
-      ids.splice(overIndex, 0, cardId);
-      ids.forEach((id, idx) => {
-        if (id !== cardId) updateCard(id, { order: idx });
-        // We already updated cardId above, but maybe order wasn't correct if we just set it to overIndex?
-        // It's safer to update all.
-        // Note: updateCard is async/optimized? 
-      });
-      // Also update cardId order explicitly if needed
-      updateCard(cardId, { ...updates, order: overIndex });
+      // CRITICAL FIX: If the moved card is an 'options' container, we must update all its children
+      // to reflect the new dashboardId and date (if applicable).
+      // Children always inherit date and dashboardId from their parent option container.
+      if (card.type === 'options') {
+        // Find all children
+        const children = cards.filter(c => c.parentId === cardId);
+        children.forEach(child => {
+          const childUpdates: Partial<Card> = {
+            dashboardId: updates.dashboardId ?? child.dashboardId,
+          };
+          // If moving to a new day, update date
+          if (updates.date !== undefined && updates.date !== child.date) {
+            childUpdates.date = updates.date;
+          }
+          // If moving to extra column (unlikely for options, but possible in theory), 
+          // we might need to handle columnType, but options usually stay in 'day' or act as 'day' types.
+          // Assuming options only live in Day columns for now.
+
+          updateCard(child.id, childUpdates);
+        });
+      }
+
+      // Reorder destination list
+      // Since destList didn't include the new card, we insert it virtually
+      // But actually, just setting the order to overIndex is risky if there are gaps.
+      // Better to shift everyone >= overIndex
+
+      // Simplest approach: Just update order. Sort is stable.
+      // But if we insert at 0, and there is already a 0...
+      // We should probably re-index the destination list + the new item.
+
+      const newIds = [...ids];
+      // Ensure we don't duplicate
+      if (!newIds.includes(cardId)) {
+        // Correct insertion point
+        // if overIndex is -1 (not found, e.g. dropped on container), append
+        const insertAt = (overIndex === -1) ? newIds.length : overIndex;
+        newIds.splice(insertAt, 0, cardId); // actually cardId is not in ids yet since it's from another list
+
+        // Update all
+        newIds.forEach((id, idx) => {
+          if (id === cardId) {
+            // handled by first updateCard but let's be safe
+            // We merge updates with new order
+            updateCard(id, { ...updates, order: idx });
+          } else {
+            updateCard(id, { order: idx });
+          }
+        });
+      }
     }
   };
 

@@ -64,7 +64,29 @@ export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: D
     // Calculate max cards in any column for this dashboard to sync grid lines
     const dayCardCounts = dates.map(date => {
         const dateStr = date.toISOString().split('T')[0];
-        return cards.filter(c => c.date === dateStr && c.columnType === 'day' && c.dashboardId === dashboard.id).length;
+        const dayCards = cards.filter(c => c.date === dateStr && c.columnType === 'day' && c.dashboardId === dashboard.id);
+
+        // Calculate "visual slots" used
+        // Standard card = 1 slot
+        // Options card = header (1) + max(branches) + footer (1) + margins(~0.5) ~ roughly 2 + max
+        // Since we unified styles to ~48px (1 slot) for header, etc.
+        // Let's approximate: Options = 2 (Header+Footer) + Max(ChildCount)
+        let visualCount = 0;
+        dayCards.forEach(c => {
+            if (c.parentId) return; // Skip children, they are counted within parent container
+
+            if (c.type === 'options') {
+                // Find children for this option
+                const children = cards.filter(child => child.parentId === c.id);
+                const count1 = children.filter(child => child.optionId === '1').length;
+                const count2 = children.filter(child => child.optionId === '2').length;
+                // Header (1 slot) + Content (max children) + AddButton (1 slot) + Margins (~0.5 but let's say 0)
+                visualCount += 2 + Math.max(count1, count2);
+            } else {
+                visualCount += 1;
+            }
+        });
+        return visualCount;
     });
 
     const extraCardCounts = extraColumns

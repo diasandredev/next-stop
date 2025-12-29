@@ -6,6 +6,11 @@ export interface Card {
   extraColumnId?: string; // for cards in extra columns
   description?: string; // Detailed description
 
+  // Options/Branching support
+  type?: 'default' | 'options';
+  parentId?: string; // If this card belongs to an option group
+  optionId?: string; // Which specific option/branch this card belongs to (e.g. 'option-1', 'option-2')
+
   order?: number; // Sort order within its column
   color?: string; // Custom card color
   notes?: string; // Additional notes

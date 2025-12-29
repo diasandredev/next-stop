@@ -5,6 +5,9 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useState } from 'react';
 import { useKanban } from '@/contexts/KanbanContext';
 import { Input } from './ui/input';
+import { Split } from 'lucide-react';
+import { Button } from './ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from './ui/tooltip';
 
 interface DayColumnProps {
   dashboardId: string;
@@ -12,7 +15,6 @@ interface DayColumnProps {
   cards: Card[];
   isCurrentDay: boolean;
   isWeekend?: boolean;
-
   minSlots: number;
   headerHeight?: string;
 }
@@ -57,7 +59,22 @@ export const DayColumn = ({
     }
   };
 
+  const handleAddOptionsGroup = () => {
+    addCard({
+      title: 'Options',
+      date: dateString,
+      columnType: 'day',
+      type: 'options',
+      order: cards.length,
+      dashboardId
+    });
+  };
+
   const MIN_SLOTS = minSlots;
+
+  // Filter cards
+  const rootCards = cards.filter(c => !c.parentId).sort((a, b) => (a.order || 0) - (b.order || 0));
+  const childCards = cards.filter(c => c.parentId);
 
   return (
     <div className={`${isWeekend ? 'flex-none w-full md:w-auto' : 'w-full md:flex-1'} min-w-0 flex flex-col overflow-hidden`}>
@@ -66,7 +83,19 @@ export const DayColumn = ({
           <div className={`text-2xl font-bold ${isCurrentDay ? 'text-primary' : 'text-white'}`}>
             {dayNumber} {monthName}
           </div>
-          <div className={`text-base capitalize ${isCurrentDay ? 'text-primary' : 'text-muted-foreground'}`}>{dayName}</div>
+          <div className="flex items-center gap-1">
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={handleAddOptionsGroup}>
+                    <Split className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Add Itinerary Options</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <div className={`text-base capitalize ${isCurrentDay ? 'text-primary' : 'text-muted-foreground'}`}>{dayName}</div>
+          </div>
         </div>
       </div>
       <div
@@ -75,9 +104,13 @@ export const DayColumn = ({
           ${isOver ? 'bg-accent/20 ring-2 ring-accent/50 ring-inset rounded-lg' : ''}
         `}
       >
-        <SortableContext items={cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
-          {cards.map(card => (
-            <KanbanCard key={card.id} card={card} />
+        <SortableContext items={rootCards.map(c => c.id)} strategy={verticalListSortingStrategy}>
+          {rootCards.map(card => (
+            <KanbanCard
+              key={card.id}
+              card={card}
+              childrenCards={childCards.filter(c => c.parentId === card.id)}
+            />
           ))}
         </SortableContext>
 
@@ -101,7 +134,7 @@ export const DayColumn = ({
         )}
 
         {/* Empty slots - Invisible but clickable */}
-        {Array.from({ length: Math.max(0, Math.max(MIN_SLOTS, cards.length + 1) - cards.length - (isAdding ? 1 : 0)) }).map((_, i) => (
+        {Array.from({ length: Math.max(0, Math.max(MIN_SLOTS, rootCards.length + 1) - rootCards.length - (isAdding ? 1 : 0)) }).map((_, i) => (
           <div
             key={`slot-${i}`}
             onClick={() => setIsAdding(true)}

@@ -6,12 +6,15 @@ import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 import { EditCardDialog } from './EditCardDialog';
 import { useKanban } from '@/contexts/KanbanContext';
+import { OptionsCard } from './OptionsCard';
 
 interface KanbanCardProps {
   card: CardType;
+  childrenCards?: CardType[];
+  isNested?: boolean;
 }
 
-export const KanbanCard = ({ card }: KanbanCardProps) => {
+export const KanbanCard = ({ card, childrenCards = [], isNested = false }: KanbanCardProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { updateCard } = useKanban();
 
@@ -24,7 +27,11 @@ export const KanbanCard = ({ card }: KanbanCardProps) => {
     isDragging,
   } = useSortable({
     id: card.id,
-    disabled: card.completed
+    disabled: card.completed,
+    data: {
+      type: card.type || 'card',
+      card
+    }
   });
 
   const customStyle = (card.color && card.color !== 'transparent') ? { backgroundColor: card.color } : {};
@@ -43,6 +50,14 @@ export const KanbanCard = ({ card }: KanbanCardProps) => {
     });
   };
 
+  if (card.type === 'options') {
+    return (
+      <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-none">
+        <OptionsCard card={card} childCards={childrenCards} />
+      </div>
+    );
+  }
+
   return (
     <>
       <div
@@ -54,27 +69,30 @@ export const KanbanCard = ({ card }: KanbanCardProps) => {
         className={`
           group cursor-grab relative
           ${isDragging ? 'invisible' : 'z-0'}
-          h-12 border-b border-border/40 hover:border-blue-500 flex items-center justify-between pr-2
+          ${isNested ? 'h-12 text-sm' : 'h-12'} 
+          border-b border-border/40 hover:border-blue-500 flex items-center justify-between pr-2
           transition-colors duration-200
           ${card.completed ? 'opacity-60' : ''}
+          ${isNested ? 'bg-black/20' : ''}
         `}
       >
         <div
           style={customStyle}
           className={`
-            inline-flex items-center gap-2 px-3 py-1 rounded-full text-white text-sm font-medium shadow-sm
+            inline-flex items-center gap-2 ${isNested ? 'px-2 py-0.5' : 'px-3 py-1'} rounded-full text-white font-medium shadow-sm
             transition-all duration-200 ease-out
             hover:scale-105 hover:shadow-md w-fit
             ${card.completed ? 'opacity-50' : ''}
+            ${isNested ? 'text-sm' : 'text-sm'}
           `}
         >
 
           {card.time && (
-            <span className="text-xs text-white/80 font-normal mr-1">
+            <span className={`text-white/80 font-normal mr-1 ${isNested ? 'text-[10px]' : 'text-xs'}`}>
               {card.time}
             </span>
           )}
-          <span className={`truncate ${card.columnType === 'extra' ? 'max-w-[300px]' : 'max-w-[200px]'} ${card.completed ? 'line-through text-white/70' : ''}`}>
+          <span className={`truncate ${card.columnType === 'extra' ? 'max-w-[300px]' : (isNested ? 'max-w-[120px]' : 'max-w-[200px]')} ${card.completed ? 'line-through text-white/70' : ''}`}>
             {card.title}
           </span>
         </div>
@@ -93,10 +111,10 @@ export const KanbanCard = ({ card }: KanbanCardProps) => {
           >
             {card.completed ? (
               <div className="bg-white rounded-full p-0.5">
-                <Check className="w-3 h-3 text-black" strokeWidth={4} />
+                <Check className={`text-black ${isNested ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} strokeWidth={4} />
               </div>
             ) : (
-              <Circle className="w-4 h-4" />
+              <Circle className={isNested ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
             )}
           </button>
         )}
