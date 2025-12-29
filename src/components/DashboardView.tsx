@@ -105,7 +105,9 @@ export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: D
     // Width logic: if <= 5 columns, fill space (fluid). If > 5, fixed width (scroll).
     const isFluid = totalColumns <= 5;
     const containerClass = isFluid ? "flex gap-4 w-full h-full" : "flex gap-4 min-w-max h-full";
-    const columnClass = isFluid ? "flex-1 min-w-0 h-full" : "w-80 flex-shrink-0 h-full";
+    const columnClass = isFluid
+        ? `flex-1 min-w-0 h-full ${totalColumns === 1 ? 'max-w-[50%]' : ''}`
+        : "w-80 flex-shrink-0 h-full";
 
     return (
         <div className="flex flex-col gap-4 p-4 border rounded-xl bg-background/40 backdrop-blur-sm shadow-sm relative group/dash">
