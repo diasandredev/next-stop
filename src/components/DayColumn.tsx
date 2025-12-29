@@ -7,6 +7,7 @@ import { useKanban } from '@/contexts/KanbanContext';
 import { Input } from './ui/input';
 
 interface DayColumnProps {
+  dashboardId: string;
   date: Date;
   cards: Card[];
   isCurrentDay: boolean;
@@ -17,6 +18,7 @@ interface DayColumnProps {
 }
 
 export const DayColumn = ({
+  dashboardId,
   date,
   cards,
   isCurrentDay,
@@ -33,8 +35,8 @@ export const DayColumn = ({
   const dateString = date.toISOString().split('T')[0];
 
   const { setNodeRef, isOver } = useDroppable({
-    id: `day-${dateString}`,
-    data: { type: 'day', date: dateString },
+    id: `day-${dashboardId}-${dateString}`,
+    data: { type: 'day', date: dateString, dashboardId },
   });
 
   const handleAddCard = (keepOpen = false) => {
@@ -44,6 +46,7 @@ export const DayColumn = ({
         date: dateString,
         columnType: 'day',
         order: cards.length,
+        dashboardId
       });
       setNewCardTitle('');
       if (!keepOpen) {

@@ -13,11 +13,12 @@ export interface Card {
   completedAt?: string; // ISO date string when task was completed
   time?: string; // Optional time for the card (HH:mm)
   createdAt: string;
-  calendarId?: string;
+  dashboardId?: string;
 }
 
 export interface ExtraColumn {
   id: string;
+  dashboardId: string; // Link to a specific dashboard
   name: string;
   order: number;
 }
@@ -27,15 +28,23 @@ export interface WeekData {
   endDate: Date;
 }
 
-
-
-export interface Calendar {
+export interface Trip {
   id: string;
   name: string;
+  startDate?: string; // ISO Date string
+}
+
+export interface Dashboard {
+  id: string;
+  tripId: string;
+  name: string;
+  days: number; // Default 7 if undefined
+  startDate?: string; // ISO Date string
+  createdAt?: string;
 }
 
 export interface AccountSettings {
-  defaultCalendarId: string;
+  defaultTripId: string;
   timezone?: string;
   customColors?: string[];
 }

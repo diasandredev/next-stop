@@ -39,6 +39,7 @@ export const ExtraColumn = ({ column, cards, minSlots = 25 }: ExtraColumnProps) 
         title: newCardTitle.trim(),
         columnType: 'extra',
         extraColumnId: column.id,
+        dashboardId: column.dashboardId
       });
       setNewCardTitle('');
       if (!keepOpen) {

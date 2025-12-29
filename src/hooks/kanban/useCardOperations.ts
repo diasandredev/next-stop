@@ -3,21 +3,19 @@ import { Card } from '@/types/kanban';
 
 interface UseCardOperationsProps {
     setCards: React.Dispatch<React.SetStateAction<Card[]>>;
-    currentCalendarId: string;
     markDirty: (id: string, type: 'cards' | 'extraColumns' | 'recurringTasks' | 'calendars' | 'accountSettings') => void;
 }
 
-export const useCardOperations = ({ setCards, currentCalendarId, markDirty }: UseCardOperationsProps) => {
+export const useCardOperations = ({ setCards, markDirty }: Omit<UseCardOperationsProps, 'currentCalendarId'>) => {
     const addCard = useCallback((cardData: Omit<Card, 'id' | 'createdAt'>) => {
         const newCard: Card = {
             ...cardData,
             id: crypto.randomUUID(),
             createdAt: new Date().toISOString(),
-            calendarId: currentCalendarId,
         };
         setCards(prev => [...prev, newCard]);
         markDirty(newCard.id, 'cards');
-    }, [currentCalendarId, markDirty, setCards]);
+    }, [markDirty, setCards]);
 
     const updateCard = useCallback((id: string, updates: Partial<Card>) => {
         setCards(prev => prev.map(card => {

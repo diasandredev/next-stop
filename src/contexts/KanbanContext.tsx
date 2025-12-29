@@ -1,27 +1,32 @@
 import React, { createContext, useContext } from 'react';
-import { Card, ExtraColumn, Calendar, AccountSettings } from '@/types/kanban';
+import { Card, ExtraColumn, Trip, Dashboard, AccountSettings } from '@/types/kanban';
 
 export interface KanbanContextType {
   cards: Card[];
   extraColumns: ExtraColumn[];
 
-  calendars: Calendar[];
-  currentCalendarId: string;
+  trips: Trip[];
+  dashboards: Dashboard[];
+  currentTripId: string;
   accountSettings: AccountSettings | null;
   isLoading: boolean;
+
   addCard: (card: Omit<Card, 'id' | 'createdAt'>) => void;
-
   updateCard: (id: string, card: Partial<Card>) => void;
-
   deleteCard: (id: string) => void;
   deleteAllCards: () => void;
 
   updateExtraColumn: (id: string, name: string) => void;
 
-  addCalendar: (name: string) => void;
-  updateCalendar: (id: string, updates: Partial<Calendar>) => void;
-  deleteCalendar: (id: string) => void;
-  setCurrentCalendarId: (id: string) => void;
+  addTrip: (name: string, startDate?: string) => string;
+  updateTrip: (id: string, updates: Partial<Trip>) => void;
+  deleteTrip: (id: string) => void;
+  setCurrentTripId: (id: string) => void;
+
+  addDashboard: (tripId: string, name: string, startDate?: string, days?: number) => void;
+  updateDashboard: (id: string, updates: Partial<Dashboard>) => void;
+  deleteDashboard: (id: string) => void;
+
   updateAccountSettings: (settings: Partial<AccountSettings>) => void;
   addCustomColor: (color: string) => void;
   setCards: React.Dispatch<React.SetStateAction<Card[]>>;

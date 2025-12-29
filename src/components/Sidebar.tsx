@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
-    Calendar,
+    Calendar as CalendarIcon,
     Settings,
     LogOut,
     ChevronLeft,
     ChevronRight,
     Plus,
-    User,
-    MoreVertical
+    MoreVertical,
+    Plane
 } from 'lucide-react';
 import {
     Tooltip,
@@ -22,45 +22,45 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Calendar as CalendarType } from '@/types/kanban';
+import { Trip } from '@/types/kanban';
 import { User as UserType } from 'firebase/auth';
 
 interface SidebarProps {
     isExpanded: boolean;
     toggleSidebar: () => void;
-    calendars: CalendarType[];
-    currentCalendarId: string | null;
-    setCurrentCalendarId: (id: string) => void;
+    trips: Trip[];
+    currentTripId: string | null;
+    setCurrentTripId: (id: string) => void;
     user: UserType | null;
     logout: () => void;
     onOpenAccountSettings: () => void;
-    onOpenCalendarSettings: () => void;
-    setCalendarToEdit: (calendar: CalendarType) => void;
-    onOpenNewCalendar: () => void;
+    onOpenTripSettings: () => void;
+    setTripToEdit: (trip: Trip) => void;
+    onOpenNewTrip: () => void;
 }
 
 export function Sidebar({
     isExpanded,
     toggleSidebar,
-    calendars,
-    currentCalendarId,
-    setCurrentCalendarId,
+    trips,
+    currentTripId,
+    setCurrentTripId,
     user,
     logout,
     onOpenAccountSettings,
-    onOpenCalendarSettings,
-    setCalendarToEdit,
-    onOpenNewCalendar
+    onOpenTripSettings,
+    setTripToEdit,
+    onOpenNewTrip
 }: SidebarProps) {
 
     return (
         <aside
             className={cn(
                 "h-screen bg-background border-r border-border flex flex-col transition-all duration-300 ease-in-out relative z-20",
-                isExpanded ? "w-64" : "w-16" // Reduced collapsed width to 16 (64px) standard
+                isExpanded ? "w-64" : "w-16"
             )}
         >
-            {/* Toggle Button - Absolute positioned to overlap border */}
+            {/* Toggle Button */}
             <button
                 onClick={toggleSidebar}
                 className="absolute -right-3 top-6 bg-background border border-border rounded-full p-1 hover:bg-muted transition-colors z-30"
@@ -86,45 +86,45 @@ export function Sidebar({
                 </div>
             </div>
 
-            {/* Calendars List */}
+            {/* Trips List */}
             <div className="flex-1 overflow-y-auto py-4 px-2 space-y-2 scrollbar-none">
                 <div className={cn("px-2 mb-2", !isExpanded && "text-center")}>
                     {isExpanded ? (
                         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            My Calendars
+                            My Trips
                         </h3>
                     ) : (
                         <div className="w-full h-px bg-border my-2" />
                     )}
                 </div>
 
-                {calendars.map((calendar) => (
-                    <Tooltip key={calendar.id} delayDuration={0}>
+                {trips.map((trip) => (
+                    <Tooltip key={trip.id} delayDuration={0}>
                         <TooltipTrigger asChild>
                             <button
-                                onClick={() => setCurrentCalendarId(calendar.id)}
+                                onClick={() => setCurrentTripId(trip.id)}
                                 className={cn(
                                     "w-full flex items-center gap-3 p-2 rounded-lg transition-all duration-200 group relative",
-                                    currentCalendarId === calendar.id
+                                    currentTripId === trip.id
                                         ? "bg-primary/10 text-primary"
                                         : "hover:bg-muted text-muted-foreground hover:text-foreground",
                                     !isExpanded && "justify-center"
                                 )}
                             >
-                                <Calendar className="w-5 h-5 flex-shrink-0" />
+                                <Plane className="w-5 h-5 flex-shrink-0" />
 
                                 {isExpanded && (
                                     <>
                                         <span className="text-sm font-medium truncate flex-1 text-left">
-                                            {calendar.name}
+                                            {trip.name}
                                         </span>
                                         {/* Edit Button only visible on hover when expanded */}
                                         <div
                                             className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-background/80 rounded"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                setCalendarToEdit(calendar);
-                                                onOpenCalendarSettings();
+                                                setTripToEdit(trip);
+                                                onOpenTripSettings();
                                             }}
                                         >
                                             <Settings className="w-3 h-3" />
@@ -132,24 +132,24 @@ export function Sidebar({
                                     </>
                                 )}
 
-                                {currentCalendarId === calendar.id && !isExpanded && (
+                                {currentTripId === trip.id && !isExpanded && (
                                     <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-primary" />
                                 )}
                             </button>
                         </TooltipTrigger>
                         {!isExpanded && (
                             <TooltipContent side="right">
-                                {calendar.name}
+                                {trip.name}
                             </TooltipContent>
                         )}
                     </Tooltip>
                 ))}
 
-                {/* New Calendar Button */}
+                {/* New Trip Button */}
                 <Tooltip delayDuration={0}>
                     <TooltipTrigger asChild>
                         <button
-                            onClick={onOpenNewCalendar}
+                            onClick={onOpenNewTrip}
                             className={cn(
                                 "w-full flex items-center gap-3 p-2 rounded-lg group transition-all duration-200 mt-2",
                                 "text-muted-foreground hover:text-foreground hover:bg-muted border border-transparent hover:border-border border-dashed",
@@ -157,11 +157,11 @@ export function Sidebar({
                             )}
                         >
                             <Plus className="w-5 h-5 flex-shrink-0" />
-                            {isExpanded && <span className="text-sm font-medium">New Calendar</span>}
+                            {isExpanded && <span className="text-sm font-medium">New Trip</span>}
                         </button>
                     </TooltipTrigger>
                     {!isExpanded && (
-                        <TooltipContent side="right">New Calendar</TooltipContent>
+                        <TooltipContent side="right">New Trip</TooltipContent>
                     )}
                 </Tooltip>
             </div>

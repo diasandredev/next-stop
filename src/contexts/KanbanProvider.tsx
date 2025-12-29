@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { Card, ExtraColumn, Calendar, AccountSettings } from '@/types/kanban';
+import { Card, ExtraColumn, Trip, Dashboard, AccountSettings } from '@/types/kanban';
 import { SyncProvider } from './SyncContext';
 import { useKanbanData } from '@/hooks/kanban/useKanbanData';
 import { useCardOperations } from '@/hooks/kanban/useCardOperations';
-import { useCalendarOperations } from '@/hooks/kanban/useCalendarOperations';
+import { useTripOperations } from '@/hooks/kanban/useTripOperations';
+import { useDashboardOperations } from '@/hooks/kanban/useDashboardOperations';
 import { KanbanContext } from './KanbanContext';
 
 // Inner provider that manages Kanban state and interacts with SyncContext
@@ -11,9 +12,10 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React
     const {
         cards, setCards,
         extraColumns, setExtraColumns,
-        calendars, setCalendars,
+        trips, setTrips,
+        dashboards, setDashboards,
         accountSettings, setAccountSettings,
-        currentCalendarId, setCurrentCalendarId,
+        currentTripId, setCurrentTripId,
         isLoading, markDirty
     } = useKanbanData();
 
@@ -22,28 +24,39 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React
         stateRef.current = {
             cards,
             extraColumns,
-            calendars,
+            trips,
+            dashboards,
             accountSettings
         };
-    }, [cards, extraColumns, calendars, accountSettings, stateRef]);
+    }, [cards, extraColumns, trips, dashboards, accountSettings, stateRef]);
 
     const {
         addCard,
         updateCard,
         deleteCard,
         deleteAllCards
-    } = useCardOperations({ setCards, currentCalendarId, markDirty });
+    } = useCardOperations({ setCards, markDirty });
 
     const {
-        addCalendar,
-        updateCalendar,
-        deleteCalendar
-    } = useCalendarOperations({
-        calendars,
-        setCalendars,
-        currentCalendarId,
-        setCurrentCalendarId,
+        addTrip,
+        updateTrip,
+        deleteTrip
+    } = useTripOperations({
+        setTrips,
+        currentTripId,
+        setCurrentTripId,
         markDirty
+    });
+
+    const {
+        addDashboard,
+        updateDashboard,
+        deleteDashboard
+    } = useDashboardOperations({
+        dashboards,
+        setDashboards,
+        markDirty,
+        timezone: accountSettings?.timezone
     });
 
     const updateExtraColumn = useCallback((id: string, name: string) => {
@@ -79,29 +92,30 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React
         });
     }, [markDirty, setAccountSettings]);
 
-    // Filtered data based on current calendar
-    const filteredCards = cards.filter(c => {
-        // If card has no calendarId, it belongs to default calendar (migration/legacy support)
-        const cardCalendarId = c.calendarId || '1';
-        return cardCalendarId === currentCalendarId;
-    });
-
     const value = {
-        cards: filteredCards,
+        cards,
         extraColumns,
-        calendars,
-        currentCalendarId,
+        trips,
+        dashboards,
+        currentTripId,
         accountSettings,
         isLoading,
+
         addCard,
         updateCard,
         deleteCard,
         deleteAllCards,
+
         updateExtraColumn,
-        addCalendar,
-        updateCalendar,
-        deleteCalendar,
-        setCurrentCalendarId,
+
+        addTrip,
+        updateTrip,
+        deleteTrip,
+        setCurrentTripId,
+
+        addDashboard,
+        updateDashboard,
+        deleteDashboard,
 
         updateAccountSettings,
         addCustomColor,
@@ -121,12 +135,14 @@ export const KanbanProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const kanbanStateRef = useRef<{
         cards: Card[];
         extraColumns: ExtraColumn[];
-        calendars: Calendar[];
+        trips: Trip[];
+        dashboards: Dashboard[];
         accountSettings: AccountSettings | null;
     }>({
         cards: [],
         extraColumns: [],
-        calendars: [],
+        trips: [],
+        dashboards: [],
         accountSettings: null,
     });
 
