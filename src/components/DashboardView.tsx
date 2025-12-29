@@ -99,6 +99,14 @@ export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: D
     // Ensure at least a minimum visual height (e.g. 5) but extend if there are more cards
     const unifiedMinSlots = Math.max(5, maxCards + 1);
 
+    const dashboardExtraColumns = extraColumns.filter(ec => ec.dashboardId === dashboard.id);
+    const totalColumns = dates.length + dashboardExtraColumns.length;
+
+    // Width logic: if <= 5 columns, fill space (fluid). If > 5, fixed width (scroll).
+    const isFluid = totalColumns <= 5;
+    const containerClass = isFluid ? "flex gap-4 w-full h-full" : "flex gap-4 min-w-max h-full";
+    const columnClass = isFluid ? "flex-1 min-w-0 h-full" : "w-80 flex-shrink-0 h-full";
+
     return (
         <div className="flex flex-col gap-4 p-4 border rounded-xl bg-background/40 backdrop-blur-sm shadow-sm relative group/dash">
             {/* Dashboard Header */}
@@ -205,12 +213,12 @@ export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: D
 
             {/* Content: Horizontal Scroll */}
             <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4">
-                <div className="flex gap-4 min-w-max h-full">
+                <div className={containerClass}>
                     {/* Day Columns */}
                     {dates.map(date => {
                         const dateStr = date.toISOString().split('T')[0];
                         return (
-                            <div key={dateStr} className="w-80 flex-shrink-0 h-full">
+                            <div key={dateStr} className={columnClass}>
                                 <DayColumn
                                     dashboardId={dashboard.id}
                                     date={date}
@@ -224,8 +232,8 @@ export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: D
                     })}
 
                     {/* Extra Columns for this dashboard */}
-                    {extraColumns.filter(ec => ec.dashboardId === dashboard.id).map(col => (
-                        <div key={col.id} className="w-80 flex-shrink-0 h-full">
+                    {dashboardExtraColumns.map(col => (
+                        <div key={col.id} className={columnClass}>
                             <ExtraColumn
                                 column={col}
                                 cards={cards.filter(c => c.columnType === 'extra' && c.extraColumnId === col.id)}
