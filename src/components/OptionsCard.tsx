@@ -26,6 +26,9 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
     const option1Cards = childCards.filter(c => c.optionId === '1').sort((a, b) => (a.order || 0) - (b.order || 0));
     const option2Cards = childCards.filter(c => c.optionId === '2').sort((a, b) => (a.order || 0) - (b.order || 0));
 
+    // Determine the maximum length to know when to hide the bottom border for the "last" item visually
+    const maxLen = Math.max(option1Cards.length, option2Cards.length);
+
     // Droppables for options
     const { setNodeRef: setRef1, isOver: isOver1 } = useDroppable({
         id: `option-${card.id}-1`,
@@ -71,109 +74,111 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
 
     return (
         <>
-            <div className="relative py-[15px] group/options border-b border-border/40">
-                {/* Decorative Split Line - Spans the top padding */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-[15px] bg-border/50"></div>
+            <div className="group/options border-b border-border/40 box-border bg-black/20 backdrop-blur-sm">
 
-                <div className="border border-border/40 rounded-xl bg-black/20 backdrop-blur-sm overflow-hidden box-border">
-                    {/* Header */}
-                    <div className="h-8 flex items-center justify-between px-3 border-b border-border/40 bg-white/5">
+                {/* Header - H-12 (48px) */}
+                <div className="h-12 flex flex-col border-b border-border/40 bg-white/5">
+                    {/* Top Row: Title + Actions */}
+                    <div className="h-6 flex items-center justify-between px-3 border-b border-border/10">
                         <div className="flex items-center gap-2">
-                            <Split className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Options</span>
+                            <Split className="w-3 h-3 text-muted-foreground" />
+                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Options Paths</span>
                         </div>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 opacity-0 group-hover/options:opacity-100 transition-opacity hover:text-red-400"
+                            className="h-4 w-4 opacity-0 group-hover/options:opacity-100 transition-opacity hover:text-red-400"
                             onClick={handleDeleteClick}
                         >
                             <Trash2 className="w-3 h-3" />
                         </Button>
                     </div>
-
-                    {/* Columns */}
-                    <div className="flex divide-x divide-border/40">
-                        {/* Option 1 */}
-                        <div ref={setRef1} className={`flex-1 flex flex-col min-w-0 transition-colors ${isOver1 ? 'bg-accent/10' : ''}`}>
-
-                            <div className={`flex flex-col h-full p-0 space-y-0 text-sm ${option1Cards.length > 0 ? 'min-h-[48px]' : ''}`}>
-                                <div className="flex-1">
-                                    <SortableContext items={option1Cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
-                                        {option1Cards.map(c => <KanbanCard key={c.id} card={c} isNested />)}
-                                    </SortableContext>
-                                </div>
-
-                                {isAddingTo === '1' ? (
-                                    <div className="h-8 flex items-center px-1 border-t border-border/40 shrink-0">
-                                        <Input
-                                            value={newCardTitle}
-                                            onChange={e => setNewCardTitle(e.target.value)}
-                                            onKeyDown={e => {
-                                                if (e.key === 'Enter') handleAddCard('1');
-                                                if (e.key === 'Escape') setIsAddingTo(null);
-                                            }}
-                                            onBlur={() => handleAddCard('1')}
-                                            autoFocus
-                                            className="h-6 text-xs bg-background/50"
-                                            placeholder="Add item..."
-                                        />
-                                    </div>
-                                ) : (
-                                    <Button
-                                        variant="ghost"
-                                        className="w-full h-8 text-xs text-muted-foreground hover:text-foreground justify-start px-3 font-normal border-t border-border/40 hover:border-border/40 rounded-none shrink-0"
-                                        onClick={() => setIsAddingTo('1')}
-                                    >
-                                        <Plus className="w-3 h-3 mr-1.5" /> Add Card
-                                    </Button>
-                                )}
-                            </div>
+                    {/* Bottom Row: Path Labels + Add Buttons */}
+                    <div className="h-6 flex divide-x divide-border/10">
+                        <div className="flex-1 flex items-center justify-between px-2 bg-white/5 group/path-a">
+                            <span className="text-[9px] font-medium text-muted-foreground/70 uppercase tracking-widest">Path A</span>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-4 w-4 text-muted-foreground hover:text-foreground opacity-0 group-hover/path-a:opacity-100 transition-opacity"
+                                onClick={() => setIsAddingTo('1')}
+                            >
+                                <Plus className="w-3 h-3" />
+                            </Button>
                         </div>
-
-                        {/* Option 2 */}
-                        <div ref={setRef2} className={`flex-1 flex flex-col min-w-0 transition-colors ${isOver2 ? 'bg-accent/10' : ''}`}>
-
-                            <div className={`flex flex-col h-full p-0 space-y-0 text-sm ${option2Cards.length > 0 ? 'min-h-[48px]' : ''}`}>
-                                <div className="flex-1">
-                                    <SortableContext items={option2Cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
-                                        {option2Cards.map(c => <KanbanCard key={c.id} card={c} isNested />)}
-                                    </SortableContext>
-                                </div>
-
-                                {isAddingTo === '2' ? (
-                                    <div className="h-8 flex items-center px-1 border-t border-border/40 shrink-0">
-                                        <Input
-                                            value={newCardTitle}
-                                            onChange={e => setNewCardTitle(e.target.value)}
-                                            onKeyDown={e => {
-                                                if (e.key === 'Enter') handleAddCard('2');
-                                                if (e.key === 'Escape') setIsAddingTo(null);
-                                            }}
-                                            onBlur={() => handleAddCard('2')}
-                                            autoFocus
-                                            className="h-6 text-xs bg-background/50"
-                                            placeholder="Add item..."
-                                        />
-                                    </div>
-                                ) : (
-                                    <Button
-                                        variant="ghost"
-                                        className="w-full h-8 text-xs text-muted-foreground hover:text-foreground justify-start px-3 font-normal border-t border-border/40 hover:border-border/40 rounded-none shrink-0"
-                                        onClick={() => setIsAddingTo('2')}
-                                    >
-                                        <Plus className="w-3 h-3 mr-1.5" /> Add Card
-                                    </Button>
-                                )}
-                            </div>
+                        <div className="flex-1 flex items-center justify-between px-2 bg-white/5 group/path-b">
+                            <span className="text-[9px] font-medium text-muted-foreground/70 uppercase tracking-widest">Path B</span>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-4 w-4 text-muted-foreground hover:text-foreground opacity-0 group-hover/path-b:opacity-100 transition-opacity"
+                                onClick={() => setIsAddingTo('2')}
+                            >
+                                <Plus className="w-3 h-3" />
+                            </Button>
                         </div>
                     </div>
                 </div>
 
-                {/* Decorative Split Line Bottom with Arrow - Spans the bottom padding */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center justify-end" style={{ height: '15px' }}>
-                    <div className="w-0.5 grow bg-border/50"></div>
-                    <ChevronDown className="w-3 h-3 text-muted-foreground -mb-[5px] bg-background relative z-10" />
+                {/* Columns Container */}
+                <div className="flex divide-x divide-border/40">
+                    {/* Option 1 */}
+                    <div ref={setRef1} className={`flex-1 flex flex-col min-w-0 transition-colors ${isOver1 ? 'bg-accent/10' : ''}`}>
+
+                        {/* Content Area */}
+                        <div className={`flex flex-col h-full p-0 space-y-0 text-sm min-h-0`}>
+                            <SortableContext items={option1Cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
+                                {option1Cards.map(c => <KanbanCard key={c.id} card={c} isNested />)}
+                            </SortableContext>
+                        </div>
+
+                        {/* Input - Only shown when adding */}
+                        {isAddingTo === '1' && (
+                            <div className="h-12 flex items-center px-1 border-t border-border/40 shrink-0">
+                                <Input
+                                    value={newCardTitle}
+                                    onChange={e => setNewCardTitle(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter') handleAddCard('1');
+                                        if (e.key === 'Escape') setIsAddingTo(null);
+                                    }}
+                                    onBlur={() => handleAddCard('1')}
+                                    autoFocus
+                                    className="h-8 text-xs bg-background/50"
+                                    placeholder="Add to Path A..."
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Option 2 */}
+                    <div ref={setRef2} className={`flex-1 flex flex-col min-w-0 transition-colors ${isOver2 ? 'bg-accent/10' : ''}`}>
+
+                        {/* Content Area */}
+                        <div className={`flex flex-col h-full p-0 space-y-0 text-sm min-h-0`}>
+                            <SortableContext items={option2Cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
+                                {option2Cards.map(c => <KanbanCard key={c.id} card={c} isNested />)}
+                            </SortableContext>
+                        </div>
+
+                        {/* Input - Only shown when adding */}
+                        {isAddingTo === '2' && (
+                            <div className="h-12 flex items-center px-1 border-t border-border/40 shrink-0">
+                                <Input
+                                    value={newCardTitle}
+                                    onChange={e => setNewCardTitle(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter') handleAddCard('2');
+                                        if (e.key === 'Escape') setIsAddingTo(null);
+                                    }}
+                                    onBlur={() => handleAddCard('2')}
+                                    autoFocus
+                                    className="h-8 text-xs bg-background/50"
+                                    placeholder="Add to Path B..."
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 

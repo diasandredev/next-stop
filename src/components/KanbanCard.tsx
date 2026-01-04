@@ -12,9 +12,10 @@ interface KanbanCardProps {
   card: CardType;
   childrenCards?: CardType[];
   isNested?: boolean;
+  className?: string;
 }
 
-export const KanbanCard = ({ card, childrenCards = [], isNested = false }: KanbanCardProps) => {
+export const KanbanCard = ({ card, childrenCards = [], isNested = false, className = '' }: KanbanCardProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { updateCard } = useKanban();
 
@@ -74,6 +75,7 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false }: Kanba
           transition-colors duration-200
           ${card.completed ? 'opacity-60' : ''}
           ${isNested ? 'bg-black/20' : ''}
+          ${className}
         `}
       >
         <div

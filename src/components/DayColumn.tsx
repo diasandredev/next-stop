@@ -142,10 +142,10 @@ export const DayColumn = ({
               const children = childCards.filter(c => c.parentId === card.id);
               const count1 = children.filter(c => c.optionId === '1').length;
               const count2 = children.filter(c => c.optionId === '2').length;
-              // 2 slots (Header + Footer) + max children. 
-              // If empty, max(0,0)=0, so just 2 slots for header+footer+buttons.
+              // 1 slot (Header) + max children. 
+              // If empty, max(0,0)=0, so just 1 slot for header.
               // Note: Visual counting must match DashboardView logic
-              usedSlots += 2 + Math.max(count1, count2);
+              usedSlots += 1 + Math.max(count1, count2);
             } else {
               usedSlots += 1;
             }
