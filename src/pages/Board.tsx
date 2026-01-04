@@ -4,7 +4,7 @@ import { useKanban } from '@/contexts/KanbanContext';
 import { Button } from '@/components/ui/button';
 import { SyncStatus } from '@/components/SyncStatus';
 import { Sidebar } from '@/components/Sidebar';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Plus, Map as MapIcon } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Card, Trip } from '@/types/kanban';
@@ -291,7 +291,13 @@ const Board = () => {
                 <h1 className="text-3xl font-bold tracking-tight">
                   {currentTrip ? currentTrip.name : 'Select a Trip'}
                 </h1>
-                <SyncStatus />
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => window.location.href = '/map'}>
+                    <MapIcon className="w-4 h-4 mr-2" />
+                    View Map
+                  </Button>
+                  <SyncStatus />
+                </div>
               </div>
             </header>
 

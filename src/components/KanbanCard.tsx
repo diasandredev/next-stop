@@ -1,6 +1,6 @@
 import { Card as CardType } from '@/types/kanban';
 
-import { Check, Circle } from 'lucide-react';
+import { Check, Circle, MapPin } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
@@ -97,6 +97,9 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
           <span className={`truncate ${card.columnType === 'extra' ? 'max-w-[300px]' : (isNested ? 'max-w-[120px]' : 'max-w-[200px]')} ${card.completed ? 'line-through text-white/70' : ''}`}>
             {card.title}
           </span>
+          {card.location && (
+            <MapPin className="w-3 h-3 text-green-400 ml-1.5 shrink-0" />
+          )}
         </div>
 
         {/* Completion Button - Only for day columns */}

@@ -19,6 +19,15 @@ export interface Card {
   time?: string; // Optional time for the card (HH:mm)
   createdAt: string;
   dashboardId?: string;
+
+  // Location Integration
+  location?: {
+    name: string;
+    address: string;
+    lat: number;
+    lng: number;
+    placeId: string;
+  };
 }
 
 export interface ExtraColumn {

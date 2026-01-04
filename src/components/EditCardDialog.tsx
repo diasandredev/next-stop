@@ -11,6 +11,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { LocationSearch } from './LocationSearch';
+import { MapPin, Map } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +39,7 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
   const [description, setDescription] = useState(card.description || '');
   const [color, setColor] = useState(card.color || 'transparent');
   const [time, setTime] = useState(card.time || '');
+  const [location, setLocation] = useState(card.location);
 
   // Ref to track if we need to save on close
   const dirtyRef = useRef(false);
@@ -47,6 +50,7 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
       setDescription(card.description || '');
       setColor(card.color || 'transparent');
       setTime(card.time || '');
+      setLocation(card.location);
       dirtyRef.current = false;
     }
   }, [card, open]);
@@ -58,6 +62,7 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
         description,
         color,
         time,
+        location,
       };
       updateCard(card.id, updates);
       onOpenChange(isOpen);
@@ -73,6 +78,11 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
 
   const handleColorChange = (newColor: string) => {
     setColor(newColor);
+    dirtyRef.current = true;
+  };
+
+  const handleLocationSelect = (newLocation: any) => {
+    setLocation(newLocation);
     dirtyRef.current = true;
   };
 
@@ -182,6 +192,31 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
               style={{ fontSize: '1.5rem' }}
               placeholder="Task title"
             />
+
+            <div className="flex flex-col gap-2">
+              {location ? (
+                <div className="flex items-center gap-2 bg-white/5 p-2 rounded-md group">
+                  <MapPin className="w-4 h-4 text-green-400 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white truncate">{location.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{location.address}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => {
+                      setLocation(undefined);
+                      dirtyRef.current = true;
+                    }}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              ) : (
+                <LocationSearch onLocationSelect={handleLocationSelect} defaultValue={location?.name} />
+              )}
+            </div>
 
             <div className="border-t border-white/5 pt-4">
               <Textarea

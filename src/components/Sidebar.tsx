@@ -7,10 +7,15 @@ import {
     LogOut,
     ChevronLeft,
     ChevronRight,
+    ChevronDown,
     Plus,
     MoreVertical,
-    Plane
+    Plane,
+    Map as MapIcon,
+    LayoutDashboard,
+    Utensils,
 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     Tooltip,
     TooltipContent,
@@ -52,6 +57,9 @@ export function Sidebar({
     setTripToEdit,
     onOpenNewTrip
 }: SidebarProps) {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [expandedTripId, setExpandedTripId] = useState<string | null>(null);
 
     return (
         <aside
@@ -98,52 +106,121 @@ export function Sidebar({
                     )}
                 </div>
 
-                {trips.map((trip) => (
-                    <Tooltip key={trip.id} delayDuration={0}>
-                        <TooltipTrigger asChild>
-                            <button
-                                onClick={() => setCurrentTripId(trip.id)}
-                                className={cn(
-                                    "w-full flex items-center gap-3 p-2 rounded-lg transition-all duration-200 group relative",
-                                    currentTripId === trip.id
-                                        ? "bg-primary/10 text-primary"
-                                        : "hover:bg-muted text-muted-foreground hover:text-foreground",
-                                    !isExpanded && "justify-center"
-                                )}
-                            >
-                                <Plane className="w-5 h-5 flex-shrink-0" />
+                {trips.map((trip) => {
+                    const isTripExpanded = expandedTripId === trip.id;
+                    const isTripActive = currentTripId === trip.id;
 
-                                {isExpanded && (
-                                    <>
-                                        <span className="text-sm font-medium truncate flex-1 text-left">
-                                            {trip.name}
-                                        </span>
-                                        {/* Edit Button only visible on hover when expanded */}
-                                        <div
-                                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-background/80 rounded"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setTripToEdit(trip);
-                                                onOpenTripSettings();
-                                            }}
-                                        >
-                                            <Settings className="w-3 h-3" />
-                                        </div>
-                                    </>
-                                )}
+                    return (
+                        <div key={trip.id} className="flex flex-col gap-1">
+                            <Tooltip delayDuration={0}>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={() => {
+                                            if (isExpanded) {
+                                                setExpandedTripId(isTripExpanded ? null : trip.id);
+                                            } else {
+                                                setCurrentTripId(trip.id);
+                                                navigate('/board');
+                                            }
+                                        }}
+                                        className={cn(
+                                            "w-full flex items-center gap-3 p-2 rounded-lg transition-all duration-200 group relative",
+                                            isTripActive && !isTripExpanded
+                                                ? "bg-primary/10 text-primary"
+                                                : "hover:bg-muted text-muted-foreground hover:text-foreground",
+                                            !isExpanded && "justify-center"
+                                        )}
+                                    >
+                                        <Plane className={cn("w-5 h-5 flex-shrink-0 transition-transform", isTripExpanded && "rotate-45")} />
 
-                                {currentTripId === trip.id && !isExpanded && (
-                                    <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-primary" />
+                                        {isExpanded && (
+                                            <>
+                                                <span className="text-sm font-medium truncate flex-1 text-left">
+                                                    {trip.name}
+                                                </span>
+                                                <div className="flex items-center gap-1">
+                                                    {/* Edit Button */}
+                                                    <div
+                                                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-background/80 rounded"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setTripToEdit(trip);
+                                                            onOpenTripSettings();
+                                                        }}
+                                                    >
+                                                        <Settings className="w-3 h-3" />
+                                                    </div>
+
+                                                    {/* Chevron */}
+                                                    {isTripExpanded ? (
+                                                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                                                    ) : (
+                                                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                                                    )}
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {isTripActive && !isExpanded && (
+                                            <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-primary" />
+                                        )}
+                                    </button>
+                                </TooltipTrigger>
+                                {!isExpanded && (
+                                    <TooltipContent side="right">
+                                        {trip.name}
+                                    </TooltipContent>
                                 )}
-                            </button>
-                        </TooltipTrigger>
-                        {!isExpanded && (
-                            <TooltipContent side="right">
-                                {trip.name}
-                            </TooltipContent>
-                        )}
-                    </Tooltip>
-                ))}
+                            </Tooltip>
+
+                            {/* Sub-menu */}
+                            {isExpanded && isTripExpanded && (
+                                <div className="ml-4 pl-4 border-l border-border space-y-1 animate-in slide-in-from-top-2 duration-200">
+                                    <button
+                                        onClick={() => {
+                                            setCurrentTripId(trip.id);
+                                            navigate('/board');
+                                        }}
+                                        className={cn(
+                                            "w-full flex items-center gap-3 p-2 rounded-lg text-sm transition-colors",
+                                            location.pathname === '/board' && isTripActive
+                                                ? "bg-primary/10 text-primary font-medium"
+                                                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                        )}
+                                    >
+                                        <LayoutDashboard className="w-4 h-4" />
+                                        Board
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            setCurrentTripId(trip.id);
+                                            navigate('/map');
+                                        }}
+                                        className={cn(
+                                            "w-full flex items-center gap-3 p-2 rounded-lg text-sm transition-colors",
+                                            location.pathname === '/map' && isTripActive
+                                                ? "bg-primary/10 text-primary font-medium"
+                                                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                        )}
+                                    >
+                                        <MapIcon className="w-4 h-4" />
+                                        Map
+                                    </button>
+
+                                    <button
+                                        disabled
+                                        className="w-full flex items-center gap-3 p-2 rounded-lg text-sm text-muted-foreground/50 cursor-not-allowed"
+                                    >
+                                        <Utensils className="w-4 h-4" />
+                                        <span className="flex-1 text-left">Restaurants</span>
+                                        <span className="text-[10px] uppercase border border-border px-1 rounded">Soon</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
 
                 {/* New Trip Button */}
                 <Tooltip delayDuration={0}>

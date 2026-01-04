@@ -8,6 +8,7 @@ import { KanbanProvider } from "./contexts/KanbanProvider";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Board from "./pages/Board";
+import TripMap from "./pages/TripMap";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -27,6 +28,11 @@ const App = () => (
               <Route path="/board" element={
                 <ProtectedRoute>
                   <Board />
+                </ProtectedRoute>
+              } />
+              <Route path="/map" element={
+                <ProtectedRoute>
+                  <TripMap />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

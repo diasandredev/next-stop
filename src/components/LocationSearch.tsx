@@ -1,0 +1,165 @@
+
+import {
+    Command,
+    CommandList,
+    CommandGroup,
+    CommandItem,
+} from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { MapPin, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+
+declare global {
+    interface Window {
+        google: any;
+    }
+}
+
+interface LocationSearchProps {
+    onLocationSelect: (location: {
+        name: string;
+        address: string;
+        lat: number;
+        lng: number;
+        placeId: string;
+    }) => void;
+    defaultValue?: string;
+    className?: string;
+}
+
+export const LocationSearch = ({ onLocationSelect, defaultValue, className }: LocationSearchProps) => {
+    const [open, setOpen] = useState(false);
+    const [inputValue, setInputValue] = useState(defaultValue || "");
+    const [isLoading, setIsLoading] = useState(false);
+    const [predictions, setPredictions] = useState<any[]>([]);
+
+    const handleSearch = (e?: React.MouseEvent | React.KeyboardEvent) => {
+        // Prevent default if it's a form submission or similar
+        if (e && 'preventDefault' in e) e.preventDefault();
+        e?.stopPropagation(); // Prevent trigger toggle if button is clicked
+
+        if (!inputValue.trim()) return;
+
+        // Check if API is loaded and has the new Places library
+        if (!window.google?.maps?.places?.Place) {
+            console.error("Google Maps Places API (New) not loaded. Ensure 'places' library is in URL.");
+            return;
+        }
+
+        setIsLoading(true);
+        setPredictions([]);
+        setOpen(true); // Force open
+
+        console.log("Searching for:", inputValue);
+
+        window.google.maps.places.Place.searchByText({
+            textQuery: inputValue,
+            fields: ['id', 'displayName', 'formattedAddress', 'location'],
+            maxResultCount: 5,
+        }).then(({ places }: { places: any[] }) => {
+            console.log("API Response places:", places);
+            setPredictions(places);
+        }).catch((error: any) => {
+            console.error("Search error:", error);
+            setPredictions([]);
+        }).finally(() => {
+            setIsLoading(false);
+        });
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSearch(e);
+        }
+    };
+
+    const handleSelect = (place: any) => {
+        if (!place) return;
+
+        console.log("Selected place:", place);
+
+        // Safety checks for location
+        const lat = typeof place.location?.lat === 'function' ? place.location.lat() : place.location?.lat;
+        const lng = typeof place.location?.lng === 'function' ? place.location.lng() : place.location?.lng;
+
+        const locationData = {
+            name: place.displayName,
+            address: place.formattedAddress,
+            lat: lat,
+            lng: lng,
+            placeId: place.id,
+        };
+
+        setInputValue(locationData.name);
+        setPredictions([]);
+        setOpen(false);
+        onLocationSelect(locationData);
+    };
+
+    if (!window.google) {
+        return (
+            <Button variant="outline" disabled className={cn("w-full justify-start text-left font-normal", className)}>
+                <MapPin className="mr-2 h-4 w-4" />
+                Google Maps API Key Missing
+            </Button>
+        )
+    }
+
+    return (
+        <div className="flex gap-2 w-full">
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <div className={cn("relative flex-1", className)}>
+                        <MapPin className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground opacity-50" />
+                        <input
+                            className="flex h-9 w-full rounded-md border border-white/10 bg-white/5 px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-8 text-white"
+                            placeholder="Search location (ex: Starbucks)..."
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            autoComplete="off"
+                        />
+                    </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] p-0 bg-[#1a1a1a] border-white/10" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
+                    <Command className="bg-transparent" shouldFilter={false}>
+                        <CommandList>
+                            {/* Remove CommandGroup if predictions are empty to avoid empty headings if that was the case, 
+                                 but show specific empty message if searched and nothing found */}
+                            {predictions.length > 0 ? (
+                                <CommandGroup heading="Results">
+                                    {predictions.map((place) => (
+                                        <CommandItem
+                                            key={place.id}
+                                            value={place.id + " " + (place.displayName || "")} // Append name to value to help unique keys if needed, but 'value' is internal ID mostly
+                                            onSelect={() => handleSelect(place)}
+                                            className="cursor-pointer aria-selected:bg-white/10"
+                                        >
+                                            <MapPin className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">{place.displayName || "Unknown Name"}</span>
+                                                <span className="text-xs text-muted-foreground">{place.formattedAddress}</span>
+                                            </div>
+                                        </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                            ) : null}
+
+                            {!isLoading && predictions.length === 0 && open && inputValue.length > 0 && (
+                                <div className="p-4 text-sm text-muted-foreground text-center">
+                                    {inputValue.length < 3 ? "Type to search..." : "No results found."}
+                                </div>
+                            )}
+                        </CommandList>
+                    </Command>
+                </PopoverContent>
+            </Popover>
+            <Button onClick={handleSearch} disabled={isLoading} variant="secondary" className="shrink-0 w-20">
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+            </Button>
+        </div>
+    );
+};
