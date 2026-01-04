@@ -6,6 +6,7 @@ import { Trip } from '@/types/kanban';
 import { Label } from './ui/label';
 import { Plane, Trash2, Calendar } from 'lucide-react';
 import { DatePicker } from './DatePicker';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface TripSettingsDialogProps {
     open: boolean;
@@ -17,6 +18,7 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
     const { updateTrip, deleteTrip } = useKanban();
     const [name, setName] = useState('');
     const [startDate, setStartDate] = useState('');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
         if (trip) {
@@ -35,8 +37,8 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
         }
     };
 
-    const handleDelete = () => {
-        if (trip && confirm('Are you sure you want to delete this trip? All dashboards and cards will be lost.')) {
+    const handleConfirmDelete = () => {
+        if (trip) {
             deleteTrip(trip.id);
             onOpenChange(false);
         }
@@ -113,7 +115,7 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
                     <Button
                         type="button"
                         variant="ghost"
-                        onClick={handleDelete}
+                        onClick={() => setShowDeleteConfirm(true)}
                         className="text-[#ff5f57] hover:bg-[#ff5f57]/10 hover:text-[#ff5f57] gap-2 rounded-full"
                     >
                         <Trash2 className="w-4 h-4" />
@@ -121,6 +123,16 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
                     </Button>
                 </div>
             </DialogContent>
+
+            <ConfirmDialog
+                open={showDeleteConfirm}
+                onOpenChange={setShowDeleteConfirm}
+                title="Delete Trip?"
+                description="Are you sure you want to delete this trip? All dashboards and cards will be lost."
+                onConfirm={handleConfirmDelete}
+                confirmText="Delete Trip"
+                variant="destructive"
+            />
         </Dialog>
     );
 }

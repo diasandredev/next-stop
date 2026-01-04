@@ -17,6 +17,7 @@ import { Label } from './ui/label';
 import { addDays, format, parseISO } from 'date-fns';
 import { DatePicker } from './DatePicker';
 import { DateRangePicker } from './DateRangePicker';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface DashboardViewProps {
     dashboard: Dashboard;
@@ -35,6 +36,7 @@ export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: D
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [editDays, setEditDays] = useState(dashboard.days);
     const [editStartDate, setEditStartDate] = useState(dashboard.startDate || trip.startDate || new Date().toISOString());
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Calculate dates
     const startDateStr = dashboard.startDate || trip.startDate || new Date().toISOString();
@@ -186,7 +188,6 @@ export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: D
                                 </div>
                             </div>
 
-                            {/* Footer Actions */}
                             <div className="bg-[#E8E1F5] p-6 pt-2 flex items-center justify-between">
                                 <Button
                                     onClick={handleSettingsSave}
@@ -197,17 +198,26 @@ export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: D
 
                                 <Button
                                     variant="ghost"
-                                    onClick={() => {
-                                        if (confirm('Delete this dashboard? Cards will be hidden/lost properly unless moved.')) {
-                                            deleteDashboard(dashboard.id);
-                                        }
-                                    }}
+                                    onClick={() => setShowDeleteConfirm(true)}
                                     className="text-[#ff5f57] hover:bg-[#ff5f57]/10 hover:text-[#ff5f57] gap-2 rounded-full"
                                 >
                                     <Trash2 className="w-4 h-4" />
                                     Delete Dashboard
                                 </Button>
                             </div>
+
+                            <ConfirmDialog
+                                open={showDeleteConfirm}
+                                onOpenChange={setShowDeleteConfirm}
+                                title="Delete Dashboard?"
+                                description="Delete this dashboard? Cards will be hidden/lost properly unless moved."
+                                onConfirm={() => {
+                                    deleteDashboard(dashboard.id);
+                                    setSettingsOpen(false); // Close settings dialog too if needed, though delete probably unmounts component
+                                }}
+                                confirmText="Delete"
+                                variant="destructive"
+                            />
                         </DialogContent>
                     </Dialog>
                 </div>
