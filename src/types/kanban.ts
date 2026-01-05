@@ -2,8 +2,6 @@ export interface Card {
   id: string;
   title: string;
   date?: string; // ISO date string for day columns
-  columnType?: 'day' | 'extra'; // day for weekday columns, extra for custom columns
-  extraColumnId?: string; // for cards in extra columns
   description?: string; // Detailed description
 
   // Options/Branching support
@@ -30,12 +28,7 @@ export interface Card {
   };
 }
 
-export interface ExtraColumn {
-  id: string;
-  dashboardId: string; // Link to a specific dashboard
-  name: string;
-  order: number;
-}
+
 
 export interface WeekData {
   startDate: Date;

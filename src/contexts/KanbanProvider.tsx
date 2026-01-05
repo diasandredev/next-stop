@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { Card, ExtraColumn, Trip, Dashboard, AccountSettings } from '@/types/kanban';
+import { Card, Trip, Dashboard, AccountSettings } from '@/types/kanban';
 import { SyncProvider } from './SyncContext';
 import { useKanbanData } from '@/hooks/kanban/useKanbanData';
 import { useCardOperations } from '@/hooks/kanban/useCardOperations';
@@ -11,7 +11,6 @@ import { KanbanContext } from './KanbanContext';
 const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React.MutableRefObject<any> }> = ({ children, stateRef }) => {
     const {
         cards, setCards,
-        extraColumns, setExtraColumns,
         trips, setTrips,
         dashboards, setDashboards,
         accountSettings, setAccountSettings,
@@ -23,12 +22,11 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React
     useEffect(() => {
         stateRef.current = {
             cards,
-            extraColumns,
             trips,
             dashboards,
             accountSettings
         };
-    }, [cards, extraColumns, trips, dashboards, accountSettings, stateRef]);
+    }, [cards, trips, dashboards, accountSettings, stateRef]);
 
     const {
         addCard,
@@ -45,7 +43,10 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React
         setTrips,
         currentTripId,
         setCurrentTripId,
-        markDirty
+        markDirty,
+        dashboards,
+        setDashboards,
+        setCards
     });
 
     const {
@@ -57,18 +58,11 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React
         setDashboards,
         markDirty,
         timezone: accountSettings?.timezone,
-        trips
+        trips,
+        setCards
     });
 
-    const updateExtraColumn = useCallback((id: string, name: string) => {
-        setExtraColumns(prev => prev.map(col => {
-            if (col.id === id) {
-                markDirty(col.id, 'extraColumns');
-                return { ...col, name };
-            }
-            return col;
-        }));
-    }, [markDirty, setExtraColumns]);
+
 
     const updateAccountSettings = useCallback((settings: Partial<AccountSettings>) => {
         setAccountSettings(prev => {
@@ -95,7 +89,6 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React
 
     const value = {
         cards,
-        extraColumns,
         trips,
         dashboards,
         currentTripId,
@@ -107,7 +100,7 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React
         deleteCard,
         deleteAllCards,
 
-        updateExtraColumn,
+
 
         addTrip,
         updateTrip,
@@ -135,13 +128,11 @@ export const KanbanProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // This ref will hold the current state of all Kanban data for the SyncProvider
     const kanbanStateRef = useRef<{
         cards: Card[];
-        extraColumns: ExtraColumn[];
         trips: Trip[];
         dashboards: Dashboard[];
         accountSettings: AccountSettings | null;
     }>({
         cards: [],
-        extraColumns: [],
         trips: [],
         dashboards: [],
         accountSettings: null,

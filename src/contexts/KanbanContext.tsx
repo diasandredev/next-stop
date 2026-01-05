@@ -1,9 +1,8 @@
 import React, { createContext, useContext } from 'react';
-import { Card, ExtraColumn, Trip, Dashboard, AccountSettings } from '@/types/kanban';
+import { Card, Trip, Dashboard, AccountSettings } from '@/types/kanban';
 
 export interface KanbanContextType {
   cards: Card[];
-  extraColumns: ExtraColumn[];
 
   trips: Trip[];
   dashboards: Dashboard[];
@@ -16,7 +15,7 @@ export interface KanbanContextType {
   deleteCard: (id: string) => void;
   deleteAllCards: () => void;
 
-  updateExtraColumn: (id: string, name: string) => void;
+
 
   addTrip: (name: string, startDate?: string, endDate?: string) => string;
   updateTrip: (id: string, updates: Partial<Trip>) => void;

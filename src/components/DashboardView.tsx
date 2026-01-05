@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Card, Dashboard, ExtraColumn as ExtraColumnType, Trip } from '@/types/kanban';
+import { Card, Dashboard, Trip } from '@/types/kanban';
 import { DayColumn } from './DayColumn';
-import { ExtraColumn } from './ExtraColumn';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Settings, Trash2, X } from 'lucide-react';
@@ -23,11 +22,10 @@ interface DashboardViewProps {
     dashboard: Dashboard;
     trip: Trip;
     cards: Card[];
-    extraColumns: ExtraColumnType[];
     today: string;
 }
 
-export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: DashboardViewProps) => {
+export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewProps) => {
     const { updateDashboard, deleteDashboard } = useKanban();
     const [isEditingName, setIsEditingName] = useState(false);
     const [name, setName] = useState(dashboard.name);
@@ -66,7 +64,7 @@ export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: D
     // Calculate max cards in any column for this dashboard to sync grid lines
     const dayCardCounts = dates.map(date => {
         const dateStr = date.toISOString().split('T')[0];
-        const dayCards = cards.filter(c => c.date === dateStr && c.columnType === 'day' && c.dashboardId === dashboard.id);
+        const dayCards = cards.filter(c => c.date === dateStr && c.dashboardId === dashboard.id);
 
         // Calculate "visual slots" used
         // Standard card = 1 slot
@@ -91,18 +89,13 @@ export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: D
         return visualCount;
     });
 
-    const extraCardCounts = extraColumns
-        .filter(ec => ec.dashboardId === dashboard.id)
-        .map(col => {
-            return cards.filter(c => c.columnType === 'extra' && c.extraColumnId === col.id).length;
-        });
 
-    const maxCards = Math.max(0, ...dayCardCounts, ...extraCardCounts);
+
+    const maxCards = Math.max(0, ...dayCardCounts);
     // Ensure at least a minimum visual height (e.g. 5) but extend if there are more cards
     const unifiedMinSlots = Math.max(5, maxCards + 1);
 
-    const dashboardExtraColumns = extraColumns.filter(ec => ec.dashboardId === dashboard.id);
-    const totalColumns = dates.length + dashboardExtraColumns.length;
+    const totalColumns = dates.length;
 
     // Width logic: if <= 5 columns, fill space (fluid). If > 5, fixed width (scroll).
     const isFluid = totalColumns <= 5;
@@ -242,7 +235,7 @@ export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: D
                                 <DayColumn
                                     dashboardId={dashboard.id}
                                     date={date}
-                                    cards={cards.filter(c => c.date === dateStr && c.columnType === 'day')}
+                                    cards={cards.filter(c => c.date === dateStr)}
                                     isCurrentDay={dateStr === today}
                                     minSlots={unifiedMinSlots}
                                     isWeekend={date.getDay() === 0 || date.getDay() === 6} // Just styling
@@ -251,16 +244,6 @@ export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: D
                         );
                     })}
 
-                    {/* Extra Columns for this dashboard */}
-                    {dashboardExtraColumns.map(col => (
-                        <div key={col.id} className={columnClass}>
-                            <ExtraColumn
-                                column={col}
-                                cards={cards.filter(c => c.columnType === 'extra' && c.extraColumnId === col.id)}
-                                minSlots={unifiedMinSlots}
-                            />
-                        </div>
-                    ))}
                 </div>
             </div>
         </div>

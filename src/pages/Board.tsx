@@ -20,7 +20,6 @@ const Board = () => {
   const { logout, user } = useAuth();
   const {
     cards,
-    extraColumns,
     trips,
     dashboards,
     currentTripId,
@@ -91,11 +90,6 @@ const Board = () => {
       destType = 'day';
       destDate = overData.date;
       destDashboardId = overData.dashboardId;
-    } else if (overData?.type === 'extra') {
-      destType = 'extra';
-      destExtraId = overData.columnId;
-      const col = extraColumns.find(c => c.id === overData.columnId);
-      destDashboardId = col?.dashboardId;
     } else if (overData?.type === 'option') {
       destType = 'option';
       destDashboardId = overData.dashboardId;
@@ -107,9 +101,9 @@ const Board = () => {
       destDate = parentCard?.date;
     } else if (overCard) {
       // If dropping ONTO a card
-      destType = overCard.columnType ?? null;
+      destType = 'day'; // Default to day if not obvious, or check context. 
+      // Actually if dropping on a card, it's likely a day card since extra is gone.
       destDate = overCard.date;
-      destExtraId = overCard.extraColumnId;
       destDashboardId = overCard.dashboardId;
 
       // Check if the card we are dropping onto is INSIDE an option
@@ -128,15 +122,8 @@ const Board = () => {
     if (destType === 'day') {
       destList = cards.filter(c =>
         c.dashboardId === destDashboardId &&
-        c.columnType === 'day' &&
         c.date === destDate &&
         !c.parentId // Only root cards
-      );
-    } else if (destType === 'extra') {
-      destList = cards.filter(c =>
-        c.dashboardId === destDashboardId &&
-        c.columnType === 'extra' &&
-        c.extraColumnId === destExtraId
       );
     } else if (destType === 'option') {
       destList = cards.filter(c =>
@@ -171,23 +158,14 @@ const Board = () => {
       };
 
       if (destType === 'day') {
-        updates.columnType = 'day';
         updates.date = destDate;
-        updates.extraColumnId = undefined;
         updates.parentId = undefined; // Clear option parents
         updates.optionId = undefined;
-      } else if (destType === 'extra') {
-        updates.columnType = 'extra';
-        updates.extraColumnId = destExtraId;
-        updates.date = undefined;
-        updates.parentId = undefined;
-        updates.optionId = undefined;
       } else if (destType === 'option') {
-        updates.columnType = 'day'; // Options are usually in day columns
         updates.date = destDate;
         updates.parentId = destParentId;
         updates.optionId = destOptionId;
-        updates.extraColumnId = undefined;
+        updates.optionId = destOptionId;
       }
 
       // Update the moved card
@@ -316,7 +294,6 @@ const Board = () => {
                       dashboard={dashboard}
                       trip={currentTrip!}
                       cards={cards.filter(c => c.dashboardId === dashboard.id)}
-                      extraColumns={extraColumns}
                       today={today}
                     />
                   ))}

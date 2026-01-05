@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Card, ExtraColumn, Trip, Dashboard, AccountSettings } from '@/types/kanban';
+import { Card, Trip, Dashboard, AccountSettings } from '@/types/kanban';
 import { useSync } from '../../contexts/SyncContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { db, dbPromise } from '@/utils/db';
 
-const defaultExtraColumns: ExtraColumn[] = [
-    // These might need dashboardId now, but for defaults we might wait until a dashboard exists
-    // OR we just define the structure
-];
+
 
 export const useKanbanData = () => {
     const { markDirty, initialFetch } = useSync();
@@ -16,7 +13,6 @@ export const useKanbanData = () => {
 
     // State for all Kanban data
     const [cards, setCards] = useState<Card[]>([]);
-    const [extraColumns, setExtraColumns] = useState<ExtraColumn[]>([]);
 
     // New States
     const [trips, setTrips] = useState<Trip[]>([]);
@@ -32,14 +28,12 @@ export const useKanbanData = () => {
             try {
                 // 1. Load from IndexedDB
                 const dbCards = await db.getAllCards();
-                const dbExtraColumns = await db.getExtraColumns();
                 const dbTrips = await db.getTrips();
                 const dbDashboards = await db.getDashboards();
                 const dbSettings = await db.getAccountSettings();
                 const dbCurrentTripId = await db.getLastTripId();
 
                 setCards(dbCards);
-                setExtraColumns(dbExtraColumns);
 
                 if (dbTrips.length > 0) {
                     setTrips(dbTrips);
@@ -97,21 +91,7 @@ export const useKanbanData = () => {
         }
     }, [cards, isLoading]);
 
-    useEffect(() => {
-        if (!isLoading) {
-            const save = async () => {
-                // Determine deleted extra columns?
-                // For now, simpler sync
-                const existing = await db.getExtraColumns();
-                const currentIds = new Set(extraColumns.map(c => c.id));
-                for (const e of existing) {
-                    if (!currentIds.has(e.id)) await db.deleteExtraColumn(e.id);
-                }
-                for (const c of extraColumns) await db.saveExtraColumn(c);
-            };
-            save();
-        }
-    }, [extraColumns, isLoading]);
+
 
     useEffect(() => {
         if (!isLoading) {
@@ -156,8 +136,6 @@ export const useKanbanData = () => {
     return {
         cards,
         setCards,
-        extraColumns,
-        setExtraColumns,
         trips,
         setTrips,
         dashboards,

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Dashboard, Trip } from '@/types/kanban';
+import { Dashboard, Trip, Card } from '@/types/kanban';
 import { formatInTimeZone } from 'date-fns-tz';
 
 interface UseDashboardOperationsProps {
@@ -8,6 +8,7 @@ interface UseDashboardOperationsProps {
     markDirty: (id: string, type: string) => void;
     timezone?: string;
     trips: Trip[];
+    setCards: React.Dispatch<React.SetStateAction<Card[]>>;
 }
 
 export const useDashboardOperations = ({
@@ -15,7 +16,8 @@ export const useDashboardOperations = ({
     setDashboards,
     markDirty,
     timezone,
-    trips
+    trips,
+    setCards
 }: UseDashboardOperationsProps) => {
 
     const addDashboard = useCallback((tripId: string, name: string, startDate?: string, days?: number) => {
@@ -121,9 +123,16 @@ export const useDashboardOperations = ({
     }, [markDirty, setDashboards]);
 
     const deleteDashboard = useCallback((id: string) => {
+        // Cascading delete: Remove cards associated with this dashboard
+        setCards(prev => {
+            const toDelete = prev.filter(c => c.dashboardId === id);
+            toDelete.forEach(c => markDirty(c.id, 'cards'));
+            return prev.filter(c => c.dashboardId !== id);
+        });
+
         setDashboards(prev => prev.filter(d => d.id !== id));
         markDirty(id, 'dashboards');
-    }, [markDirty, setDashboards]);
+    }, [markDirty, setCards, setDashboards]);
 
     return {
         addDashboard,
