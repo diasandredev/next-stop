@@ -141,10 +141,10 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                         <DialogContent hideCloseButton className="bg-[#E8E1F5] border-none text-black sm:max-w-[500px] p-0 rounded-3xl shadow-2xl overflow-hidden gap-0">
                             <div className="p-6 pb-2">
                                 <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-bold flex items-center gap-2">
+                                    <DialogTitle className="text-xl font-bold flex items-center gap-2">
                                         {dashboard.name}
                                         <Settings className="w-4 h-4 text-black/50" />
-                                    </h2>
+                                    </DialogTitle>
                                     <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-black/5" onClick={() => setSettingsOpen(false)}>
                                         <span className="sr-only">Close</span>
                                         <X className="w-4 h-4 opacity-50" />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
 import { Label } from '@/components/ui/label';
@@ -60,10 +60,10 @@ export function AccountSettingsDialog({ open, onOpenChange }: AccountSettingsDia
                 <DialogContent hideCloseButton className="bg-[#E8E1F5] border-none text-black sm:max-w-[500px] p-0 rounded-3xl shadow-2xl overflow-hidden gap-0">
                     <div className="p-6 pb-2">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold flex items-center gap-2">
+                            <DialogTitle className="text-xl font-bold flex items-center gap-2">
                                 Account settings
                                 <Settings className="w-4 h-4 text-black/50" />
-                            </h2>
+                            </DialogTitle>
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)}>
                                 <span className="sr-only">Close</span>
                             </Button>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useKanban } from '@/contexts/KanbanContext';
 import { CalendarIcon, Plane, X } from 'lucide-react';
@@ -43,10 +43,10 @@ export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
                 <form onSubmit={handleSubmit}>
                     <div className="p-6 pb-2">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold flex items-center gap-2">
+                            <DialogTitle className="text-xl font-bold flex items-center gap-2">
                                 New Trip
                                 <Plane className="w-4 h-4 text-black/50" />
-                            </h2>
+                            </DialogTitle>
                             <Button type="button" variant="ghost" size="icon" className="h-8 w-8 hover:bg-black/5" onClick={() => onOpenChange(false)}>
                                 <span className="sr-only">Close</span>
                                 <X className="w-4 h-4 opacity-50" />
