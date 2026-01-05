@@ -56,7 +56,8 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React
         dashboards,
         setDashboards,
         markDirty,
-        timezone: accountSettings?.timezone
+        timezone: accountSettings?.timezone,
+        trips
     });
 
     const updateExtraColumn = useCallback((id: string, name: string) => {

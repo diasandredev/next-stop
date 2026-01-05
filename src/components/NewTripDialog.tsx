@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { useKanban } from '@/contexts/KanbanContext';
 import { CalendarIcon, Plane, X } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import { DatePicker } from './DatePicker';
+import { DateRangePicker } from './DateRangePicker';
+import { DateRange } from 'react-day-picker';
 
 interface NewTripDialogProps {
     open: boolean;
@@ -14,12 +15,14 @@ interface NewTripDialogProps {
 export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
     const { addTrip, addDashboard, setCurrentTripId } = useKanban();
     const [name, setName] = useState('');
-    const [startDate, setStartDate] = useState('');
+    const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (name.trim()) {
-            const tripId = addTrip(name.trim(), startDate || undefined);
+            const startDate = dateRange?.from?.toISOString();
+            const endDate = dateRange?.to?.toISOString();
+            const tripId = addTrip(name.trim(), startDate, endDate);
 
             // Switch to new trip immediately
             setCurrentTripId(tripId);
@@ -29,7 +32,7 @@ export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
             addDashboard(tripId, 'Main Board', defaultDate, 1);
 
             setName('');
-            setStartDate('');
+            setDateRange(undefined);
             onOpenChange(false);
         }
     };
@@ -67,10 +70,9 @@ export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label className="text-xs font-bold text-black/50">Start Date</Label>
+                                <Label className="text-xs font-bold text-black/50">Trip Dates</Label>
                                 <div className="flex items-center gap-2 bg-white/50 p-1 pl-3 rounded-xl relative">
-                                    <CalendarIcon className="w-4 h-4 text-black/40" />
-                                    <DatePicker date={startDate ? new Date(startDate) : undefined} setDate={(d) => setStartDate(d ? d.toISOString() : '')} />
+                                    <DateRangePicker date={dateRange} setDate={setDateRange} />
                                 </div>
                             </div>
                         </div>

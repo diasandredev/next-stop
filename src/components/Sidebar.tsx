@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -60,6 +60,12 @@ export function Sidebar({
     const navigate = useNavigate();
     const location = useLocation();
     const [expandedTripId, setExpandedTripId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (currentTripId) {
+            setExpandedTripId(currentTripId);
+        }
+    }, [currentTripId]);
 
     return (
         <aside

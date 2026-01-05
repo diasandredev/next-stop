@@ -18,7 +18,7 @@ export interface KanbanContextType {
 
   updateExtraColumn: (id: string, name: string) => void;
 
-  addTrip: (name: string, startDate?: string) => string;
+  addTrip: (name: string, startDate?: string, endDate?: string) => string;
   updateTrip: (id: string, updates: Partial<Trip>) => void;
   deleteTrip: (id: string) => void;
   setCurrentTripId: (id: string) => void;

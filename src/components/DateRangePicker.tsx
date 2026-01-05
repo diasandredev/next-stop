@@ -12,7 +12,9 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 
-interface DateRangePickerProps {
+import { DayPickerRangeProps } from "react-day-picker"
+
+interface DateRangePickerProps extends Omit<DayPickerRangeProps, "mode" | "selected" | "onSelect"> {
     date?: DateRange
     setDate: (date?: DateRange) => void
     className?: string
@@ -22,6 +24,7 @@ export function DateRangePicker({
     date,
     setDate,
     className,
+    ...props
 }: DateRangePickerProps) {
     return (
         <div className={cn("grid gap-2", className)}>
@@ -69,6 +72,7 @@ export function DateRangePicker({
                             nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 hover:bg-white/50 rounded-md text-black border-black/10 border",
                             caption: "flex justify-center pt-1 relative items-center text-black font-bold",
                         }}
+                        {...props}
                     />
                 </PopoverContent>
             </Popover>

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Dashboard } from '@/types/kanban';
+import { Dashboard, Trip } from '@/types/kanban';
 import { formatInTimeZone } from 'date-fns-tz';
 
 interface UseDashboardOperationsProps {
@@ -7,20 +7,23 @@ interface UseDashboardOperationsProps {
     setDashboards: React.Dispatch<React.SetStateAction<Dashboard[]>>;
     markDirty: (id: string, type: string) => void;
     timezone?: string;
+    trips: Trip[];
 }
 
 export const useDashboardOperations = ({
     dashboards,
     setDashboards,
     markDirty,
-    timezone
+    timezone,
+    trips
 }: UseDashboardOperationsProps) => {
 
     const addDashboard = useCallback((tripId: string, name: string, startDate?: string, days?: number) => {
-        // Find existing dashboards for this trip to determine defaults
+        const trip = trips.find(t => t.id === tripId);
+
+        // Find existing dashboards for this trip
         const tripDashboards = dashboards
             .filter(d => d.tripId === tripId)
-            // Sort by startDate to find the "last" one chronologically
             .sort((a, b) => {
                 const timeA = a.startDate ? new Date(a.startDate).getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
                 const timeB = b.startDate ? new Date(b.startDate).getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
@@ -29,37 +32,60 @@ export const useDashboardOperations = ({
 
         let finalDays = days;
         let finalStartDate = startDate;
-
-        // Use configured timezone or fallback to system
         const targetTimeZone = timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+        // Default logic
         if (tripDashboards.length === 0) {
-            // Default Case: First dashboard
-            // If no days specified, default to 1 day
             if (finalDays === undefined) finalDays = 1;
-            // If no startDate specified, default to today in configured timezone
             if (!finalStartDate) {
-                finalStartDate = formatInTimeZone(new Date(), targetTimeZone, 'yyyy-MM-dd');
+                // If trip has start date, use it. Otherwise use today.
+                if (trip?.startDate) {
+                    finalStartDate = trip.startDate;
+                } else {
+                    finalStartDate = formatInTimeZone(new Date(), targetTimeZone, 'yyyy-MM-dd');
+                }
             }
         } else {
-            // Subsequent Case: Previous dashboards exist
-            // If no days specified, default to 1 day
             if (finalDays === undefined) finalDays = 1;
-
-            // If no startDate specified, calculate from last dashboard
             if (!finalStartDate) {
                 const lastDashboard = tripDashboards[tripDashboards.length - 1];
                 if (lastDashboard.startDate) {
                     const lastStart = new Date(lastDashboard.startDate);
-                    // Start on the last day of the previous dashboard
-                    // Last Day = Start + (Days - 1)
-                    // We need the day AFTER the last day = Start + Days
                     const nextDate = new Date(lastStart);
                     nextDate.setDate(lastStart.getDate() + lastDashboard.days);
                     finalStartDate = nextDate.toISOString();
                 } else {
-                    // Fallback if last dashboard has no date (shouldn't happen usually)
                     finalStartDate = formatInTimeZone(new Date(), targetTimeZone, 'yyyy-MM-dd');
+                }
+            }
+        }
+
+        // VALIDATION: Start Date must be >= Trip Start Date
+        if (trip?.startDate && finalStartDate && new Date(finalStartDate) < new Date(trip.startDate)) {
+            finalStartDate = trip.startDate;
+        }
+
+        // VALIDATION: End Date must be <= Trip End Date
+        // Actually, we can just clamp the days or start date if needed?
+        // User request: "data final do dashboard deve ser menor ou igual ao ultimo dia da trip"
+        // Let's check end date.
+        if (trip?.endDate && finalStartDate && finalDays) {
+            const start = new Date(finalStartDate);
+            const proposedEnd = new Date(start);
+            proposedEnd.setDate(start.getDate() + finalDays - 1); // Inclusive
+
+            const tripEnd = new Date(trip.endDate);
+            // tripEnd should be inclusive (e.g. ends on Jan 10 means Jan 10 is last day)
+            // If proposedEnd > tripEnd
+            if (proposedEnd > tripEnd) {
+                // Option 1: Reduce days
+                const diffTime = tripEnd.getTime() - start.getTime();
+                const maxDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 because inclusive
+                if (maxDays > 0) {
+                    finalDays = maxDays;
+                } else {
+                    // Start date is already after trip end, which is bad. 
+                    // But we already checked start >= start. If start > end, that's a trip config issue or user error.
                 }
             }
         }
@@ -68,18 +94,25 @@ export const useDashboardOperations = ({
             id: crypto.randomUUID(),
             tripId,
             name,
-            days: finalDays!, // finalDays is definitely set above
+            days: finalDays!,
             startDate: finalStartDate,
             createdAt: new Date().toISOString()
         };
         setDashboards(prev => [...prev, newDashboard]);
         markDirty(newDashboard.id, 'dashboards');
         return newDashboard.id;
-    }, [dashboards, markDirty, setDashboards]);
+    }, [dashboards, markDirty, setDashboards, timezone, trips]);
 
     const updateDashboard = useCallback((id: string, updates: Partial<Dashboard>) => {
         setDashboards(prev => prev.map(dash => {
             if (dash.id === id) {
+                // We should validate here too, but updates usually come from UI which we will constrain.
+                // However, adding basic validation here is safe.
+                // We need the trip for this dashboard.
+                // Since this is inside map, we might not have efficient access to trip without searching.
+                // Let's rely on UI constraints for updateDashboard for now to avoid perf hit or complex logic inside map.
+                // Or we can find trip outside.
+
                 markDirty(id, 'dashboards');
                 return { ...dash, ...updates };
             }

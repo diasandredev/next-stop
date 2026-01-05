@@ -4,7 +4,7 @@ import { useKanban } from '@/contexts/KanbanContext';
 import { Button } from '@/components/ui/button';
 import { SyncStatus } from '@/components/SyncStatus';
 import { Sidebar } from '@/components/Sidebar';
-import { Loader2, Plus, Map as MapIcon } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Card, Trip } from '@/types/kanban';
@@ -288,14 +288,19 @@ const Board = () => {
             {/* Header */}
             <header className="px-6 py-4 flex-shrink-0 sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/50">
               <div className="flex items-center justify-between gap-4">
-                <h1 className="text-3xl font-bold tracking-tight">
-                  {currentTrip ? currentTrip.name : 'Select a Trip'}
-                </h1>
+                <div className="flex items-center gap-4">
+                  <h1 className="text-3xl font-bold tracking-tight">
+                    {currentTrip ? currentTrip.name : 'Select a Trip'}
+                  </h1>
+                  {currentTrip?.startDate && (
+                    <span className="text-sm font-medium bg-secondary text-secondary-foreground px-3 py-1 rounded-full">
+                      {formatInTimeZone(new Date(currentTrip.startDate), timeZone, 'MMM d')}
+                      {currentTrip.endDate && ` - ${formatInTimeZone(new Date(currentTrip.endDate), timeZone, 'MMM d')}`}
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => window.location.href = '/map'}>
-                    <MapIcon className="w-4 h-4 mr-2" />
-                    View Map
-                  </Button>
+
                   <SyncStatus />
                 </div>
               </div>

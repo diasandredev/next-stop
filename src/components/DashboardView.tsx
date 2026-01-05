@@ -182,6 +182,14 @@ export const DashboardView = ({ dashboard, trip, cards, extraColumns, today }: D
                                                         setEditDays(1);
                                                     }
                                                 }}
+                                                fromDate={trip.startDate ? new Date(trip.startDate) : undefined}
+                                                toDate={trip.endDate ? new Date(trip.endDate) : undefined}
+                                                disabled={(date) => {
+                                                    // Optional: Stronger validation
+                                                    if (trip.startDate && date < new Date(trip.startDate)) return true;
+                                                    if (trip.endDate && date > new Date(trip.endDate)) return true;
+                                                    return false;
+                                                }}
                                             />
                                         </div>
                                     </div>

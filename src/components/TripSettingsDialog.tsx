@@ -5,7 +5,8 @@ import { useKanban } from '@/contexts/KanbanContext';
 import { Trip } from '@/types/kanban';
 import { Label } from './ui/label';
 import { Plane, Trash2, Calendar } from 'lucide-react';
-import { DatePicker } from './DatePicker';
+import { DateRangePicker } from './DateRangePicker';
+import { DateRange } from 'react-day-picker';
 import { ConfirmDialog } from './ConfirmDialog';
 
 interface TripSettingsDialogProps {
@@ -17,13 +18,16 @@ interface TripSettingsDialogProps {
 export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDialogProps) {
     const { updateTrip, deleteTrip } = useKanban();
     const [name, setName] = useState('');
-    const [startDate, setStartDate] = useState('');
+    const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
         if (trip) {
             setName(trip.name);
-            setStartDate(trip.startDate || '');
+            setDateRange({
+                from: trip.startDate ? new Date(trip.startDate) : undefined,
+                to: trip.endDate ? new Date(trip.endDate) : undefined
+            });
         }
     }, [trip]);
 
@@ -31,7 +35,8 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
         if (trip && name.trim()) {
             updateTrip(trip.id, {
                 name: name.trim(),
-                startDate: startDate || undefined
+                startDate: dateRange?.from?.toISOString(),
+                endDate: dateRange?.to?.toISOString()
             });
             onOpenChange(false);
         }
@@ -91,12 +96,11 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-xs font-bold text-black/50">Start Date</Label>
+                            <Label className="text-xs font-bold text-black/50">Trip Dates</Label>
                             <div className="flex items-center gap-2 bg-white/50 p-1 pl-3 rounded-xl relative">
-                                <Calendar className="w-4 h-4 text-black/40" />
-                                <DatePicker
-                                    date={startDate ? new Date(startDate) : undefined}
-                                    setDate={(d) => setStartDate(d ? d.toISOString() : '')}
+                                <DateRangePicker
+                                    date={dateRange}
+                                    setDate={setDateRange}
                                 />
                             </div>
                         </div>

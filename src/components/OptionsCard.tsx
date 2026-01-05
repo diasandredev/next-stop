@@ -82,7 +82,7 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
                     <div className="h-6 flex items-center justify-between px-3 border-b border-border/10">
                         <div className="flex items-center gap-2">
                             <Split className="w-3 h-3 text-muted-foreground" />
-                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Options Paths</span>
+                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">ITINERARY OPTIONS</span>
                         </div>
                         <Button
                             variant="ghost"
@@ -96,7 +96,7 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
                     {/* Bottom Row: Path Labels + Add Buttons */}
                     <div className="h-6 flex divide-x divide-border/10">
                         <div className="flex-1 flex items-center justify-between px-2 bg-white/5 group/path-a">
-                            <span className="text-[9px] font-medium text-muted-foreground/70 uppercase tracking-widest">Path A</span>
+                            <span className="text-[9px] font-medium text-muted-foreground/70 uppercase tracking-widest">ITINERARY A</span>
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -107,7 +107,7 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
                             </Button>
                         </div>
                         <div className="flex-1 flex items-center justify-between px-2 bg-white/5 group/path-b">
-                            <span className="text-[9px] font-medium text-muted-foreground/70 uppercase tracking-widest">Path B</span>
+                            <span className="text-[9px] font-medium text-muted-foreground/70 uppercase tracking-widest">ITINERARY B</span>
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -145,7 +145,7 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
                                     onBlur={() => handleAddCard('1')}
                                     autoFocus
                                     className="h-8 text-xs bg-background/50"
-                                    placeholder="Add to Path A..."
+                                    placeholder="Add to Itinerary A..."
                                 />
                             </div>
                         )}
@@ -174,7 +174,7 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
                                     onBlur={() => handleAddCard('2')}
                                     autoFocus
                                     className="h-8 text-xs bg-background/50"
-                                    placeholder="Add to Path B..."
+                                    placeholder="Add to Itinerary B..."
                                 />
                             </div>
                         )}

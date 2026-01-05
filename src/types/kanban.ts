@@ -46,6 +46,7 @@ export interface Trip {
   id: string;
   name: string;
   startDate?: string; // ISO Date string
+  endDate?: string; // ISO Date string
 }
 
 export interface Dashboard {

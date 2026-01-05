@@ -15,11 +15,12 @@ export const useTripOperations = ({
     markDirty
 }: UseTripOperationsProps) => {
 
-    const addTrip = useCallback((name: string, startDate?: string) => {
+    const addTrip = useCallback((name: string, startDate?: string, endDate?: string) => {
         const newTrip: Trip = {
             id: crypto.randomUUID(),
             name,
-            startDate
+            startDate,
+            endDate
         };
         setTrips(prev => [...prev, newTrip]);
         markDirty(newTrip.id, 'trips');
