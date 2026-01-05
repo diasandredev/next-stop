@@ -15,14 +15,8 @@ import {
 } from "@/components/ui/select";
 import {
     AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface AccountSettingsDialogProps {
     open: boolean;
@@ -137,22 +131,15 @@ export function AccountSettingsDialog({ open, onOpenChange }: AccountSettingsDia
                 </DialogContent>
             </Dialog>
 
-            <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
-                <AlertDialogContent className="bg-[#E8E1F5] border-none text-black">
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Delete all cards?</AlertDialogTitle>
-                        <AlertDialogDescription className="text-black/60">
-                            This action cannot be undone. This will permanently delete ALL cards in the current view.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel className="bg-transparent border-black/10 text-black hover:bg-black/5">Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteCards} className="bg-[#ff5f57] hover:bg-[#ff5f57]/90 text-white border-none">
-                            Delete
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <ConfirmDialog
+                open={showDeleteAlert}
+                onOpenChange={setShowDeleteAlert}
+                title="Delete all cards?"
+                description="This action cannot be undone. This will permanently delete ALL cards in the current view."
+                onConfirm={handleDeleteCards}
+                confirmText="Delete"
+                variant="destructive"
+            />
         </>
     );
 }
