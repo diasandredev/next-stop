@@ -135,7 +135,7 @@ export function Sidebar({
                                         className={cn(
                                             "w-full flex items-center gap-3 p-2 rounded-lg transition-all duration-200 group relative",
                                             isTripActive && !isTripExpanded
-                                                ? "bg-primary/10 text-primary"
+                                                ? "bg-[#304D73]/20 text-[#5a8fc4]"
                                                 : "hover:bg-muted text-muted-foreground hover:text-foreground",
                                             !isExpanded && "justify-center"
                                         )}
@@ -204,7 +204,7 @@ export function Sidebar({
                                         className={cn(
                                             "w-full flex items-center gap-3 p-2 rounded-lg text-sm transition-colors",
                                             location.pathname === '/board' && isTripActive
-                                                ? "bg-primary/10 text-primary font-medium"
+                                                ? "bg-[#304D73]/20 text-[#5a8fc4] font-medium"
                                                 : "text-muted-foreground hover:text-foreground hover:bg-muted"
                                         )}
                                     >
@@ -220,7 +220,7 @@ export function Sidebar({
                                         className={cn(
                                             "w-full flex items-center gap-3 p-2 rounded-lg text-sm transition-colors",
                                             location.pathname === '/map' && isTripActive
-                                                ? "bg-primary/10 text-primary font-medium"
+                                                ? "bg-[#304D73]/20 text-[#5a8fc4] font-medium"
                                                 : "text-muted-foreground hover:text-foreground hover:bg-muted"
                                         )}
                                     >

@@ -71,7 +71,7 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
           group cursor-grab relative
           ${isDragging ? 'invisible' : 'z-0'}
           ${isNested ? 'h-12 text-sm' : 'h-12'} 
-          border-b border-border/40 hover:border-blue-500 flex items-center justify-between pr-2
+          border-b border-border/40 hover:border-[#5a8fc4] flex items-center justify-between pr-2
           transition-colors duration-200
           ${card.completed ? 'opacity-60' : ''}
           ${isNested ? 'bg-black/20' : ''}

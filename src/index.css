@@ -17,7 +17,7 @@ All colors MUST be HSL.
     --popover: 0 0% 8%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 232 88% 64%;
+    --primary: 214 41% 32%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 10%;
@@ -26,7 +26,7 @@ All colors MUST be HSL.
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 60%;
 
-    --accent: 232 88% 64%%;
+    --accent: 214 41% 32%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -34,11 +34,11 @@ All colors MUST be HSL.
 
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: 232 88% 64%%;
+    --ring: 214 41% 32%;
 
     --radius: 0.5rem;
 
-    --current-day: 232 88% 64%;
+    --current-day: 214 41% 32%;
     --weekend: 0 0% 5%;
 
     /* Chip colors */

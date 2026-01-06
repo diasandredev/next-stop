@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useKanban } from '@/contexts/KanbanContext';
 import { Trip } from '@/types/kanban';
 import { Label } from './ui/label';
-import { Plane, Trash2, Calendar } from 'lucide-react';
+import { Plane, Trash2, X } from 'lucide-react';
 import { DateRangePicker } from './DateRangePicker';
 import { DateRange } from 'react-day-picker';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -53,53 +53,40 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent hideCloseButton className="bg-[#E8E1F5] border-none text-black sm:max-w-[500px] p-0 rounded-3xl shadow-2xl overflow-hidden gap-0">
+            <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
                 <DialogTitle className="sr-only">Trip Settings</DialogTitle>
                 <DialogDescription className="sr-only">Edit your trip details.</DialogDescription>
-                <div className="p-6 pb-2">
-                    <div className="flex items-center justify-between mb-6">
-                        <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                            Trip settings
-                            <Plane className="w-4 h-4 text-black/50" />
-                        </DialogTitle>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-black/5" onClick={() => onOpenChange(false)}>
-                            <span className="sr-only">Close</span>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="h-4 w-4 opacity-50"
-                            >
-                                <path d="M18 6 6 18" />
-                                <path d="m6 6 12 12" />
-                            </svg>
-                        </Button>
-                    </div>
 
-                    <div className="mb-6 space-y-4">
-                        <h3 className="font-bold text-sm text-black/60 uppercase tracking-wider">Information</h3>
+                <div className="flex items-center justify-between mb-6">
+                    <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                        Trip settings
+                        <Plane className="w-4 h-4 text-muted-foreground" />
+                    </DialogTitle>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => onOpenChange(false)}>
+                        <span className="sr-only">Close</span>
+                        <X className="w-4 h-4" />
+                    </Button>
+                </div>
 
+                <div className="space-y-4 mb-6">
+                    <Label className="text-sm font-medium text-muted-foreground">Information</Label>
+
+                    <div className="space-y-3">
                         <div className="space-y-2">
-                            <Label className="text-xs font-bold text-black/50">Name</Label>
-                            <div className="bg-white/50 p-1 rounded-xl">
+                            <Label className="text-xs font-medium text-muted-foreground">Name</Label>
+                            <div className="bg-white/5 rounded-xl">
                                 <input
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full bg-transparent border-none p-2 px-3 text-base font-medium focus:outline-none placeholder:text-black/30"
+                                    className="w-full bg-transparent border-none p-3 text-base font-medium focus:outline-none placeholder:text-muted-foreground/50 text-white"
                                     placeholder="Trip Name"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-xs font-bold text-black/50">Trip Dates</Label>
-                            <div className="flex items-center gap-2 bg-white/50 p-1 pl-3 rounded-xl relative">
+                            <Label className="text-xs font-medium text-muted-foreground">Trip Dates</Label>
+                            <div className="flex items-center gap-2 bg-white/5 p-1 pl-3 rounded-xl relative">
                                 <DateRangePicker
                                     date={dateRange}
                                     setDate={setDateRange}
@@ -110,10 +97,10 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
                 </div>
 
                 {/* Footer Actions */}
-                <div className="bg-[#E8E1F5] p-6 pt-2 flex items-center justify-between">
+                <div className="flex items-center justify-between">
                     <Button
                         onClick={handleSave}
-                        className="bg-[#Bfb6d3] hover:bg-[#Bfb6d3]/90 text-white rounded-full h-10 px-8 font-bold shadow-none"
+                        className="bg-[#304D73] hover:bg-[#264059] text-white rounded-full h-10 px-6 font-medium"
                     >
                         Save
                     </Button>
@@ -122,7 +109,7 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
                         type="button"
                         variant="ghost"
                         onClick={() => setShowDeleteConfirm(true)}
-                        className="text-[#ff5f57] hover:bg-[#ff5f57]/10 hover:text-[#ff5f57] gap-2 rounded-full"
+                        className="text-red-400 hover:bg-red-400/10 hover:text-red-400 gap-2 rounded-full"
                     >
                         <Trash2 className="w-4 h-4" />
                         Delete Trip

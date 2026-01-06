@@ -138,61 +138,61 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                                 <Settings className="h-4 w-4" />
                             </Button>
                         </DialogTrigger>
-                        <DialogContent hideCloseButton className="bg-[#E8E1F5] border-none text-black sm:max-w-[500px] p-0 rounded-3xl shadow-2xl overflow-hidden gap-0">
-                            <div className="p-6 pb-2">
-                                <div className="flex items-center justify-between mb-6">
-                                    <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                                        {dashboard.name}
-                                        <Settings className="w-4 h-4 text-black/50" />
-                                    </DialogTitle>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-black/5" onClick={() => setSettingsOpen(false)}>
-                                        <span className="sr-only">Close</span>
-                                        <X className="w-4 h-4 opacity-50" />
-                                    </Button>
-                                </div>
+                        <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
+                            <DialogTitle className="sr-only">Dashboard Settings</DialogTitle>
 
-                                <div className="mb-6 space-y-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-bold text-black/50">Travel Dates</Label>
-                                        <div className="bg-white/50 p-1 pl-3 rounded-xl flex items-center gap-2 relative">
-                                            <DateRangePicker
-                                                date={{
-                                                    from: editStartDate ? new Date(editStartDate) : undefined,
-                                                    to: editStartDate && editDays ? addDays(new Date(editStartDate), editDays - 1) : undefined
-                                                }}
-                                                setDate={(range) => {
-                                                    if (range?.from) {
-                                                        setEditStartDate(range.from.toISOString());
-                                                        if (range.to) {
-                                                            const diffTime = Math.abs(range.to.getTime() - range.from.getTime());
-                                                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                                                            setEditDays(diffDays);
-                                                        } else {
-                                                            setEditDays(1);
-                                                        }
+                            <div className="flex items-center justify-between mb-6">
+                                <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                                    {dashboard.name}
+                                    <Settings className="w-4 h-4 text-muted-foreground" />
+                                </DialogTitle>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => setSettingsOpen(false)}>
+                                    <span className="sr-only">Close</span>
+                                    <X className="w-4 h-4" />
+                                </Button>
+                            </div>
+
+                            <div className="space-y-4 mb-6">
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-medium text-muted-foreground">Travel Dates</Label>
+                                    <div className="bg-white/5 p-1 pl-3 rounded-xl flex items-center gap-2 relative">
+                                        <DateRangePicker
+                                            date={{
+                                                from: editStartDate ? new Date(editStartDate) : undefined,
+                                                to: editStartDate && editDays ? addDays(new Date(editStartDate), editDays - 1) : undefined
+                                            }}
+                                            setDate={(range) => {
+                                                if (range?.from) {
+                                                    setEditStartDate(range.from.toISOString());
+                                                    if (range.to) {
+                                                        const diffTime = Math.abs(range.to.getTime() - range.from.getTime());
+                                                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                                                        setEditDays(diffDays);
                                                     } else {
-                                                        setEditStartDate('');
                                                         setEditDays(1);
                                                     }
-                                                }}
-                                                fromDate={trip.startDate ? new Date(trip.startDate) : undefined}
-                                                toDate={trip.endDate ? new Date(trip.endDate) : undefined}
-                                                disabled={(date) => {
-                                                    // Optional: Stronger validation
-                                                    if (trip.startDate && date < new Date(trip.startDate)) return true;
-                                                    if (trip.endDate && date > new Date(trip.endDate)) return true;
-                                                    return false;
-                                                }}
-                                            />
-                                        </div>
+                                                } else {
+                                                    setEditStartDate('');
+                                                    setEditDays(1);
+                                                }
+                                            }}
+                                            fromDate={trip.startDate ? new Date(trip.startDate) : undefined}
+                                            toDate={trip.endDate ? new Date(trip.endDate) : undefined}
+                                            disabled={(date) => {
+                                                // Optional: Stronger validation
+                                                if (trip.startDate && date < new Date(trip.startDate)) return true;
+                                                if (trip.endDate && date > new Date(trip.endDate)) return true;
+                                                return false;
+                                            }}
+                                        />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-[#E8E1F5] p-6 pt-2 flex items-center justify-between">
+                            <div className="flex items-center justify-between">
                                 <Button
                                     onClick={handleSettingsSave}
-                                    className="bg-[#Bfb6d3] hover:bg-[#Bfb6d3]/90 text-white rounded-full h-10 px-8 font-bold shadow-none"
+                                    className="bg-[#304D73] hover:bg-[#264059] text-white rounded-full h-10 px-6 font-medium"
                                 >
                                     Save
                                 </Button>
@@ -200,7 +200,7 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                                 <Button
                                     variant="ghost"
                                     onClick={() => setShowDeleteConfirm(true)}
-                                    className="text-[#ff5f57] hover:bg-[#ff5f57]/10 hover:text-[#ff5f57] gap-2 rounded-full"
+                                    className="text-red-400 hover:bg-red-400/10 hover:text-red-400 gap-2 rounded-full"
                                 >
                                     <Trash2 className="w-4 h-4" />
                                     Delete Dashboard

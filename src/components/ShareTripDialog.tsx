@@ -148,7 +148,7 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                             <Button
                                 onClick={handleAddShare}
                                 disabled={isLoading || !email.trim()}
-                                className="bg-violet-600 hover:bg-violet-500"
+                                className="bg-[#304D73] hover:bg-[#264059]"
                             >
                                 <UserPlus className="w-4 h-4" />
                             </Button>
@@ -166,7 +166,7 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                                         className="flex items-center justify-between p-3 bg-white/5 rounded-lg group"
                                     >
                                         <div className="flex items-center gap-3 min-w-0">
-                                            <div className="w-8 h-8 rounded-full bg-violet-600/30 flex items-center justify-center text-sm font-medium text-violet-300">
+                                            <div className="w-8 h-8 rounded-full bg-[#304D73]/30 flex items-center justify-center text-sm font-medium text-[#5a8fc4]">
                                                 {share.email.charAt(0).toUpperCase()}
                                             </div>
                                             <div className="min-w-0">
