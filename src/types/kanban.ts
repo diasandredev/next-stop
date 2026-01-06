@@ -1,6 +1,7 @@
 export interface Card {
   id: string;
   title: string;
+  icon?: string; // Optional emoji icon
   date?: string; // ISO date string for day columns
   description?: string; // Detailed description
 

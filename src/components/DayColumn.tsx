@@ -8,6 +8,7 @@ import { Input } from './ui/input';
 import { Split } from 'lucide-react';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from './ui/tooltip';
+import { EmojiPicker } from './EmojiPicker';
 
 interface DayColumnProps {
   dashboardId: string;
@@ -31,6 +32,7 @@ export const DayColumn = ({
   const { addCard } = useKanban();
   const [isAdding, setIsAdding] = useState(false);
   const [newCardTitle, setNewCardTitle] = useState('');
+  const [newCardIcon, setNewCardIcon] = useState<string | undefined>();
   const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
   const dayNumber = date.getDate();
   const monthName = date.toLocaleDateString('en-US', { month: 'short' });
@@ -45,17 +47,20 @@ export const DayColumn = ({
     if (newCardTitle.trim()) {
       addCard({
         title: newCardTitle.trim(),
+        icon: newCardIcon,
         date: dateString,
         columnType: 'day',
         order: cards.length,
         dashboardId
       });
       setNewCardTitle('');
+      setNewCardIcon(undefined);
       if (!keepOpen) {
         setIsAdding(false);
       }
     } else if (!keepOpen) {
       setIsAdding(false);
+      setNewCardIcon(undefined);
     }
   };
 
@@ -115,7 +120,12 @@ export const DayColumn = ({
         </SortableContext>
 
         {isAdding && (
-          <div className="h-12 border-b border-border/40 rounded-md bg-transparent px-2 flex items-center">
+          <div className="h-12 border-b border-border/40 rounded-md bg-transparent px-1 flex items-center gap-1">
+            <EmojiPicker
+              value={newCardIcon}
+              onChange={setNewCardIcon}
+              triggerClassName="h-6 w-6 shrink-0"
+            />
             <Input
               value={newCardTitle}
               onChange={(e) => setNewCardTitle(e.target.value)}
@@ -124,10 +134,11 @@ export const DayColumn = ({
                 if (e.key === 'Escape') {
                   setIsAdding(false);
                   setNewCardTitle('');
+                  setNewCardIcon(undefined);
                 }
               }}
               onBlur={() => handleAddCard(false)}
-              className="h-full text-sm bg-transparent border-none shadow-none px-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground placeholder:text-muted-foreground"
+              className="h-full text-sm bg-transparent border-none shadow-none px-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground placeholder:text-muted-foreground flex-1"
               autoFocus
             />
           </div>

@@ -9,6 +9,7 @@ import { Plus, Trash2, Split, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { Input } from './ui/input';
 import { ConfirmDialog } from './ConfirmDialog';
+import { EmojiPicker } from './EmojiPicker';
 
 interface OptionsCardProps {
     card: Card;
@@ -19,6 +20,7 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
     const { addCard, deleteCard } = useKanban();
     const [isAddingTo, setIsAddingTo] = useState<string | null>(null);
     const [newCardTitle, setNewCardTitle] = useState('');
+    const [newCardIcon, setNewCardIcon] = useState<string | undefined>();
 
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -43,11 +45,13 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
     const handleAddCard = (optionId: string) => {
         if (!newCardTitle.trim()) {
             setIsAddingTo(null);
+            setNewCardIcon(undefined);
             return;
         }
 
         addCard({
             title: newCardTitle.trim(),
+            icon: newCardIcon,
             columnType: card.columnType,
             // The date is crucial for the main filter, but parentId hides it from main view
             date: card.date,
@@ -57,6 +61,7 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
             order: 999
         });
         setNewCardTitle('');
+        setNewCardIcon(undefined);
         setIsAddingTo(null);
     }
 
@@ -134,17 +139,25 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
 
                         {/* Input - Only shown when adding */}
                         {isAddingTo === '1' && (
-                            <div className="h-12 flex items-center px-1 border-t border-border/40 shrink-0">
+                            <div className="h-12 flex items-center gap-1 px-1 border-t border-border/40 shrink-0">
+                                <EmojiPicker
+                                    value={newCardIcon}
+                                    onChange={setNewCardIcon}
+                                    triggerClassName="h-6 w-6 shrink-0"
+                                />
                                 <Input
                                     value={newCardTitle}
                                     onChange={e => setNewCardTitle(e.target.value)}
                                     onKeyDown={e => {
                                         if (e.key === 'Enter') handleAddCard('1');
-                                        if (e.key === 'Escape') setIsAddingTo(null);
+                                        if (e.key === 'Escape') {
+                                            setIsAddingTo(null);
+                                            setNewCardIcon(undefined);
+                                        }
                                     }}
                                     onBlur={() => handleAddCard('1')}
                                     autoFocus
-                                    className="h-8 text-xs bg-background/50"
+                                    className="h-8 text-xs bg-background/50 flex-1"
                                     placeholder="Add to Itinerary A..."
                                 />
                             </div>
@@ -163,17 +176,25 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
 
                         {/* Input - Only shown when adding */}
                         {isAddingTo === '2' && (
-                            <div className="h-12 flex items-center px-1 border-t border-border/40 shrink-0">
+                            <div className="h-12 flex items-center gap-1 px-1 border-t border-border/40 shrink-0">
+                                <EmojiPicker
+                                    value={newCardIcon}
+                                    onChange={setNewCardIcon}
+                                    triggerClassName="h-6 w-6 shrink-0"
+                                />
                                 <Input
                                     value={newCardTitle}
                                     onChange={e => setNewCardTitle(e.target.value)}
                                     onKeyDown={e => {
                                         if (e.key === 'Enter') handleAddCard('2');
-                                        if (e.key === 'Escape') setIsAddingTo(null);
+                                        if (e.key === 'Escape') {
+                                            setIsAddingTo(null);
+                                            setNewCardIcon(undefined);
+                                        }
                                     }}
                                     onBlur={() => handleAddCard('2')}
                                     autoFocus
-                                    className="h-8 text-xs bg-background/50"
+                                    className="h-8 text-xs bg-background/50 flex-1"
                                     placeholder="Add to Itinerary B..."
                                 />
                             </div>

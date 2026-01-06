@@ -89,6 +89,11 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
           `}
         >
 
+          {card.icon && (
+            <span className={`mr-1 ${isNested ? 'text-sm' : 'text-base'}`}>
+              {card.icon}
+            </span>
+          )}
           {card.time && (
             <span className={`text-white/80 font-normal mr-1 ${isNested ? 'text-[10px]' : 'text-xs'}`}>
               {card.time}

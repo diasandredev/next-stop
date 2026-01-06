@@ -26,6 +26,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ColorPicker } from './ColorPicker';
+import { EmojiPicker } from './EmojiPicker';
 
 interface EditCardDialogProps {
   open: boolean;
@@ -36,6 +37,7 @@ interface EditCardDialogProps {
 export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps) => {
   const { updateCard, deleteCard } = useKanban();
   const [title, setTitle] = useState(card.title);
+  const [icon, setIcon] = useState(card.icon);
   const [description, setDescription] = useState(card.description || '');
   const [color, setColor] = useState(card.color || 'transparent');
   const [time, setTime] = useState(card.time || '');
@@ -47,6 +49,7 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
   useEffect(() => {
     if (open) {
       setTitle(card.title);
+      setIcon(card.icon);
       setDescription(card.description || '');
       setColor(card.color || 'transparent');
       setTime(card.time || '');
@@ -59,6 +62,7 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
     if (!isOpen && dirtyRef.current) {
       const updates: Partial<Card> = {
         title,
+        icon,
         description,
         color,
         time,
@@ -183,17 +187,26 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
           </DialogHeader>
 
           <div className="space-y-6">
-            <Input
-              autoFocus
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                dirtyRef.current = true;
-              }}
-              className="font-bold bg-transparent border-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none placeholder:text-muted-foreground/50 h-auto"
-              style={{ fontSize: '1.5rem' }}
-              placeholder="Task title"
-            />
+            <div className="flex items-center gap-2">
+              <EmojiPicker
+                value={icon}
+                onChange={(newIcon) => {
+                  setIcon(newIcon);
+                  dirtyRef.current = true;
+                }}
+              />
+              <Input
+                autoFocus
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  dirtyRef.current = true;
+                }}
+                className="font-bold bg-transparent border-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none placeholder:text-muted-foreground/50 h-auto flex-1"
+                style={{ fontSize: '1.5rem' }}
+                placeholder="Task title"
+              />
+            </div>
 
             <div className="flex flex-col gap-2">
               {location ? (
