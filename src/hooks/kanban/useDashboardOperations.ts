@@ -4,20 +4,20 @@ import { formatInTimeZone } from 'date-fns-tz';
 
 interface UseDashboardOperationsProps {
     dashboards: Dashboard[];
-    setDashboards: React.Dispatch<React.SetStateAction<Dashboard[]>>;
-    markDirty: (id: string, type: string) => void;
+    setDashboards?: React.Dispatch<React.SetStateAction<Dashboard[]>>; // Deprecated
     timezone?: string;
     trips: Trip[];
-    setCards: React.Dispatch<React.SetStateAction<Card[]>>;
+    setCards?: React.Dispatch<React.SetStateAction<Card[]>>; // Deprecated/Unused
+    saveDashboard: (tripId: string, dashboard: Dashboard) => Promise<void>;
+    deleteDashboard: (tripId: string, dashboardId: string) => Promise<void>;
 }
 
 export const useDashboardOperations = ({
     dashboards,
-    setDashboards,
-    markDirty,
     timezone,
     trips,
-    setCards
+    saveDashboard,
+    deleteDashboard
 }: UseDashboardOperationsProps) => {
 
     const addDashboard = useCallback((tripId: string, name: string, startDate?: string, days?: number) => {
@@ -100,43 +100,28 @@ export const useDashboardOperations = ({
             startDate: finalStartDate,
             createdAt: new Date().toISOString()
         };
-        setDashboards(prev => [...prev, newDashboard]);
-        markDirty(newDashboard.id, 'dashboards');
+        saveDashboard(tripId, newDashboard);
         return newDashboard.id;
-    }, [dashboards, markDirty, setDashboards, timezone, trips]);
+    }, [dashboards, timezone, trips, saveDashboard]);
 
     const updateDashboard = useCallback((id: string, updates: Partial<Dashboard>) => {
-        setDashboards(prev => prev.map(dash => {
-            if (dash.id === id) {
-                // We should validate here too, but updates usually come from UI which we will constrain.
-                // However, adding basic validation here is safe.
-                // We need the trip for this dashboard.
-                // Since this is inside map, we might not have efficient access to trip without searching.
-                // Let's rely on UI constraints for updateDashboard for now to avoid perf hit or complex logic inside map.
-                // Or we can find trip outside.
+        const dash = dashboards.find(d => d.id === id);
+        if (dash) {
+            const updated = { ...dash, ...updates };
+            saveDashboard(dash.tripId, updated);
+        }
+    }, [dashboards, saveDashboard]);
 
-                markDirty(id, 'dashboards');
-                return { ...dash, ...updates };
-            }
-            return dash;
-        }));
-    }, [markDirty, setDashboards]);
+    const deleteDashboardFn = useCallback((id: string) => {
+        const dash = dashboards.find(d => d.id === id);
+        if (!dash) return;
 
-    const deleteDashboard = useCallback((id: string) => {
-        // Cascading delete: Remove cards associated with this dashboard
-        setCards(prev => {
-            const toDelete = prev.filter(c => c.dashboardId === id);
-            toDelete.forEach(c => markDirty(c.id, 'cards'));
-            return prev.filter(c => c.dashboardId !== id);
-        });
-
-        setDashboards(prev => prev.filter(d => d.id !== id));
-        markDirty(id, 'dashboards');
-    }, [markDirty, setCards, setDashboards]);
+        deleteDashboard(dash.tripId, id);
+    }, [dashboards, deleteDashboard]);
 
     return {
         addDashboard,
         updateDashboard,
-        deleteDashboard
+        deleteDashboard: deleteDashboardFn
     };
 };

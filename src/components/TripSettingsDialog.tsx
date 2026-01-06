@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useKanban } from '@/contexts/KanbanContext';
 import { Trip } from '@/types/kanban';
@@ -54,6 +54,8 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent hideCloseButton className="bg-[#E8E1F5] border-none text-black sm:max-w-[500px] p-0 rounded-3xl shadow-2xl overflow-hidden gap-0">
+                <DialogTitle className="sr-only">Trip Settings</DialogTitle>
+                <DialogDescription className="sr-only">Edit your trip details.</DialogDescription>
                 <div className="p-6 pb-2">
                     <div className="flex items-center justify-between mb-6">
                         <DialogTitle className="text-xl font-bold flex items-center gap-2">

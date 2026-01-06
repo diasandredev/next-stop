@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useKanban } from '@/contexts/KanbanContext';
 import { Button } from '@/components/ui/button';
-import { SyncStatus } from '@/components/SyncStatus';
+
 import { Sidebar } from '@/components/Sidebar';
 import { Loader2, Plus } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { NewTripDialog } from '@/components/NewTripDialog';
 import { TripSettingsDialog } from '@/components/TripSettingsDialog';
 import { AccountSettingsDialog } from '@/components/AccountSettingsDialog';
+import { ShareTripDialog } from '@/components/ShareTripDialog';
 import { formatInTimeZone } from 'date-fns-tz';
 import { DashboardView } from '@/components/DashboardView';
 import { NoTripsView } from '@/components/NoTripsView';
@@ -25,6 +26,7 @@ const Board = () => {
     currentTripId,
     setCurrentTripId,
     updateCard,
+    updateTrip,
     addDashboard,
     isLoading
   } = useKanban();
@@ -40,6 +42,7 @@ const Board = () => {
   const [showNewTripDialog, setShowNewTripDialog] = useState(false);
   const [showTripSettingsDialog, setShowTripSettingsDialog] = useState(false);
   const [showAccountSettingsDialog, setShowAccountSettingsDialog] = useState(false);
+  const [showShareTripDialog, setShowShareTripDialog] = useState(false);
   const [tripToEdit, setTripToEdit] = useState<Trip | null>(null);
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
@@ -255,6 +258,7 @@ const Board = () => {
         }}
         setTripToEdit={setTripToEdit}
         onOpenNewTrip={() => setShowNewTripDialog(true)}
+        onOpenShareTrip={() => setShowShareTripDialog(true)}
       />
 
       {/* Main Content */}
@@ -279,7 +283,6 @@ const Board = () => {
                 </div>
                 <div className="flex items-center gap-2">
 
-                  <SyncStatus />
                 </div>
               </div>
             </header>
@@ -344,6 +347,15 @@ const Board = () => {
         open={showAccountSettingsDialog}
         onOpenChange={setShowAccountSettingsDialog}
       />
+
+      {tripToEdit && (
+        <ShareTripDialog
+          open={showShareTripDialog}
+          onOpenChange={setShowShareTripDialog}
+          trip={tripToEdit}
+          onUpdateTrip={updateTrip}
+        />
+      )}
     </div>
   );
 };

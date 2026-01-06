@@ -1,6 +1,7 @@
 import {
     AlertDialog,
     AlertDialogContent,
+    AlertDialogDescription,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,10 @@ export function ConfirmDialog({
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
             <AlertDialogContent className="bg-[#E8E1F5] border-none text-black sm:max-w-[500px] p-0 rounded-3xl shadow-2xl overflow-hidden gap-0">
+                <AlertDialogTitle className="sr-only">Confirmation</AlertDialogTitle>
+                <AlertDialogDescription className="sr-only">
+                    Please confirm your action.
+                </AlertDialogDescription>
                 <div className="p-6 pb-2">
                     <div className="flex items-center justify-between mb-6">
                         <AlertDialogTitle className="text-xl font-bold flex items-center gap-2">
@@ -66,8 +71,8 @@ export function ConfirmDialog({
                             onOpenChange(false);
                         }}
                         className={`${variant === 'destructive'
-                                ? 'bg-[#ff5f57] hover:bg-[#ff5f57]/90 text-white'
-                                : 'bg-[#Bfb6d3] hover:bg-[#Bfb6d3]/90 text-white'
+                            ? 'bg-[#ff5f57] hover:bg-[#ff5f57]/90 text-white'
+                            : 'bg-[#Bfb6d3] hover:bg-[#Bfb6d3]/90 text-white'
                             } rounded-full h-10 px-8 font-bold shadow-none`}
                     >
                         {confirmText}

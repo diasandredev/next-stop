@@ -103,6 +103,8 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[600px] p-6 rounded-2xl shadow-2xl">
+        <DialogTitle className="sr-only">Edit Card</DialogTitle>
+        <DialogDescription className="sr-only">Edit the details of your card</DialogDescription>
         <TooltipProvider>
           <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <DialogTitle className="sr-only">Edit Card</DialogTitle>
@@ -229,6 +231,28 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                 placeholder="Add some extra notes here..."
               />
             </div>
+
+            {/* Authorship Footer */}
+            {(card.createdBy || card.lastEditedBy) && (
+              <div className="border-t border-white/5 pt-3 text-xs text-muted-foreground/70 space-y-1">
+                {card.createdBy && (
+                  <p>Criado por <span className="text-muted-foreground">{card.createdBy}</span></p>
+                )}
+                {card.lastEditedBy && card.lastEditedBy !== card.createdBy && (
+                  <p>
+                    Última edição por <span className="text-muted-foreground">{card.lastEditedBy}</span>
+                    {card.lastEditedAt && (
+                      <span> em {new Date(card.lastEditedAt).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}</span>
+                    )}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </TooltipProvider>
       </DialogContent>

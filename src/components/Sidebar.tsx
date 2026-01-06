@@ -14,6 +14,7 @@ import {
     Map as MapIcon,
     LayoutDashboard,
     Utensils,
+    Users,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -42,6 +43,7 @@ interface SidebarProps {
     onOpenTripSettings: () => void;
     setTripToEdit: (trip: Trip) => void;
     onOpenNewTrip: () => void;
+    onOpenShareTrip: () => void;
 }
 
 export function Sidebar({
@@ -55,7 +57,8 @@ export function Sidebar({
     onOpenAccountSettings,
     onOpenTripSettings,
     setTripToEdit,
-    onOpenNewTrip
+    onOpenNewTrip,
+    onOpenShareTrip
 }: SidebarProps) {
     const navigate = useNavigate();
     const location = useLocation();
@@ -145,6 +148,17 @@ export function Sidebar({
                                                     {trip.name}
                                                 </span>
                                                 <div className="flex items-center gap-1">
+                                                    {/* Share Button */}
+                                                    <div
+                                                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-background/80 rounded"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setTripToEdit(trip);
+                                                            onOpenShareTrip();
+                                                        }}
+                                                    >
+                                                        <Users className="w-3 h-3" />
+                                                    </div>
                                                     {/* Edit Button */}
                                                     <div
                                                         className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-background/80 rounded"

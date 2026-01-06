@@ -1,76 +1,84 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { Card, Trip, Dashboard, AccountSettings } from '@/types/kanban';
-import { SyncProvider } from './SyncContext';
+import { useAuth } from './AuthContext';
 import { useKanbanData } from '@/hooks/kanban/useKanbanData';
 import { useCardOperations } from '@/hooks/kanban/useCardOperations';
 import { useTripOperations } from '@/hooks/kanban/useTripOperations';
 import { useDashboardOperations } from '@/hooks/kanban/useDashboardOperations';
 import { KanbanContext } from './KanbanContext';
 
-// Inner provider that manages Kanban state and interacts with SyncContext
-const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React.MutableRefObject<any> }> = ({ children, stateRef }) => {
+// Inner provider that manages Kanban state
+const KanbanInnerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const {
         cards, setCards,
         trips, setTrips,
         dashboards, setDashboards,
         accountSettings, setAccountSettings,
         currentTripId, setCurrentTripId,
-        isLoading, markDirty
+        isLoading,
+        saveTrip, deleteTrip,
+        saveDashboard, deleteDashboard,
+        saveCard, deleteCard
     } = useKanbanData();
 
-    // Update stateRef for SyncContext
-    useEffect(() => {
-        stateRef.current = {
-            cards,
-            trips,
-            dashboards,
-            accountSettings
-        };
-    }, [cards, trips, dashboards, accountSettings, stateRef]);
+    const { user } = useAuth();
 
     const {
         addCard,
         updateCard,
-        deleteCard,
+        deleteCard: deleteCardOp,
         deleteAllCards
-    } = useCardOperations({ setCards, markDirty });
+    } = useCardOperations({ cards, userEmail: user?.email, saveCard, deleteCard, currentTripId });
 
     const {
         addTrip,
         updateTrip,
-        deleteTrip
+        deleteTrip: deleteTripOp
     } = useTripOperations({
-        setTrips,
+        trips,
         currentTripId,
         setCurrentTripId,
-        markDirty,
         dashboards,
-        setDashboards,
-        setCards
+        setDashboards, // Wait, setDashboards? I thought I removed it? No, in useTripOperations, I kept setDashboards in destructuring in step 161 replacement?
+        // Let me check useTripOperations content from step 161.
+        // It receives setDashboards. "dashboards, setDashboards, setCards".
+        // But setDashboards is deprecated.
+        // useTripOperations shouldn't need setDashboards anymore if I refactored it properly.
+        // Let's check step 161 again.
+        // It removes markDirty. It didn't remove setDashboards/setCards.
+        // But useKanbanData still returns setDashboards (as no-op).
+        // So passing it is fine for now, just useless.
+        // I'll keep it to match the hook signature if it requires it.
+        // Wait, check useTripOperations signature in step 161 replacement content.
+        // "setDashboards: React.Dispatch..." is in props.
+        // So I MUST pass it.
+        setCards,      // usage in useTripOperations? It was used for deleteTrip cleanup maybe?
+        // step 161: "setCards: React.Dispatch..." is in props.
+        // So I must pass it.
+        saveTrip,
+        deleteTrip,
+        ownerId: user?.uid
     });
 
     const {
         addDashboard,
         updateDashboard,
-        deleteDashboard
+        deleteDashboard: deleteDashboardOp
     } = useDashboardOperations({
         dashboards,
-        setDashboards,
-        markDirty,
         timezone: accountSettings?.timezone,
         trips,
-        setCards
+        saveDashboard,
+        deleteDashboard
     });
-
-
 
     const updateAccountSettings = useCallback((settings: Partial<AccountSettings>) => {
         setAccountSettings(prev => {
             const newSettings = prev ? { ...prev, ...settings } : settings as AccountSettings;
-            markDirty('settings', 'accountSettings');
+            // markDirty removed. State update triggers persistence effect in useKanbanData.
             return newSettings;
         });
-    }, [markDirty, setAccountSettings]);
+    }, [setAccountSettings]);
 
     const addCustomColor = useCallback((color: string) => {
         setAccountSettings(prev => {
@@ -82,10 +90,10 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React
                 customColors: [...currentColors, color]
             } as AccountSettings;
 
-            markDirty('settings', 'accountSettings');
+            // markDirty removed.
             return newSettings;
         });
-    }, [markDirty, setAccountSettings]);
+    }, [setAccountSettings]);
 
     const value = {
         cards,
@@ -97,23 +105,21 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React
 
         addCard,
         updateCard,
-        deleteCard,
+        deleteCard: deleteCardOp,
         deleteAllCards,
-
-
 
         addTrip,
         updateTrip,
-        deleteTrip,
+        deleteTrip: deleteTripOp,
         setCurrentTripId,
 
         addDashboard,
         updateDashboard,
-        deleteDashboard,
+        deleteDashboard: deleteDashboardOp,
 
         updateAccountSettings,
         addCustomColor,
-        setCards
+        setCards // Still exposed in context?
     };
 
     return (
@@ -124,28 +130,11 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode; stateRef: React
 };
 
 // Outer KanbanProvider that wraps SyncProvider
+// Outer KanbanProvider
 export const KanbanProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    // This ref will hold the current state of all Kanban data for the SyncProvider
-    const kanbanStateRef = useRef<{
-        cards: Card[];
-        trips: Trip[];
-        dashboards: Dashboard[];
-        accountSettings: AccountSettings | null;
-    }>({
-        cards: [],
-        trips: [],
-        dashboards: [],
-        accountSettings: null,
-    });
-
-    // This function will be passed to SyncProvider to get the latest state
-    const getKanbanStateForSync = useCallback(() => kanbanStateRef.current, []);
-
     return (
-        <SyncProvider getState={getKanbanStateForSync}>
-            <KanbanInnerProvider stateRef={kanbanStateRef}>
-                {children}
-            </KanbanInnerProvider>
-        </SyncProvider>
+        <KanbanInnerProvider>
+            {children}
+        </KanbanInnerProvider>
     );
 };

@@ -1,8 +1,52 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // User-specific data (settings, etc.)
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+    
+    // Shared trips - top-level collection
+    match /trips/{tripId} {
+      // Helper functions
+      function isOwner() {
+        return request.auth != null && 
+               resource.data.ownerId == request.auth.uid;
+      }
+      
+      function hasAccess() {
+        return request.auth != null && (
+          resource.data.ownerId == request.auth.uid ||
+          request.auth.token.email in resource.data.sharedEmails
+        );
+      }
+      
+      function canEdit() {
+        return request.auth != null && (
+          resource.data.ownerId == request.auth.uid ||
+          request.auth.token.email in resource.data.editorEmails
+        );
+      }
+      
+      allow read: if hasAccess();
+      allow update, delete: if canEdit();
+      allow create: if request.auth != null;
+      
+      // Subcollections (dashboards, cards)
+      match /dashboards/{dashboardId} {
+        allow read: if get(/databases/$(database)/documents/trips/$(tripId)).data.ownerId == request.auth.uid ||
+                       request.auth.token.email in get(/databases/$(database)/documents/trips/$(tripId)).data.sharedEmails;
+        allow write: if get(/databases/$(database)/documents/trips/$(tripId)).data.ownerId == request.auth.uid ||
+                        request.auth.token.email in get(/databases/$(database)/documents/trips/$(tripId)).data.editorEmails;
+      }
+      
+      match /cards/{cardId} {
+        allow read: if get(/databases/$(database)/documents/trips/$(tripId)).data.ownerId == request.auth.uid ||
+                       request.auth.token.email in get(/databases/$(database)/documents/trips/$(tripId)).data.sharedEmails;
+        allow write: if get(/databases/$(database)/documents/trips/$(tripId)).data.ownerId == request.auth.uid ||
+                        request.auth.token.email in get(/databases/$(database)/documents/trips/$(tripId)).data.editorEmails;
+      }
+    }
   }
 }
+

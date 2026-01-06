@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '@/lib/firebase';
+import { db } from '@/utils/db';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -71,7 +72,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     await signOut(auth);
-    localStorage.clear();
+    localStorage.clear(); // Clears all local storage, including kanban_auth
+    await db.clearAll(); // Clears all IndexedDB data
   };
 
   return (

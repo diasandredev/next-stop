@@ -2,43 +2,45 @@ import { useCallback } from 'react';
 import { Card } from '@/types/kanban';
 
 interface UseCardOperationsProps {
-    setCards: React.Dispatch<React.SetStateAction<Card[]>>;
-    markDirty: (id: string, type: 'cards' | 'extraColumns' | 'recurringTasks' | 'calendars' | 'accountSettings') => void;
+    cards: Card[];
+    setCards?: React.Dispatch<React.SetStateAction<Card[]>>; // Deprecated
+    userEmail?: string | null;
+    saveCard: (tripId: string, card: Card) => Promise<void>;
+    deleteCard: (tripId: string, cardId: string) => Promise<void>;
+    currentTripId: string;
 }
 
-export const useCardOperations = ({ setCards, markDirty }: Omit<UseCardOperationsProps, 'currentCalendarId'>) => {
+export const useCardOperations = ({ cards, userEmail, saveCard, deleteCard: deleteCardOp, currentTripId }: Omit<UseCardOperationsProps, 'currentCalendarId'>) => {
     const addCard = useCallback((cardData: Omit<Card, 'id' | 'createdAt'>) => {
         const newCard: Card = {
             ...cardData,
             id: crypto.randomUUID(),
             createdAt: new Date().toISOString(),
+            createdBy: userEmail || undefined,
         };
-        setCards(prev => [...prev, newCard]);
-        markDirty(newCard.id, 'cards');
-    }, [markDirty, setCards]);
+        saveCard(currentTripId, newCard);
+    }, [saveCard, currentTripId, userEmail]);
 
     const updateCard = useCallback((id: string, updates: Partial<Card>) => {
-        setCards(prev => prev.map(card => {
-            if (card.id === id) {
-                const updated = { ...card, ...updates };
-                markDirty(id, 'cards');
-                return updated;
-            }
-            return card;
-        }));
-    }, [markDirty, setCards]);
+        const card = cards.find(c => c.id === id);
+        if (card) {
+            const updated = {
+                ...card,
+                ...updates,
+                lastEditedBy: userEmail || undefined,
+                lastEditedAt: new Date().toISOString(),
+            };
+            saveCard(currentTripId, updated);
+        }
+    }, [saveCard, currentTripId, userEmail, cards]);
 
     const deleteCard = useCallback((id: string) => {
-        setCards(prev => prev.filter(c => c.id !== id));
-        markDirty(id, 'cards');
-    }, [markDirty, setCards]);
+        deleteCardOp(currentTripId, id);
+    }, [deleteCardOp, currentTripId]);
 
     const deleteAllCards = useCallback(() => {
-        setCards(prev => {
-            prev.forEach(c => markDirty(c.id, 'cards'));
-            return [];
-        });
-    }, [markDirty, setCards]);
+        cards.forEach(c => deleteCardOp(currentTripId, c.id));
+    }, [deleteCardOp, currentTripId, cards]);
 
     return {
         addCard,
@@ -47,3 +49,4 @@ export const useCardOperations = ({ setCards, markDirty }: Omit<UseCardOperation
         deleteAllCards
     };
 };
+

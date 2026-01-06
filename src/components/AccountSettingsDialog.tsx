@@ -52,6 +52,7 @@ export function AccountSettingsDialog({ open, onOpenChange }: AccountSettingsDia
         <>
             <Dialog open={open} onOpenChange={onOpenChange}>
                 <DialogContent hideCloseButton className="bg-[#E8E1F5] border-none text-black sm:max-w-[500px] p-0 rounded-3xl shadow-2xl overflow-hidden gap-0">
+                    <DialogTitle className="sr-only">Account Settings</DialogTitle>
                     <div className="p-6 pb-2">
                         <div className="flex items-center justify-between mb-6">
                             <DialogTitle className="text-xl font-bold flex items-center gap-2">

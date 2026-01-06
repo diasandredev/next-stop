@@ -18,6 +18,11 @@ export interface Card {
   createdAt: string;
   dashboardId?: string;
 
+  // Authorship tracking
+  createdBy?: string; // Email of creator
+  lastEditedBy?: string; // Email of last editor
+  lastEditedAt?: string; // ISO timestamp of last edit
+
   // Location Integration
   location?: {
     name: string;
@@ -35,9 +40,18 @@ export interface WeekData {
   endDate: Date;
 }
 
+export interface TripShare {
+  email: string;
+  permission: 'view' | 'edit';
+  addedAt: string; // ISO timestamp
+  addedBy: string; // Email of who added the share
+}
+
 export interface Trip {
   id: string;
   name: string;
+  ownerId?: string; // Firebase UID of owner
+  sharedWith?: TripShare[]; // List of shares
   startDate?: string; // ISO Date string
   endDate?: string; // ISO Date string
 }
@@ -56,3 +70,4 @@ export interface AccountSettings {
   timezone?: string;
   customColors?: string[];
 }
+
