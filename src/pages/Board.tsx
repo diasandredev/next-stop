@@ -4,7 +4,7 @@ import { useKanban } from '@/contexts/KanbanContext';
 import { Button } from '@/components/ui/button';
 
 import { Sidebar } from '@/components/Sidebar';
-import { Loader2, Plus, Settings, Users } from 'lucide-react';
+import { Calendar, Loader2, Plus, Settings, Users } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Card, Trip } from '@/types/kanban';
@@ -262,47 +262,65 @@ const Board = () => {
         ) : (
           <>
             {/* Header */}
-            <header className="px-6 py-4 flex-shrink-0 sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/50">
-              <div className="flex items-center gap-6">
+            <header className="px-6 py-4 flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-md border-b border-border/30">
+              <div className="flex items-center justify-between">
+                {/* Left Section - Trip Info */}
                 <div className="flex items-center gap-4">
-                  <h1 className="text-3xl font-bold tracking-tight">
+                  <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
                     {currentTrip ? currentTrip.name : 'Select a Trip'}
                   </h1>
                   {currentTrip?.startDate && (
-                    <span className="text-sm font-medium bg-secondary text-secondary-foreground px-3 py-1 rounded-full">
-                      {formatInTimeZone(new Date(currentTrip.startDate), timeZone, 'MMM d')}
-                      {currentTrip.endDate && ` - ${formatInTimeZone(new Date(currentTrip.endDate), timeZone, 'MMM d')}`}
-                    </span>
+                    <div className="flex items-center gap-2 bg-secondary/60 text-secondary-foreground px-3 py-1.5 rounded-full border border-border/50">
+                      <Calendar className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-medium">
+                        {formatInTimeZone(new Date(currentTrip.startDate), timeZone, 'MMM d')}
+                        {currentTrip.endDate && ` - ${formatInTimeZone(new Date(currentTrip.endDate), timeZone, 'MMM d')}`}
+                      </span>
+                    </div>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
 
+                {/* Right Section - Actions */}
+                <div className="flex items-center gap-1 bg-secondary/40 rounded-xl p-1 border border-border/30">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
+                        onClick={() => {
+                          if (currentTrip) {
+                            setShowShareTripDialog(true);
+                          }
+                        }}
+                      >
+                        <Users className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Share Trip</p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      if (currentTrip) {
-                        setShowShareTripDialog(true);
-                      }
-                    }}
-                    title="Share Trip"
-                  >
-                    <Users className="w-5 h-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      if (currentTrip) {
-                        setShowTripSettingsDialog(true);
-                      }
-                    }}
-                    title="Trip Settings"
-                  >
-                    <Settings className="w-5 h-5" />
-                  </Button>
-
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
+                        onClick={() => {
+                          if (currentTrip) {
+                            setShowTripSettingsDialog(true);
+                          }
+                        }}
+                      >
+                        <Settings className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Trip Settings</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             </header>
