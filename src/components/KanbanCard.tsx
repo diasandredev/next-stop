@@ -103,7 +103,7 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
             {card.title}
           </span>
           {card.location && (
-            <MapPin className="w-3 h-3 text-green-400 ml-1.5 shrink-0" />
+            <MapPin className="w-3 h-3 text-white/70 ml-1.5 shrink-0" />
           )}
         </div>
 

@@ -37,22 +37,22 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
 
     const handleAddShare = async () => {
         if (!email.trim()) {
-            toast.error('Por favor, insira um email');
+            toast.error('Please enter an email');
             return;
         }
 
         if (!validateEmail(email.trim())) {
-            toast.error('Email inválido');
+            toast.error('Invalid email');
             return;
         }
 
         if (email.trim().toLowerCase() === user?.email?.toLowerCase()) {
-            toast.error('Você não pode compartilhar consigo mesmo');
+            toast.error('You cannot share with yourself');
             return;
         }
 
         if (shares.some(s => s.email.toLowerCase() === email.trim().toLowerCase())) {
-            toast.error('Este usuário já tem acesso');
+            toast.error('This user already has access');
             return;
         }
 
@@ -69,10 +69,10 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
             onUpdateTrip(trip.id, { sharedWith: updatedShares });
 
             setEmail('');
-            toast.success(`Viagem compartilhada com ${newShare.email}`);
+            toast.success(`Trip shared with ${newShare.email}`);
         } catch (error) {
             console.error('Error sharing trip:', error);
-            toast.error('Falha ao compartilhar viagem');
+            toast.error('Failed to share trip');
         } finally {
             setIsLoading(false);
         }
@@ -81,7 +81,7 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
     const handleRemoveShare = (emailToRemove: string) => {
         const updatedShares = shares.filter(s => s.email !== emailToRemove);
         onUpdateTrip(trip.id, { sharedWith: updatedShares });
-        toast.success(`Acesso removido para ${emailToRemove}`);
+        toast.success(`Access removed for ${emailToRemove}`);
     };
 
     const handleUpdatePermission = (emailToUpdate: string, newPermission: 'view' | 'edit') => {
@@ -91,31 +91,27 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                 : s
         );
         onUpdateTrip(trip.id, { sharedWith: updatedShares });
-        toast.success(`Permissão atualizada para ${emailToUpdate}`);
+        toast.success(`Permission updated for ${emailToUpdate}`);
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="bg-[#1a1a1a] border-none text-white sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
-                <DialogTitle className="sr-only">Share Trip</DialogTitle>
-                <DialogDescription>
-                    Share this trip with other users by entering their email address.
-                </DialogDescription>
                 <DialogHeader className="pb-4">
-                    <DialogTitle className="text-xl font-bold">Compartilhar "{trip.name}"</DialogTitle>
+                    <DialogTitle className="text-xl font-bold">Share "{trip.name}"</DialogTitle>
                     <DialogDescription className="text-muted-foreground">
-                        Convide outras pessoas para colaborar nesta viagem
+                        Invite other people to collaborate on this trip by entering their email address.
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-6">
                     {/* Add new share */}
                     <div className="space-y-3">
-                        <Label className="text-sm font-medium text-muted-foreground">Adicionar pessoa</Label>
+                        <Label className="text-sm font-medium text-muted-foreground">Add person</Label>
                         <div className="flex gap-2">
                             <Input
                                 type="email"
-                                placeholder="email@exemplo.com"
+                                placeholder="email@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-muted-foreground"
@@ -134,13 +130,13 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                                     <SelectItem value="view" className="text-white focus:bg-white/10 focus:text-white">
                                         <div className="flex items-center gap-2">
                                             <Eye className="w-4 h-4" />
-                                            <span>Visualizar</span>
+                                            <span>View</span>
                                         </div>
                                     </SelectItem>
                                     <SelectItem value="edit" className="text-white focus:bg-white/10 focus:text-white">
                                         <div className="flex items-center gap-2">
                                             <Edit3 className="w-4 h-4" />
-                                            <span>Editar</span>
+                                            <span>Edit</span>
                                         </div>
                                     </SelectItem>
                                 </SelectContent>
@@ -158,7 +154,7 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                     {/* Current shares list */}
                     {shares.length > 0 && (
                         <div className="space-y-3">
-                            <Label className="text-sm font-medium text-muted-foreground">Pessoas com acesso</Label>
+                            <Label className="text-sm font-medium text-muted-foreground">People with access</Label>
                             <div className="space-y-2 max-h-[200px] overflow-y-auto">
                                 {shares.map((share) => (
                                     <div
@@ -172,7 +168,7 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                                             <div className="min-w-0">
                                                 <p className="text-sm font-medium truncate">{share.email}</p>
                                                 <p className="text-xs text-muted-foreground">
-                                                    Adicionado por {share.addedBy}
+                                                    Added by {share.addedBy}
                                                 </p>
                                             </div>
                                         </div>
@@ -186,10 +182,10 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                                                 </SelectTrigger>
                                                 <SelectContent className="bg-[#2a2a2a] border-white/10">
                                                     <SelectItem value="view" className="text-white text-xs focus:bg-white/10 focus:text-white">
-                                                        Visualizar
+                                                        View
                                                     </SelectItem>
                                                     <SelectItem value="edit" className="text-white text-xs focus:bg-white/10 focus:text-white">
-                                                        Editar
+                                                        Edit
                                                     </SelectItem>
                                                 </SelectContent>
                                             </Select>
@@ -211,8 +207,8 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                     {shares.length === 0 && (
                         <div className="text-center py-8 text-muted-foreground">
                             <UserPlus className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                            <p className="text-sm">Nenhuma pessoa adicionada ainda</p>
-                            <p className="text-xs mt-1">Adicione o email de alguém para compartilhar esta viagem</p>
+                            <p className="text-sm">No people added yet</p>
+                            <p className="text-xs mt-1">Add someone's email to share this trip</p>
                         </div>
                     )}
                 </div>

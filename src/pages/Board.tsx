@@ -4,7 +4,7 @@ import { useKanban } from '@/contexts/KanbanContext';
 import { Button } from '@/components/ui/button';
 
 import { Sidebar } from '@/components/Sidebar';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Plus, Settings, Users } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Card, Trip } from '@/types/kanban';
@@ -43,7 +43,7 @@ const Board = () => {
   const [showTripSettingsDialog, setShowTripSettingsDialog] = useState(false);
   const [showAccountSettingsDialog, setShowAccountSettingsDialog] = useState(false);
   const [showShareTripDialog, setShowShareTripDialog] = useState(false);
-  const [tripToEdit, setTripToEdit] = useState<Trip | null>(null);
+
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
 
@@ -252,13 +252,7 @@ const Board = () => {
         user={user}
         logout={logout}
         onOpenAccountSettings={() => setShowAccountSettingsDialog(true)}
-        onOpenTripSettings={() => {
-          // tripToEdit is set by sidebar
-          setShowTripSettingsDialog(true);
-        }}
-        setTripToEdit={setTripToEdit}
         onOpenNewTrip={() => setShowNewTripDialog(true)}
-        onOpenShareTrip={() => setShowShareTripDialog(true)}
       />
 
       {/* Main Content */}
@@ -269,7 +263,7 @@ const Board = () => {
           <>
             {/* Header */}
             <header className="px-6 py-4 flex-shrink-0 sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/50">
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-6">
                 <div className="flex items-center gap-4">
                   <h1 className="text-3xl font-bold tracking-tight">
                     {currentTrip ? currentTrip.name : 'Select a Trip'}
@@ -282,6 +276,32 @@ const Board = () => {
                   )}
                 </div>
                 <div className="flex items-center gap-2">
+
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      if (currentTrip) {
+                        setShowShareTripDialog(true);
+                      }
+                    }}
+                    title="Share Trip"
+                  >
+                    <Users className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      if (currentTrip) {
+                        setShowTripSettingsDialog(true);
+                      }
+                    }}
+                    title="Trip Settings"
+                  >
+                    <Settings className="w-5 h-5" />
+                  </Button>
 
                 </div>
               </div>
@@ -337,24 +357,21 @@ const Board = () => {
         onOpenChange={setShowNewTripDialog}
       />
 
-      <TripSettingsDialog
-        open={showTripSettingsDialog}
-        onOpenChange={setShowTripSettingsDialog}
-        trip={tripToEdit}
-      />
+      {currentTrip && (
+        <>
+          <TripSettingsDialog
+            open={showTripSettingsDialog}
+            onOpenChange={setShowTripSettingsDialog}
+            trip={currentTrip}
+          />
 
-      <AccountSettingsDialog
-        open={showAccountSettingsDialog}
-        onOpenChange={setShowAccountSettingsDialog}
-      />
-
-      {tripToEdit && (
-        <ShareTripDialog
-          open={showShareTripDialog}
-          onOpenChange={setShowShareTripDialog}
-          trip={tripToEdit}
-          onUpdateTrip={updateTrip}
-        />
+          <ShareTripDialog
+            open={showShareTripDialog}
+            onOpenChange={setShowShareTripDialog}
+            trip={currentTrip}
+            onUpdateTrip={updateTrip}
+          />
+        </>
       )}
     </div>
   );
