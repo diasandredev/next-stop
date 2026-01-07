@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import {
     Calendar as CalendarIcon,
     Settings,
@@ -9,7 +8,6 @@ import {
     ChevronRight,
     ChevronDown,
     Plus,
-    MoreVertical,
     Plane,
     Map as MapIcon,
     LayoutDashboard,
@@ -239,73 +237,69 @@ export function Sidebar({
 
             {/* User Section (Bottom) */}
             <div className={cn(
-                "p-4 border-t border-border bg-background/50",
-                isExpanded ? "flex flex-col gap-1" : "flex flex-col items-center"
+                "p-3",
+                isExpanded ? "flex flex-col" : "flex flex-col items-center"
             )}>
-                {isExpanded ? (
-                    <div className="flex items-center justify-between group">
-                        <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center border border-border flex-shrink-0">
-                                <span className="text-sm font-medium">
-                                    {user?.displayName
-                                        ? user.displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
-                                        : user?.email?.substring(0, 2).toUpperCase() || 'U'}
-                                </span>
-                            </div>
-                            <div className="flex flex-col overflow-hidden">
-                                <span className="text-sm font-medium truncate text-foreground">
-                                    {user?.displayName || 'User'}
-                                </span>
-                                <span className="text-xs text-muted-foreground truncate">
-                                    {user?.email}
-                                </span>
-                            </div>
-                        </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        {isExpanded ? (
+                            <button className="w-full flex items-center gap-3 p-2 rounded-xl transition-all duration-200 hover:bg-muted/80 group cursor-pointer">
+                                {/* Premium Avatar with gradient and status indicator */}
+                                <div className="relative flex-shrink-0">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                                        <span className="text-sm font-semibold text-primary-foreground">
+                                            {user?.displayName
+                                                ? user.displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+                                                : user?.email?.substring(0, 2).toUpperCase() || 'U'}
+                                        </span>
+                                    </div>
+                                    {/* Online status indicator */}
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-background" />
+                                </div>
 
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted">
-                                    <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56">
-                                <DropdownMenuItem onClick={onOpenAccountSettings} className="cursor-pointer gap-2">
-                                    <Settings className="w-4 h-4" />
-                                    Account Settings
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={logout} className="cursor-pointer gap-2 text-red-500 focus:text-red-500">
-                                    <LogOut className="w-4 h-4" />
-                                    Log out
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                ) : (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center border border-border hover:ring-2 hover:ring-primary/20 transition-all">
-                                <span className="text-sm font-medium">
-                                    {user?.displayName
-                                        ? user.displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
-                                        : user?.email?.substring(0, 2).toUpperCase() || 'U'}
-                                </span>
+                                {/* User info */}
+                                <div className="flex flex-col overflow-hidden flex-1 text-left">
+                                    <span className="text-sm font-medium truncate text-foreground group-hover:text-foreground transition-colors">
+                                        {user?.displayName || 'User'}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground truncate">
+                                        {user?.email}
+                                    </span>
+                                </div>
+
+                                {/* Chevron indicator */}
+                                <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                             </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent side="right" className="w-56 ml-2">
-                            <div className="px-2 py-1.5 text-sm font-medium border-b border-border mb-1">
-                                {user?.displayName || 'User'}
-                            </div>
-                            <DropdownMenuItem onClick={onOpenAccountSettings} className="cursor-pointer gap-2">
-                                <Settings className="w-4 h-4" />
-                                Account Settings
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={logout} className="cursor-pointer gap-2 text-red-500 focus:text-red-500">
-                                <LogOut className="w-4 h-4" />
-                                Log out
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                )}
+                        ) : (
+                            <button className="relative group cursor-pointer">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center shadow-lg shadow-primary/20 transition-all duration-200 group-hover:shadow-xl group-hover:shadow-primary/30 group-hover:scale-105">
+                                    <span className="text-sm font-semibold text-primary-foreground">
+                                        {user?.displayName
+                                            ? user.displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+                                            : user?.email?.substring(0, 2).toUpperCase() || 'U'}
+                                    </span>
+                                </div>
+                                {/* Online status indicator */}
+                                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-background" />
+                            </button>
+                        )}
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                        side={isExpanded ? "top" : "right"}
+                        align={isExpanded ? "start" : "center"}
+                        sideOffset={4}
+                        className="w-[calc(100%-1.5rem)] min-w-[200px]"
+                    >
+                        <DropdownMenuItem onClick={onOpenAccountSettings} className="cursor-pointer gap-3 py-2.5">
+                            <Settings className="w-4 h-4" />
+                            Account Settings
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={logout} className="cursor-pointer gap-3 py-2.5 text-red-500 focus:text-red-500 focus:bg-red-500/10">
+                            <LogOut className="w-4 h-4" />
+                            Log out
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </aside>
     );
