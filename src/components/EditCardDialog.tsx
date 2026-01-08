@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ColorPicker } from './ColorPicker';
 import { EmojiPicker } from './EmojiPicker';
+import { createGoogleMapsLocationUrl } from '@/utils/googleMapsUtils';
 
 interface EditCardDialogProps {
   open: boolean;
@@ -95,6 +96,13 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
     setTimeout(() => {
       onOpenChange(false);
     }, 0);
+  };
+
+  const handleOpenInMaps = () => {
+    if (location) {
+      const mapsUrl = createGoogleMapsLocationUrl(location);
+      window.open(mapsUrl, '_blank');
+    }
   };
 
   const dateString = card.date ? new Date(card.date).toLocaleDateString('en-US', {
@@ -216,6 +224,21 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                     <p className="text-sm font-medium text-white truncate">{location.name}</p>
                     <p className="text-xs text-muted-foreground truncate">{location.address}</p>
                   </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-muted-foreground hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={handleOpenInMaps}
+                      >
+                        <Map className="w-3 h-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Open in Google Maps</p>
+                    </TooltipContent>
+                  </Tooltip>
                   <Button
                     variant="ghost"
                     size="icon"

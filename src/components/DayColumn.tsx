@@ -5,10 +5,12 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useState } from 'react';
 import { useKanban } from '@/contexts/KanbanContext';
 import { Input } from './ui/input';
-import { Split } from 'lucide-react';
+import { Split, Map, MapPinned } from 'lucide-react';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from './ui/tooltip';
 import { EmojiPicker } from './EmojiPicker';
+import { createGoogleMapsRouteUrl } from '@/utils/googleMapsUtils';
+import { CustomRouteDialog } from './CustomRouteDialog';
 
 interface DayColumnProps {
   dashboardId: string;
@@ -33,6 +35,7 @@ export const DayColumn = ({
   const [isAdding, setIsAdding] = useState(false);
   const [newCardTitle, setNewCardTitle] = useState('');
   const [newCardIcon, setNewCardIcon] = useState<string | undefined>();
+  const [showCustomRouteDialog, setShowCustomRouteDialog] = useState(false);
   const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
   const dayNumber = date.getDate();
   const monthName = date.toLocaleDateString('en-US', { month: 'short' });
@@ -75,6 +78,23 @@ export const DayColumn = ({
     });
   };
 
+  const handleCreateRoute = () => {
+    // Extract locations from cards that have them
+    const locationsInOrder = cards
+      .filter(c => !c.parentId && c.location) // Only root cards with locations
+      .sort((a, b) => (a.order || 0) - (b.order || 0)) // Sort by order
+      .map(c => ({
+        lat: c.location!.lat,
+        lng: c.location!.lng,
+        placeId: c.location!.placeId
+      }));
+
+    const routeUrl = createGoogleMapsRouteUrl(locationsInOrder);
+    if (routeUrl) {
+      window.open(routeUrl, '_blank');
+    }
+  };
+
   const MIN_SLOTS = minSlots;
 
   // Filter cards
@@ -89,6 +109,46 @@ export const DayColumn = ({
             {dayNumber} {monthName}
           </div>
           <div className="flex items-center gap-1">
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                    onClick={handleCreateRoute}
+                    disabled={!cards.some(c => !c.parentId && c.location)}
+                  >
+                    <Map className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {cards.some(c => !c.parentId && c.location)
+                    ? 'Create Route in Google Maps'
+                    : 'No locations to route'}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                    onClick={() => setShowCustomRouteDialog(true)}
+                    disabled={!cards.some(c => !c.parentId && c.location)}
+                  >
+                    <MapPinned className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {cards.some(c => !c.parentId && c.location)
+                    ? 'Create Custom Route'
+                    : 'No locations to route'}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -175,6 +235,13 @@ export const DayColumn = ({
           ));
         })()}
       </div>
+
+      <CustomRouteDialog
+        open={showCustomRouteDialog}
+        onOpenChange={setShowCustomRouteDialog}
+        cards={cards}
+        dayDate={dateString}
+      />
     </div>
   );
 };

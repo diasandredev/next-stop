@@ -11,6 +11,7 @@ export interface Card {
   optionId?: string; // Which specific option/branch this card belongs to (e.g. 'option-1', 'option-2')
 
   order?: number; // Sort order within its column
+  columnType?: 'day' | 'extra'; // Type of column the card belongs to
   color?: string; // Custom card color
   notes?: string; // Additional notes
   completed?: boolean; // Task completion status
