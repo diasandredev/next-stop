@@ -165,17 +165,30 @@ export default function TripMap() {
                                     }}
                                 >
                                     <div className="group relative flex flex-col items-center hover:z-50 cursor-pointer">
-                                        <div
-                                            className="bg-white p-1.5 rounded-full shadow-lg border-2 transition-transform group-hover:scale-110"
-                                            style={{ borderColor: route.color }}
-                                        >
-                                            <MapPin className="w-4 h-4 text-black" fill={route.color} />
+                                        <div className="relative">
+                                            {card.icon ? (
+                                                <div
+                                                    className="bg-white p-2.5 rounded-full shadow-xl border-3 transition-all duration-200 group-hover:scale-110 group-hover:shadow-2xl text-2xl"
+                                                    style={{ borderColor: route.color, borderWidth: '3px' }}
+                                                >
+                                                    {card.icon}
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    className="bg-white p-2 rounded-full shadow-xl border-3 transition-all duration-200 group-hover:scale-110 group-hover:shadow-2xl"
+                                                    style={{ borderColor: route.color, borderWidth: '3px' }}
+                                                >
+                                                    <MapPin className="w-5 h-5 text-black" fill={route.color} />
+                                                </div>
+                                            )}
+                                            {/* Number Badge */}
+                                            <div
+                                                className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-md border-2 border-white"
+                                                style={{ backgroundColor: route.color }}
+                                            >
+                                                {index + 1}
+                                            </div>
                                         </div>
-                                        <span
-                                            className="mt-1 text-xs font-bold text-white bg-black/70 px-2 py-0.5 rounded backdrop-blur-sm border border-white/10 shadow-sm whitespace-nowrap max-w-[150px] truncate"
-                                        >
-                                            {index + 1} - {card.title}
-                                        </span>
                                     </div>
                                 </Marker>
                             ))}
@@ -190,20 +203,84 @@ export default function TripMap() {
                         longitude={popupInfo.location!.lng}
                         latitude={popupInfo.location!.lat}
                         onClose={() => setPopupInfo(null)}
-                        className="text-black"
-                        closeButton={false}
+                        closeButton={true}
+                        closeOnClick={false}
+                        maxWidth="360px"
                     >
-                        <div className="p-3 min-w-[200px] border-none">
-                            <h3 className="font-bold text-sm mb-1">{popupInfo.title}</h3>
-                            <p className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
-                                <MapPin className="w-3 h-3" />
-                                {popupInfo.location?.name}
-                            </p>
-                            {popupInfo.description && (
-                                <p className="text-xs bg-slate-100 p-2 rounded text-slate-700">
-                                    {popupInfo.description}
-                                </p>
-                            )}
+                        <div className="relative overflow-hidden">
+                            {/* Color accent bar */}
+                            <div
+                                className="absolute top-0 left-0 right-0 h-1"
+                                style={{
+                                    backgroundColor: routes.find(r => r?.cards.some(c => c.id === popupInfo.id))?.color || '#3b82f6'
+                                }}
+                            />
+
+                            <div className="p-4 pt-5">
+                                {/* Header with icon and title */}
+                                <div className="flex items-start gap-3 mb-3">
+                                    {popupInfo.icon ? (
+                                        <div className="text-3xl shrink-0 mt-0.5">
+                                            {popupInfo.icon}
+                                        </div>
+                                    ) : (
+                                        <div
+                                            className="p-2 rounded-lg shrink-0"
+                                            style={{
+                                                backgroundColor: routes.find(r => r?.cards.some(c => c.id === popupInfo.id))?.color + '20' || '#3b82f620'
+                                            }}
+                                        >
+                                            <MapPin
+                                                className="w-5 h-5"
+                                                style={{
+                                                    color: routes.find(r => r?.cards.some(c => c.id === popupInfo.id))?.color || '#3b82f6'
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-bold text-base mb-1 text-gray-900 leading-tight">
+                                            {popupInfo.title}
+                                        </h3>
+                                        {popupInfo.time && (
+                                            <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+                                                {popupInfo.time}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Location info */}
+                                <div className="space-y-2">
+                                    {/* Location name */}
+                                    {popupInfo.location?.name && (
+                                        <div className="flex items-start gap-2">
+                                            <MapPin className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+                                            <p className="text-sm font-medium text-gray-700 leading-snug">
+                                                {popupInfo.location.name}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Full address */}
+                                    {popupInfo.location?.address && (
+                                        <div className="pl-6">
+                                            <p className="text-xs text-gray-500 leading-relaxed">
+                                                {popupInfo.location.address}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Description */}
+                                {popupInfo.description && (
+                                    <div className="mt-3 pt-3 border-t border-gray-100">
+                                        <p className="text-xs text-gray-600 leading-relaxed">
+                                            {popupInfo.description}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </Popup>
                 )}
