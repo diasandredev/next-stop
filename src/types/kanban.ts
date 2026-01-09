@@ -12,6 +12,7 @@ export interface Card {
 
   order?: number; // Sort order within its column
   columnType?: 'day' | 'extra'; // Type of column the card belongs to
+  groupId?: string; // If this card belongs to a group in the right sidebar
   color?: string; // Custom card color
   notes?: string; // Additional notes
   completed?: boolean; // Task completion status

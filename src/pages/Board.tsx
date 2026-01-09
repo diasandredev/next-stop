@@ -4,6 +4,7 @@ import { useKanban } from '@/contexts/KanbanContext';
 import { Button } from '@/components/ui/button';
 
 import { Sidebar } from '@/components/Sidebar';
+import { RightSidebar } from '@/components/RightSidebar';
 import { Calendar, Loader2, Plus, Settings, Users } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
@@ -23,11 +24,15 @@ const Board = () => {
     cards,
     trips,
     dashboards,
+    groups,
     currentTripId,
     setCurrentTripId,
     updateCard,
     updateTrip,
     addDashboard,
+    addGroup,
+    updateGroup,
+    deleteGroup,
     isLoading
   } = useKanban();
 
@@ -46,6 +51,8 @@ const Board = () => {
 
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+  const [isRightSidebarExpanded, setIsRightSidebarExpanded] = useState(false);
+  const [activeDashboardId, setActiveDashboardId] = useState<string | undefined>(undefined);
 
   // Derived state
   const currentTrip = trips.find(t => t.id === currentTripId);
@@ -69,7 +76,10 @@ const Board = () => {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveCard(null);
+
+    // Delay clearing activeCard to allow drop animation to complete
+    setTimeout(() => setActiveCard(null), 200);
+
     if (!over) return;
 
     const cardId = active.id as string;
@@ -77,21 +87,26 @@ const Board = () => {
     if (!card) return;
 
     // Determine drop target
-    const overData = over.data.current as { type?: string; date?: string; columnId?: string; dashboardId?: string; parentId?: string; optionId?: string } | undefined;
+    const overData = over.data.current as { type?: string; date?: string; columnId?: string; dashboardId?: string; parentId?: string; optionId?: string; groupId?: string } | undefined;
     const overId = over.id as string;
     const overCard = cards.find(c => c.id === overId);
 
     // Determine Destination properties
-    let destType: 'day' | 'extra' | 'option' | null = null;
+    let destType: 'day' | 'extra' | 'option' | 'group' | null = null;
     let destDate: string | undefined;
     let destExtraId: string | undefined;
     let destDashboardId: string | undefined;
     let destParentId: string | undefined;
     let destOptionId: string | undefined;
+    let destGroupId: string | undefined;
 
     if (overData?.type === 'day') {
       destType = 'day';
       destDate = overData.date;
+      destDashboardId = overData.dashboardId;
+    } else if (overData?.type === 'group') {
+      destType = 'group';
+      destGroupId = overData.groupId;
       destDashboardId = overData.dashboardId;
     } else if (overData?.type === 'option') {
       destType = 'option';
@@ -104,16 +119,23 @@ const Board = () => {
       destDate = parentCard?.date;
     } else if (overCard) {
       // If dropping ONTO a card
-      destType = 'day'; // Default to day if not obvious, or check context. 
-      // Actually if dropping on a card, it's likely a day card since extra is gone.
-      destDate = overCard.date;
-      destDashboardId = overCard.dashboardId;
+      // Check if the card is in a group
+      if (overCard.groupId) {
+        destType = 'group';
+        destGroupId = overCard.groupId;
+        destDashboardId = overCard.dashboardId;
+      } else {
+        destType = 'day'; // Default to day if not obvious, or check context. 
+        // Actually if dropping on a card, it's likely a day card since extra is gone.
+        destDate = overCard.date;
+        destDashboardId = overCard.dashboardId;
 
-      // Check if the card we are dropping onto is INSIDE an option
-      if (overCard.parentId) {
-        destType = 'option';
-        destParentId = overCard.parentId;
-        destOptionId = overCard.optionId;
+        // Check if the card we are dropping onto is INSIDE an option
+        if (overCard.parentId) {
+          destType = 'option';
+          destParentId = overCard.parentId;
+          destOptionId = overCard.optionId;
+        }
       }
     }
 
@@ -127,6 +149,10 @@ const Board = () => {
         c.dashboardId === destDashboardId &&
         c.date === destDate &&
         !c.parentId // Only root cards
+      );
+    } else if (destType === 'group') {
+      destList = cards.filter(c =>
+        c.groupId === destGroupId
       );
     } else if (destType === 'option') {
       destList = cards.filter(c =>
@@ -164,11 +190,18 @@ const Board = () => {
         updates.date = destDate;
         updates.parentId = undefined; // Clear option parents
         updates.optionId = undefined;
+        updates.groupId = undefined; // Clear group
+      } else if (destType === 'group') {
+        updates.groupId = destGroupId;
+        updates.date = undefined; // Clear date
+        updates.parentId = undefined;
+        updates.optionId = undefined;
       } else if (destType === 'option') {
         updates.date = destDate;
         updates.parentId = destParentId;
         updates.optionId = destOptionId;
         updates.optionId = destOptionId;
+        updates.groupId = undefined; // Clear group
       }
 
       // Update the moved card
@@ -356,10 +389,26 @@ const Board = () => {
                       </Button>
                     </div>
                   )}
+
+                  {/* Right Sidebar - Inside DndContext */}
+                  <RightSidebar
+                    isExpanded={isRightSidebarExpanded}
+                    onToggle={() => setIsRightSidebarExpanded(!isRightSidebarExpanded)}
+                    groups={groups}
+                    cards={cards}
+                    dashboards={tripDashboards}
+                    activeDashboardId={activeDashboardId}
+                    onActiveDashboardChange={setActiveDashboardId}
+                    onAddGroup={(dashboardId, name) => addGroup(dashboardId, name)}
+                    onUpdateGroup={updateGroup}
+                    onDeleteGroup={deleteGroup}
+                  />
+
                   <DragOverlay>
                     {activeCard ? (
-                      <div className="bg-blue-900/50 rounded-md p-2 shadow-2xl cursor-grab flex items-center">
-                        <p className="text-sm font-medium text-white/50 truncate w-full line-through decoration-transparent">{activeCard.title}</p>
+                      <div className="bg-blue-900/50 rounded-md px-3 py-2 shadow-2xl cursor-grab inline-flex items-center max-w-md">
+                        {activeCard.icon && <span className="mr-1.5 text-sm">{activeCard.icon}</span>}
+                        <p className="text-sm font-medium text-white/50 whitespace-nowrap">{activeCard.title}</p>
                       </div>
                     ) : null}
                   </DragOverlay>

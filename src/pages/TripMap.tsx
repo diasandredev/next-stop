@@ -32,14 +32,23 @@ export default function TripMap() {
         return cards.filter(card => card.location && card.location.lat && card.location.lng);
     }, [cards]);
 
+    // Separate cards into route cards (with dates) and standalone cards (in groups)
+    const routeCards = useMemo(() => {
+        return cardsWithLocation.filter(card => card.date && !card.groupId);
+    }, [cardsWithLocation]);
+
+    const standaloneCards = useMemo(() => {
+        return cardsWithLocation.filter(card => card.groupId);
+    }, [cardsWithLocation]);
+
     // Group cards by Date to create routes
     const routes = useMemo(() => {
-        // Get unique dates
-        const dates = Array.from(new Set(cardsWithLocation.map(c => c.date).filter(Boolean))) as string[];
+        // Get unique dates from route cards only
+        const dates = Array.from(new Set(routeCards.map(c => c.date).filter(Boolean))) as string[];
         dates.sort();
 
         return dates.map((date, index) => {
-            const dayCards = cardsWithLocation
+            const dayCards = routeCards
                 .filter(card => card.date === date)
                 .sort((a, b) => (a.order || 0) - (b.order || 0));
 
@@ -67,11 +76,12 @@ export default function TripMap() {
                 } as GeoJSON.Feature<GeoJSON.LineString>
             };
         }).filter(Boolean);
-    }, [cardsWithLocation]);
+    }, [routeCards]);
 
     // Calculate initial view state (bounds)
     const initialViewState = useMemo(() => {
-        if (cardsWithLocation.length === 0) {
+        const allCards = [...routeCards, ...standaloneCards];
+        if (allCards.length === 0) {
             return {
                 longitude: -58.3816, // Buenos Aires fallback (based on user context :) or London -0.1276
                 latitude: -34.6037,
@@ -79,8 +89,8 @@ export default function TripMap() {
             };
         }
 
-        const lngs = cardsWithLocation.map(c => c.location!.lng);
-        const lats = cardsWithLocation.map(c => c.location!.lat);
+        const lngs = allCards.map(c => c.location!.lng);
+        const lats = allCards.map(c => c.location!.lat);
         const centerLng = lngs.reduce((a, b) => a + b, 0) / lngs.length;
         const centerLat = lats.reduce((a, b) => a + b, 0) / lats.length;
 
@@ -89,7 +99,7 @@ export default function TripMap() {
             latitude: centerLat,
             zoom: 13
         };
-    }, [cardsWithLocation]);
+    }, [routeCards, standaloneCards]);
 
     return (
         <div className="h-screen w-screen relative bg-[#1a1a1a]">
@@ -194,6 +204,40 @@ export default function TripMap() {
                             ))}
                         </div>
                     )
+                ))}
+
+                {/* Standalone Points (Group Cards) */}
+                {standaloneCards.map((card) => (
+                    <Marker
+                        key={card.id}
+                        longitude={card.location!.lng}
+                        latitude={card.location!.lat}
+                        anchor="bottom"
+                        onClick={e => {
+                            e.originalEvent.stopPropagation();
+                            setPopupInfo(card);
+                        }}
+                    >
+                        <div className="group relative flex flex-col items-center hover:z-50 cursor-pointer">
+                            <div className="relative">
+                                {card.icon ? (
+                                    <div
+                                        className="bg-white p-2.5 rounded-full shadow-xl border-3 transition-all duration-200 group-hover:scale-110 group-hover:shadow-2xl text-2xl opacity-70"
+                                        style={{ borderColor: '#6b7280', borderWidth: '3px', borderStyle: 'dashed' }}
+                                    >
+                                        {card.icon}
+                                    </div>
+                                ) : (
+                                    <div
+                                        className="bg-white p-2 rounded-full shadow-xl border-3 transition-all duration-200 group-hover:scale-110 group-hover:shadow-2xl opacity-70"
+                                        style={{ borderColor: '#6b7280', borderWidth: '3px', borderStyle: 'dashed' }}
+                                    >
+                                        <MapPin className="w-5 h-5 text-gray-500" fill="#6b7280" />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </Marker>
                 ))}
 
                 {/* Popups */}

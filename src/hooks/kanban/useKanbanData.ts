@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Trip, Dashboard, AccountSettings } from '@/types/kanban';
+import { Group } from '@/types/group';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRealtimeSync } from './useRealtimeSync';
 import { db, dbPromise } from '@/utils/db';
@@ -13,12 +14,15 @@ export const useKanbanData = () => {
     const {
         trips: syncTrips,
         dashboards: syncDashboards,
+        groups: syncGroups,
         cards: syncCards,
         isLoading: isSyncLoading,
         saveTrip,
         deleteTrip,
         saveDashboard,
         deleteDashboard,
+        saveGroup,
+        deleteGroup,
         saveCard,
         deleteCard
     } = useRealtimeSync();
@@ -29,6 +33,7 @@ export const useKanbanData = () => {
     const [cards, setCards] = useState<Card[]>([]);
     const [trips, setTrips] = useState<Trip[]>([]);
     const [dashboards, setDashboards] = useState<Dashboard[]>([]);
+    const [groups, setGroups] = useState<Group[]>([]);
 
     const [accountSettings, setAccountSettings] = useState<AccountSettings | null>(null);
     const [currentTripId, setCurrentTripId] = useState<string>('1');
@@ -42,6 +47,7 @@ export const useKanbanData = () => {
                 const dbCards = await db.getAllCards();
                 const dbTrips = await db.getTrips();
                 const dbDashboards = await db.getDashboards();
+                const dbGroups = await db.getGroups();
                 const dbSettings = await db.getAccountSettings();
                 const dbCurrentTripId = await db.getLastTripId();
 
@@ -53,6 +59,10 @@ export const useKanbanData = () => {
 
                 if (dbDashboards.length > 0) {
                     setDashboards(dbDashboards);
+                }
+
+                if (dbGroups.length > 0) {
+                    setGroups(dbGroups);
                 }
 
                 if (dbSettings) {
@@ -88,6 +98,7 @@ export const useKanbanData = () => {
             // Update state with synchronized data
             setTrips(syncTrips);
             setDashboards(syncDashboards);
+            setGroups(syncGroups);
             setCards(syncCards);
 
             // Persist to IndexedDB for offline support
@@ -98,13 +109,16 @@ export const useKanbanData = () => {
                 // Dashboards
                 await db.syncDashboards(syncDashboards);
 
+                // Groups
+                await db.syncGroups(syncGroups);
+
                 // Cards
                 await db.syncCards(syncCards);
             };
 
             persistToLocal();
         }
-    }, [syncTrips, syncDashboards, syncCards, isSyncLoading, user]);
+    }, [syncTrips, syncDashboards, syncGroups, syncCards, isSyncLoading, user]);
 
     // Persistence Effects for AccountSettings (Local DB + Firestore)
     useEffect(() => {
@@ -139,6 +153,7 @@ export const useKanbanData = () => {
         setTrips: () => console.warn('setTrips is deprecated'),
         dashboards,
         setDashboards: () => console.warn('setDashboards is deprecated'),
+        groups,
         accountSettings,
         setAccountSettings,
         currentTripId,
@@ -149,6 +164,8 @@ export const useKanbanData = () => {
         deleteTrip,
         saveDashboard,
         deleteDashboard,
+        saveGroup,
+        deleteGroup,
         saveCard,
         deleteCard
     };

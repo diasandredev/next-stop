@@ -13,10 +13,12 @@ import {
 } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { Trip, Dashboard, Card } from '@/types/kanban';
+import { Group } from '@/types/group';
 
 interface RealtimeSyncState {
     trips: Trip[];
     dashboards: Dashboard[];
+    groups: Group[];
     cards: Card[];
     isLoading: boolean;
     error: Error | null;
@@ -27,6 +29,8 @@ interface UseRealtimeSyncReturn extends RealtimeSyncState {
     deleteTrip: (tripId: string) => Promise<void>;
     saveDashboard: (tripId: string, dashboard: Dashboard) => Promise<void>;
     deleteDashboard: (tripId: string, dashboardId: string) => Promise<void>;
+    saveGroup: (dashboardId: string, group: Group) => Promise<void>;
+    deleteGroup: (dashboardId: string, groupId: string) => Promise<void>;
     saveCard: (tripId: string, card: Card) => Promise<void>;
     deleteCard: (tripId: string, cardId: string) => Promise<void>;
 }
@@ -41,6 +45,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
     const [state, setState] = useState<RealtimeSyncState>({
         trips: [],
         dashboards: [],
+        groups: [],
         cards: [],
         isLoading: true,
         error: null,
@@ -48,6 +53,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
 
     const unsubscribersRef = useRef<Unsubscribe[]>([]);
     const dashboardUnsubscribersRef = useRef<Map<string, Unsubscribe>>(new Map());
+    const groupUnsubscribersRef = useRef<Map<string, Unsubscribe>>(new Map());
     const cardUnsubscribersRef = useRef<Map<string, Unsubscribe>>(new Map());
 
     // Clean up all listeners
@@ -56,6 +62,8 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         unsubscribersRef.current = [];
         dashboardUnsubscribersRef.current.forEach(unsub => unsub());
         dashboardUnsubscribersRef.current.clear();
+        groupUnsubscribersRef.current.forEach(unsub => unsub());
+        groupUnsubscribersRef.current.clear();
         cardUnsubscribersRef.current.forEach(unsub => unsub());
         cardUnsubscribersRef.current.clear();
     }, []);
@@ -85,6 +93,41 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         });
 
         dashboardUnsubscribersRef.current.set(tripId, unsub);
+    }, []);
+
+    // Subscribe to groups for all dashboards in a trip
+    const subscribeToGroups = useCallback((tripId: string) => {
+        if (groupUnsubscribersRef.current.has(tripId)) return;
+
+        const dashboardsRef = collection(db, `trips/${tripId}/dashboards`);
+        const unsub = onSnapshot(dashboardsRef, (dashboardSnapshot) => {
+            // For each dashboard, subscribe to its groups subcollection
+            dashboardSnapshot.docs.forEach(dashboardDoc => {
+                const dashboardId = dashboardDoc.id;
+                const groupsRef = collection(db, `trips/${tripId}/dashboards/${dashboardId}/groups`);
+
+                onSnapshot(groupsRef, (groupSnapshot) => {
+                    const groupsData = groupSnapshot.docs.map(doc => ({
+                        ...doc.data(),
+                        id: doc.id,
+                        dashboardId,
+                    })) as Group[];
+
+                    setState(prev => {
+                        // Remove old groups for this dashboard and add new ones
+                        const otherGroups = prev.groups.filter(g => g.dashboardId !== dashboardId);
+                        return {
+                            ...prev,
+                            groups: [...otherGroups, ...groupsData],
+                        };
+                    });
+                }, (error) => {
+                    console.error(`Error subscribing to groups for dashboard ${dashboardId}:`, error);
+                });
+            });
+        });
+
+        groupUnsubscribersRef.current.set(tripId, unsub);
     }, []);
 
     // Subscribe to a trip's cards
@@ -123,6 +166,12 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         if (dashboardUnsub) {
             dashboardUnsub();
             dashboardUnsubscribersRef.current.delete(tripId);
+        }
+
+        const groupUnsub = groupUnsubscribersRef.current.get(tripId);
+        if (groupUnsub) {
+            groupUnsub();
+            groupUnsubscribersRef.current.delete(tripId);
         }
 
         const cardUnsub = cardUnsubscribersRef.current.get(tripId);
@@ -164,6 +213,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
                 // Subscribe to subcollections for new trips
                 ownedTrips.forEach(trip => {
                     subscribeToDashboards(trip.id);
+                    subscribeToGroups(trip.id);
                     subscribeToCards(trip.id);
                 });
 
@@ -196,6 +246,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
                 // Subscribe to subcollections for new shared trips
                 sharedTrips.forEach(trip => {
                     subscribeToDashboards(trip.id);
+                    subscribeToGroups(trip.id);
                     subscribeToCards(trip.id);
                 });
 
@@ -215,7 +266,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         return () => {
             cleanupListeners();
         };
-    }, [user?.email, user?.uid, cleanupListeners, subscribeToDashboards, subscribeToCards]);
+    }, [user?.email, user?.uid, cleanupListeners, subscribeToDashboards, subscribeToGroups, subscribeToCards]);
 
     // CRUD operations
     const saveTrip = useCallback(async (trip: Trip) => {
@@ -247,10 +298,41 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         await deleteDoc(doc(db, `trips/${tripId}/dashboards`, dashboardId));
     }, []);
 
+    const saveGroup = useCallback(async (dashboardId: string, group: Group) => {
+        // Find the trip that owns this dashboard
+        const dashboard = state.dashboards.find(d => d.id === dashboardId);
+        if (!dashboard) return;
+
+        const groupData = { ...group };
+        delete (groupData as any).dashboardId; // Don't duplicate dashboardId in subcollection
+        await setDoc(doc(db, `trips/${dashboard.tripId}/dashboards/${dashboardId}/groups`, group.id), groupData, { merge: true });
+    }, [state.dashboards]);
+
+    const deleteGroup = useCallback(async (dashboardId: string, groupId: string) => {
+        // Find the trip that owns this dashboard
+        const dashboard = state.dashboards.find(d => d.id === dashboardId);
+        if (!dashboard) return;
+
+        await deleteDoc(doc(db, `trips/${dashboard.tripId}/dashboards/${dashboardId}/groups`, groupId));
+    }, [state.dashboards]);
+
     const saveCard = useCallback(async (tripId: string, card: Card) => {
-        // Sanitize card to remove undefined values which Firestore setDoc doesn't accept
-        const saneCard = JSON.parse(JSON.stringify(card));
-        await setDoc(doc(db, `trips/${tripId}/cards`, card.id), saneCard, { merge: true });
+        const { deleteField } = await import('firebase/firestore');
+        const cardData: any = { ...card };
+        delete cardData.id; // Don't store id in document
+
+        // Convert undefined values to deleteField() to remove them from Firestore
+        const updates: any = {};
+        Object.keys(cardData).forEach(key => {
+            const value = cardData[key];
+            if (value === undefined) {
+                updates[key] = deleteField();
+            } else {
+                updates[key] = value;
+            }
+        });
+
+        await setDoc(doc(db, `trips/${tripId}/cards`, card.id), updates, { merge: true });
     }, []);
 
     const deleteCard = useCallback(async (tripId: string, cardId: string) => {
@@ -263,6 +345,8 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         deleteTrip,
         saveDashboard,
         deleteDashboard,
+        saveGroup,
+        deleteGroup,
         saveCard,
         deleteCard,
     };

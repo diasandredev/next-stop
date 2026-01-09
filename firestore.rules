@@ -20,7 +20,6 @@ service cloud.firestore {
           request.auth.token.email in resource.data.sharedEmails
         );
       }
-      
       function canEdit() {
         return request.auth != null && (
           resource.data.ownerId == request.auth.uid ||
@@ -38,6 +37,14 @@ service cloud.firestore {
                        request.auth.token.email in get(/databases/$(database)/documents/trips/$(tripId)).data.sharedEmails;
         allow write: if get(/databases/$(database)/documents/trips/$(tripId)).data.ownerId == request.auth.uid ||
                         request.auth.token.email in get(/databases/$(database)/documents/trips/$(tripId)).data.editorEmails;
+        
+        // Groups subcollection under dashboards
+        match /groups/{groupId} {
+          allow read: if get(/databases/$(database)/documents/trips/$(tripId)).data.ownerId == request.auth.uid ||
+                         request.auth.token.email in get(/databases/$(database)/documents/trips/$(tripId)).data.sharedEmails;
+          allow write: if get(/databases/$(database)/documents/trips/$(tripId)).data.ownerId == request.auth.uid ||
+                          request.auth.token.email in get(/databases/$(database)/documents/trips/$(tripId)).data.editorEmails;
+        }
       }
       
       match /cards/{cardId} {

@@ -1,5 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import { Card, Trip, Dashboard, AccountSettings } from '@/types/kanban';
+import { Group } from '@/types/group';
 import { v4 as uuidv4 } from 'uuid';
 
 interface NextStopDB extends DBSchema {
@@ -15,6 +16,10 @@ interface NextStopDB extends DBSchema {
         key: string;
         value: Dashboard;
     };
+    groups: {
+        key: string;
+        value: Group;
+    };
     // Legacy store for migration, will be deleted or ignored
     // tables removed
 
@@ -29,7 +34,7 @@ interface NextStopDB extends DBSchema {
 }
 
 const DB_NAME = 'next-stop-db';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 let _dbPromise: Promise<NextStopDB> | null = null; // Type IDBPDatabase<NextStopDB> but Promise wrapper
 
@@ -57,6 +62,11 @@ function getDB() {
                     if (db.objectStoreNames.contains('calendars' as any)) {
                         db.deleteObjectStore('calendars' as any);
                     }
+                }
+
+                if (oldVersion < 4) {
+                    // Add groups store
+                    db.createObjectStore('groups', { keyPath: 'id' });
                 }
             },
             terminated() {
@@ -161,6 +171,37 @@ export const db = {
 
         for (const d of dashboards) {
             await store.put(d);
+        }
+
+        await tx.done;
+    },
+
+    // Groups
+    async getGroups(): Promise<Group[]> {
+        return (await getDB()).getAll('groups');
+    },
+    async saveGroup(group: Group): Promise<void> {
+        await (await getDB()).put('groups', group);
+    },
+    async deleteGroup(id: string): Promise<void> {
+        await (await getDB()).delete('groups', id);
+    },
+    async syncGroups(groups: Group[]): Promise<void> {
+        const db = await getDB();
+        const tx = db.transaction('groups', 'readwrite');
+        const store = tx.objectStore('groups');
+
+        const existingKeys = await store.getAllKeys();
+        const incomingIds = new Set(groups.map(g => g.id));
+
+        for (const key of existingKeys) {
+            if (!incomingIds.has(key)) {
+                await store.delete(key);
+            }
+        }
+
+        for (const g of groups) {
+            await store.put(g);
         }
 
         await tx.done;

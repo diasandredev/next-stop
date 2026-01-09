@@ -1,11 +1,13 @@
 import React, { createContext, useContext } from 'react';
 import { Card, Trip, Dashboard, AccountSettings } from '@/types/kanban';
+import { Group } from '@/types/group';
 
 export interface KanbanContextType {
   cards: Card[];
 
   trips: Trip[];
   dashboards: Dashboard[];
+  groups: Group[];
   currentTripId: string;
   accountSettings: AccountSettings | null;
   isLoading: boolean;
@@ -25,6 +27,10 @@ export interface KanbanContextType {
   addDashboard: (tripId: string, name: string, startDate?: string, days?: number) => void;
   updateDashboard: (id: string, updates: Partial<Dashboard>) => void;
   deleteDashboard: (id: string) => void;
+
+  addGroup: (dashboardId: string, name: string) => void;
+  updateGroup: (id: string, updates: Partial<Group>) => void;
+  deleteGroup: (id: string) => void;
 
   updateAccountSettings: (settings: Partial<AccountSettings>) => void;
   addCustomColor: (color: string) => void;

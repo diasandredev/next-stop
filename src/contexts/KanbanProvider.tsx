@@ -5,6 +5,7 @@ import { useKanbanData } from '@/hooks/kanban/useKanbanData';
 import { useCardOperations } from '@/hooks/kanban/useCardOperations';
 import { useTripOperations } from '@/hooks/kanban/useTripOperations';
 import { useDashboardOperations } from '@/hooks/kanban/useDashboardOperations';
+import { useGroupOperations } from '@/hooks/kanban/useGroupOperations';
 import { KanbanContext } from './KanbanContext';
 
 // Inner provider that manages Kanban state
@@ -13,11 +14,13 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode }> = ({ children
         cards, setCards,
         trips, setTrips,
         dashboards, setDashboards,
+        groups,
         accountSettings, setAccountSettings,
         currentTripId, setCurrentTripId,
         isLoading,
         saveTrip, deleteTrip,
         saveDashboard, deleteDashboard,
+        saveGroup, deleteGroup,
         saveCard, deleteCard
     } = useKanbanData();
 
@@ -72,6 +75,16 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteDashboard
     });
 
+    const {
+        addGroup,
+        updateGroup,
+        deleteGroup: deleteGroupOp
+    } = useGroupOperations({
+        groups,
+        saveGroup,
+        deleteGroup
+    });
+
     const updateAccountSettings = useCallback((settings: Partial<AccountSettings>) => {
         setAccountSettings(prev => {
             const newSettings = prev ? { ...prev, ...settings } : settings as AccountSettings;
@@ -99,6 +112,7 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode }> = ({ children
         cards,
         trips,
         dashboards,
+        groups,
         currentTripId,
         accountSettings,
         isLoading,
@@ -116,6 +130,10 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addDashboard,
         updateDashboard,
         deleteDashboard: deleteDashboardOp,
+
+        addGroup,
+        updateGroup,
+        deleteGroup: deleteGroupOp,
 
         updateAccountSettings,
         addCustomColor,
