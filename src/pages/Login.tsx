@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Loader2, MapPin } from 'lucide-react';
+import { Logo } from '@/components/Logo';
 
 // Custom airplane SVG for better aesthetics
 const AirplaneSvg = ({ size, opacity }: { size: number; opacity: number }) => (
@@ -239,15 +240,13 @@ const Login = () => {
       {/* Login Card */}
       <div className="login-card">
         {/* Logo / Branding */}
+
         <div className="login-header">
-          <div className="logo-container">
-            <div className="logo-icon">
-              <MapPin size={28} strokeWidth={2.5} />
-            </div>
-            <h1 className="logo-text">
-              next<span className="logo-highlight">-stop</span>
-            </h1>
-          </div>
+          <Logo
+            variant="large"
+            className="justify-center mb-8 scale-125"
+            textClassName="text-white"
+          />
         </div>
 
         {/* Form */}

@@ -29,6 +29,8 @@ import {
 import { Trip } from '@/types/kanban';
 import { User as UserType } from 'firebase/auth';
 
+import { Logo } from '@/components/Logo';
+
 interface SidebarProps {
     isExpanded: boolean;
     toggleSidebar: () => void;
@@ -83,16 +85,7 @@ export function Sidebar({
 
             {/* Header / Logo */}
             <div className={cn("flex items-center p-4 h-16", isExpanded ? "justify-start" : "justify-center")}>
-                <div className="flex items-center gap-2 overflow-hidden">
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                        <span className="text-primary-foreground font-bold text-lg">N</span>
-                    </div>
-                    {isExpanded && (
-                        <span className="font-bold text-xl tracking-tight text-foreground whitespace-nowrap animate-in fade-in duration-300">
-                            Next Stop
-                        </span>
-                    )}
-                </div>
+                <Logo showText={isExpanded} iconSize={isExpanded ? 24 : 20} />
             </div>
 
             {/* Trips List */}
