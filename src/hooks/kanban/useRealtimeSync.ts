@@ -201,19 +201,25 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
 
         // 1. Trips owned by user
         const ownedQuery = query(tripsRef, where('ownerId', '==', user.uid));
-        const ownedUnsub = onSnapshot(ownedQuery, (snapshot) => {
+        const ownedUnsub = onSnapshot(ownedQuery, { includeMetadataChanges: true }, (snapshot) => {
             const ownedTrips = snapshot.docs.map(doc => ({
                 ...doc.data(),
                 id: doc.id,
-            })) as Trip[];
+                hasPendingWrites: doc.metadata.hasPendingWrites,
+            })) as (Trip & { hasPendingWrites?: boolean })[];
 
             setState(prev => {
                 // Merge with shared trips
                 const sharedTrips = prev.trips.filter(t => t.ownerId !== user.uid);
-                const allTrips = [...ownedTrips, ...sharedTrips];
+                // We cast back to Trip[] because hasPendingWrites is internal usage here
+                const allTrips = [...ownedTrips, ...sharedTrips] as Trip[];
 
                 // Subscribe to subcollections for new trips
                 ownedTrips.forEach(trip => {
+                    // Skip subscription if the trip is being created (has pending writes)
+                    // The listener will fire again when the write commits
+                    if (trip.hasPendingWrites) return;
+
                     subscribeToDashboards(trip.id);
                     subscribeToGroups(trip.id);
                     subscribeToCards(trip.id);
