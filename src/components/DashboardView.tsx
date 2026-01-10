@@ -17,6 +17,7 @@ import { addDays, format, parseISO } from 'date-fns';
 import { DatePicker } from './DatePicker';
 import { DateRangePicker } from './DateRangePicker';
 import { ConfirmDialog } from './ConfirmDialog';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface DashboardViewProps {
     dashboard: Dashboard;
@@ -27,6 +28,7 @@ interface DashboardViewProps {
 
 export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewProps) => {
     const { updateDashboard, deleteDashboard } = useKanban();
+    const { user } = useAuth();
     const [isEditingName, setIsEditingName] = useState(false);
     const [name, setName] = useState(dashboard.name);
 
@@ -197,14 +199,16 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                                     Save
                                 </Button>
 
-                                <Button
-                                    variant="ghost"
-                                    onClick={() => setShowDeleteConfirm(true)}
-                                    className="text-red-400 hover:bg-red-400/10 hover:text-red-400 gap-2 rounded-full"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                    Delete Dashboard
-                                </Button>
+                                {trip.ownerId === user?.uid && (
+                                    <Button
+                                        variant="ghost"
+                                        onClick={() => setShowDeleteConfirm(true)}
+                                        className="text-red-400 hover:bg-red-400/10 hover:text-red-400 gap-2 rounded-full"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        Delete Dashboard
+                                    </Button>
+                                )}
                             </div>
 
                             <ConfirmDialog

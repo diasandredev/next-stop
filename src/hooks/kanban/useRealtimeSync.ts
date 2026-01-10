@@ -8,6 +8,8 @@ import {
     where,
     setDoc,
     deleteDoc,
+    getDocs,
+    writeBatch,
     Unsubscribe,
     DocumentData
 } from 'firebase/firestore';
@@ -284,9 +286,51 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
     }, [user?.uid]);
 
     const deleteTrip = useCallback(async (tripId: string) => {
+        const trip = state.trips.find(t => t.id === tripId);
+        if (!trip) {
+            // It might be legal to delete a trip you can't see? No.
+            // But if it's not in state, we can't check owner.
+            // Let's assume if it's not in state (synced), we shouldn't touch it.
+            return;
+        }
+
+        if (trip.ownerId !== user?.uid) {
+            console.error("Only the owner can delete the trip");
+            throw new Error("Only the owner can delete the trip");
+        }
+
         unsubscribeFromTrip(tripId);
-        await deleteDoc(doc(db, 'trips', tripId));
-    }, [unsubscribeFromTrip]);
+
+        const batch = writeBatch(db);
+
+        // 1. Delete all cards
+        const cardsRef = collection(db, `trips/${tripId}/cards`);
+        const cardsSnapshot = await getDocs(cardsRef);
+        cardsSnapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        // 2. Delete all dashboards and their groups
+        const dashboardsRef = collection(db, `trips/${tripId}/dashboards`);
+        const dashboardsSnapshot = await getDocs(dashboardsRef);
+
+        // We can't batch delete subcollections of dashboards easily without reading them first
+        // So for each dashboard, find groups and delete
+        for (const dashboardDoc of dashboardsSnapshot.docs) {
+            const groupsRef = collection(db, `trips/${tripId}/dashboards/${dashboardDoc.id}/groups`);
+            const groupsSnapshot = await getDocs(groupsRef);
+            groupsSnapshot.docs.forEach(gDoc => {
+                batch.delete(gDoc.ref);
+            });
+            // Delete the dashboard doc
+            batch.delete(dashboardDoc.ref);
+        }
+
+        // 3. Delete the trip doc
+        batch.delete(doc(db, 'trips', tripId));
+
+        await batch.commit();
+    }, [unsubscribeFromTrip, state.trips, user?.uid]);
 
     const saveDashboard = useCallback(async (tripId: string, dashboard: Dashboard) => {
         const dashboardData = { ...dashboard };
@@ -295,8 +339,45 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
     }, []);
 
     const deleteDashboard = useCallback(async (tripId: string, dashboardId: string) => {
-        await deleteDoc(doc(db, `trips/${tripId}/dashboards`, dashboardId));
-    }, []);
+        const trip = state.trips.find(t => t.id === tripId);
+        if (!trip) {
+            console.error("Trip not found for deletion permissions check");
+            return;
+        }
+
+        if (trip.ownerId !== user?.uid) {
+            console.error("Only the owner can delete dashboards");
+            // You might want to throw an error here to catch it in the UI
+            throw new Error("Only the owner can delete dashboards");
+        }
+
+        // 1. Delete all cards in this dashboard
+        // We need to query cards where dashboardId == dashboardId
+        // The cards are in trips/{tripId}/cards
+        const cardsRef = collection(db, `trips/${tripId}/cards`);
+        const cardsQuery = query(cardsRef, where('dashboardId', '==', dashboardId));
+        const cardsSnapshot = await getDocs(cardsQuery);
+
+        const batch = writeBatch(db);
+        cardsSnapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        // 2. Delete all groups in this dashboard
+        // groups are in trips/{tripId}/dashboards/{dashboardId}/groups
+        const groupsRef = collection(db, `trips/${tripId}/dashboards/${dashboardId}/groups`);
+        const groupsSnapshot = await getDocs(groupsRef);
+        groupsSnapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        // 3. Delete the dashboard itself
+        const dashboardRef = doc(db, `trips/${tripId}/dashboards`, dashboardId);
+        batch.delete(dashboardRef);
+
+        await batch.commit();
+
+    }, [state.trips, user?.uid]);
 
     const saveGroup = useCallback(async (dashboardId: string, group: Group) => {
         // Find the trip that owns this dashboard

@@ -49,9 +49,10 @@ export const useTripOperations = ({
     const deleteTripFn = useCallback((id: string) => {
         deleteTrip(id);
         if (currentTripId === id) {
-            // Logic to switch trip could go here if needed
+            const otherTrip = trips.find(t => t.id !== id);
+            setCurrentTripId(otherTrip ? otherTrip.id : '');
         }
-    }, [currentTripId, deleteTrip]);
+    }, [currentTripId, deleteTrip, trips, setCurrentTripId]);
 
     return {
         addTrip,

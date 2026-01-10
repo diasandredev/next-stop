@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useKanban } from '@/contexts/KanbanContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Trip } from '@/types/kanban';
 import { Label } from './ui/label';
 import { Plane, Trash2, X } from 'lucide-react';
@@ -17,6 +18,7 @@ interface TripSettingsDialogProps {
 
 export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDialogProps) {
     const { updateTrip, deleteTrip } = useKanban();
+    const { user } = useAuth();
     const [name, setName] = useState('');
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -105,15 +107,17 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
                         Save
                     </Button>
 
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => setShowDeleteConfirm(true)}
-                        className="text-red-400 hover:bg-red-400/10 hover:text-red-400 gap-2 rounded-full"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                        Delete Trip
-                    </Button>
+                    {user?.uid === trip.ownerId && (
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setShowDeleteConfirm(true)}
+                            className="text-red-400 hover:bg-red-400/10 hover:text-red-400 gap-2 rounded-full"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Delete Trip
+                        </Button>
+                    )}
                 </div>
             </DialogContent>
 

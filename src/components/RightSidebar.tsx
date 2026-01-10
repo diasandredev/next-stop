@@ -3,7 +3,7 @@ import { Card, Dashboard } from '@/types/kanban';
 import { Button } from './ui/button';
 import { X, Plus } from 'lucide-react';
 import { GroupColumn } from '@/components/GroupColumn';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface RightSidebarProps {
@@ -32,6 +32,34 @@ export const RightSidebar = ({
     onDeleteGroup
 }: RightSidebarProps) => {
     const [newGroupId, setNewGroupId] = useState<string | null>(null);
+    const sidebarRef = useRef<HTMLDivElement>(null);
+
+    // Click outside to close
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isExpanded && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+                // Check if the click was on the toggle button itself (to prevent immediate reopen)
+                const toggleButton = document.getElementById('right-sidebar-toggle');
+                if (toggleButton && toggleButton.contains(event.target as Node)) {
+                    return;
+                }
+
+                // Allow interactions with dialogs or overlays (like dragging?)
+                // Usually click outside means "click on the background/board".
+                // If dragging, dnd-kit uses pointer events.
+                // If the user is just clicking on the board, we close.
+                onToggle();
+            }
+        };
+
+        if (isExpanded) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isExpanded, onToggle]);
 
     // Filter groups for active dashboard
     const dashboardGroups = groups
@@ -76,107 +104,92 @@ export const RightSidebar = ({
     if (!activeDashboardId || dashboards.length === 0) return null;
 
     return (
-        <>
-            {/* Sidebar */}
-            <div
-                className={cn(
-                    "fixed top-0 right-0 h-screen bg-background border-l border-border z-40 transition-all duration-300 ease-in-out shadow-2xl",
-                    isExpanded ? 'w-[400px]' : 'w-0'
-                )}
-            >
-                {/* Sidebar Content */}
-                <div className={cn(
-                    "h-full flex flex-col transition-opacity duration-300",
-                    isExpanded ? "opacity-100" : "opacity-0"
-                )}>
-                    {/* Header */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
-                        <h2 className="text-2xl font-bold text-foreground">Groups</h2>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={onToggle}
-                            className="h-8 w-8 rounded-lg hover:bg-muted"
-                        >
-                            <X className="w-4 h-4" />
-                        </Button>
-                    </div>
+        <div
+            ref={sidebarRef}
+            className={cn(
+                "fixed top-0 right-0 h-screen bg-[#060606] border-l border-border z-40 transition-all duration-300 ease-in-out shadow-2xl",
+                isExpanded ? 'w-[400px]' : 'w-0'
+            )}
+        >
+            {/* Sidebar Content */}
+            <div className={cn(
+                "h-full flex flex-col transition-opacity duration-300",
+                isExpanded ? "opacity-100" : "opacity-0"
+            )}>
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
+                    <h2 className="text-2xl font-bold text-foreground">Groups</h2>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onToggle}
+                        className="h-8 w-8 rounded-lg hover:bg-muted"
+                    >
+                        <X className="w-4 h-4" />
+                    </Button>
+                </div>
 
-                    {/* Dashboard Tabs */}
-                    <div className="px-4 py-3 border-b border-border/30 bg-muted/20">
-                        <div className="flex gap-2 overflow-x-auto scrollbar-none">
-                            {dashboards.map(dashboard => (
-                                <button
-                                    key={dashboard.id}
-                                    onClick={() => onActiveDashboardChange(dashboard.id)}
-                                    className={cn(
-                                        "px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200",
-                                        activeDashboardId === dashboard.id
-                                            ? "bg-primary text-primary-foreground shadow-sm"
-                                            : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-                                    )}
-                                >
-                                    {dashboard.name}
-                                </button>
-                            ))}
-                        </div>
+                {/* Dashboard Tabs */}
+                <div className="px-4 py-3 border-b border-border/30 bg-muted/20">
+                    <div className="flex gap-2 overflow-x-auto scrollbar-none">
+                        {dashboards.map(dashboard => (
+                            <button
+                                key={dashboard.id}
+                                onClick={() => onActiveDashboardChange(dashboard.id)}
+                                className={cn(
+                                    "px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200",
+                                    activeDashboardId === dashboard.id
+                                        ? "bg-primary text-primary-foreground shadow-sm"
+                                        : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                )}
+                            >
+                                {dashboard.name}
+                            </button>
+                        ))}
                     </div>
+                </div>
 
-                    {/* New Group Button */}
-                    <div className="px-4 py-4">
-                        <Button
-                            onClick={handleAddGroup}
-                            className="w-full gap-2 bg-primary hover:bg-primary/90 shadow-sm"
-                        >
-                            <Plus className="w-4 h-4" />
-                            New Group
-                        </Button>
-                    </div>
+                {/* New Group Button */}
+                <div className="px-4 py-4">
+                    <Button
+                        onClick={handleAddGroup}
+                        className="w-full gap-2 bg-primary hover:bg-primary/90 shadow-sm"
+                    >
+                        <Plus className="w-4 h-4" />
+                        New Group
+                    </Button>
+                </div>
 
-                    {/* Groups Container */}
-                    <div className="flex-1 overflow-y-auto px-4 pb-4">
-                        <div className="flex flex-col gap-3">
-                            {dashboardGroups.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-4">
-                                    <div className="p-4 bg-muted/30 rounded-xl">
-                                        <svg className="w-12 h-12 text-muted-foreground/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                        </svg>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-sm font-medium">No groups yet</p>
-                                        <p className="text-xs text-muted-foreground/70 mt-1">Create a group to organize your cards</p>
-                                    </div>
+                {/* Groups Container */}
+                <div className="flex-1 overflow-y-auto px-4 pb-4">
+                    <div className="flex flex-col gap-3">
+                        {dashboardGroups.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-4">
+                                <div className="p-4 bg-muted/30 rounded-xl">
+                                    <svg className="w-12 h-12 text-muted-foreground/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                    </svg>
                                 </div>
-                            ) : (
-                                dashboardGroups.map((group, index) => (
-                                    <GroupColumn
-                                        key={group.id}
-                                        group={group}
-                                        cards={cards.filter(c => c.groupId === group.id)}
-                                        onUpdateGroup={onUpdateGroup}
-                                        onDeleteGroup={onDeleteGroup}
-                                        autoFocusName={index === dashboardGroups.length - 1 && newGroupId !== null}
-                                    />
-                                ))
-                            )}
-                        </div>
+                                <div className="text-center">
+                                    <p className="text-sm font-medium">No groups yet</p>
+                                    <p className="text-xs text-muted-foreground/70 mt-1">Create a group to organize your cards</p>
+                                </div>
+                            </div>
+                        ) : (
+                            dashboardGroups.map((group, index) => (
+                                <GroupColumn
+                                    key={group.id}
+                                    group={group}
+                                    cards={cards.filter(c => c.groupId === group.id)}
+                                    onUpdateGroup={onUpdateGroup}
+                                    onDeleteGroup={onDeleteGroup}
+                                    autoFocusName={index === dashboardGroups.length - 1 && newGroupId !== null}
+                                />
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
-
-            {/* Toggle Button - Floating on the right edge */}
-            {!isExpanded && (
-                <button
-                    onClick={onToggle}
-                    className="fixed right-0 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground p-3 rounded-l-xl hover:bg-primary/90 transition-all duration-200 shadow-2xl z-50 hover:pr-4"
-                    title="Open groups"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
-            )}
-        </>
+        </div>
     );
 };

@@ -65,7 +65,7 @@ export function Sidebar({
     return (
         <aside
             className={cn(
-                "h-screen bg-background border-r border-border flex flex-col transition-all duration-300 ease-in-out relative z-20",
+                "h-screen bg-[#060606] border-r border-border flex flex-col transition-all duration-300 ease-in-out relative z-20",
                 isExpanded ? "w-64" : "w-16"
             )}
         >

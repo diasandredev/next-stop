@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 import { Sidebar } from '@/components/Sidebar';
 import { RightSidebar } from '@/components/RightSidebar';
-import { Calendar, Loader2, Plus, Settings, Users } from 'lucide-react';
+import { Calendar, Loader2, Plus, Settings, Users, PanelRight } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Card, Trip } from '@/types/kanban';
@@ -332,6 +332,25 @@ const Board = () => {
                     </TooltipTrigger>
                     <TooltipContent side="bottom">
                       <p>Share Trip</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        id="right-sidebar-toggle"
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
+                        onClick={() => {
+                          setIsRightSidebarExpanded(!isRightSidebarExpanded);
+                        }}
+                      >
+                        <PanelRight className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Groups</p>
                     </TooltipContent>
                   </Tooltip>
 
