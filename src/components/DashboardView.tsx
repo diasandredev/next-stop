@@ -3,8 +3,10 @@ import { Card, Dashboard, Trip } from '@/types/kanban';
 import { DayColumn } from './DayColumn';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Settings, Trash2, X } from 'lucide-react';
+import { Trash2, X, Palette, Settings } from 'lucide-react';
 import { useKanban } from '@/contexts/KanbanContext';
+import chroma from 'chroma-js';
+import { ColorPicker } from './ColorPicker';
 import {
     Dialog,
     DialogContent,
@@ -36,6 +38,7 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [editDays, setEditDays] = useState(dashboard.days);
     const [editStartDate, setEditStartDate] = useState(dashboard.startDate || trip.startDate || new Date().toISOString());
+    const [editBackgroundColor, setEditBackgroundColor] = useState(dashboard.backgroundColor || 'transparent');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Calculate dates
@@ -58,8 +61,10 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
     const handleSettingsSave = () => {
         updateDashboard(dashboard.id, {
             days: editDays,
-            startDate: editStartDate
+            startDate: editStartDate,
+            backgroundColor: editBackgroundColor
         });
+        setSettingsOpen(false);
         setSettingsOpen(false);
     };
 
@@ -107,7 +112,13 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
         : "w-80 flex-shrink-0 h-full";
 
     return (
-        <div className="flex flex-col gap-4 p-4 border rounded-xl bg-background/40 backdrop-blur-sm shadow-sm relative group/dash">
+        <div
+            className="flex flex-col gap-4 p-4 border rounded-xl backdrop-blur-sm shadow-sm relative group/dash transition-colors duration-500"
+            style={{
+                borderColor: dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' ? chroma(dashboard.backgroundColor).alpha(0.3).css() : 'hsl(var(--border))',
+                backgroundColor: dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' ? chroma(dashboard.backgroundColor).alpha(0.15).css() : 'bg-background/40'
+            }}
+        >
             {/* Dashboard Header */}
             <div className="flex items-center justify-between pb-2 border-b border-border/50">
                 <div className="flex items-center gap-4">
@@ -186,6 +197,26 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                                                 if (trip.endDate && date > new Date(trip.endDate)) return true;
                                                 return false;
                                             }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-medium text-muted-foreground">Background Color</Label>
+                                    <div className="flex items-center gap-3">
+                                        <ColorPicker
+                                            color={editBackgroundColor}
+                                            onChange={setEditBackgroundColor}
+                                            trigger={
+                                                <Button variant="outline" className="w-full justify-start gap-2 bg-white/5 border-white/10 hover:bg-white/10 text-left font-normal text-muted-foreground hover:text-white">
+                                                    <div
+                                                        className="w-4 h-4 rounded-full border border-white/20"
+                                                        style={{ backgroundColor: editBackgroundColor === 'transparent' ? 'transparent' : editBackgroundColor }}
+                                                    />
+                                                    {editBackgroundColor === 'transparent' ? 'No Color' : ''}
+                                                    <Palette className="w-4 h-4 ml-auto opacity-50" />
+                                                </Button>
+                                            }
                                         />
                                     </div>
                                 </div>

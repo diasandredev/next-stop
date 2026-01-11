@@ -1,4 +1,5 @@
 import { Card as CardType } from '@/types/kanban';
+import chroma from 'chroma-js';
 
 import { Check, Circle, MapPin } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
@@ -35,7 +36,10 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
     }
   });
 
-  const customStyle = (card.color && card.color !== 'transparent') ? { backgroundColor: card.color } : {};
+  const customStyle = (card.color && card.color !== 'transparent') ? {
+    backgroundColor: chroma(card.color).alpha(0.2).css(),
+    borderColor: chroma(card.color).alpha(0.3).css()
+  } : {};
 
   const style = {
     transform: CSS.Transform.toString(transform),

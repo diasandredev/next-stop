@@ -65,6 +65,7 @@ export interface Dashboard {
   name: string;
   days: number; // Default 7 if undefined
   startDate?: string; // ISO Date string
+  backgroundColor?: string; // Hex color for dashboard background
   createdAt?: string;
 }
 

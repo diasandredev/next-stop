@@ -26,6 +26,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ColorPicker } from './ColorPicker';
+import { TimePicker } from './TimePicker';
 import { EmojiPicker } from './EmojiPicker';
 import { createGoogleMapsLocationUrl } from '@/utils/googleMapsUtils';
 
@@ -127,17 +128,14 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
 
               <div className="w-px h-4 bg-white/10 mx-2" />
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="time"
-                  value={time}
-                  onChange={(e) => {
-                    setTime(e.target.value);
-                    dirtyRef.current = true;
-                  }}
-                  className="bg-transparent border-none text-sm font-medium focus:ring-0 px-1 w-[85px] text-muted-foreground hover:text-white transition-colors [color-scheme:dark]"
-                />
-              </div>
+              <TimePicker
+                time={time}
+                onChange={(newTime) => {
+                  setTime(newTime);
+                  dirtyRef.current = true;
+                }}
+                className="px-1 w-auto"
+              />
             </div>
             <div className="flex items-center gap-1">
               <Tooltip>
@@ -263,7 +261,7 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                   setDescription(e.target.value);
                   dirtyRef.current = true;
                 }}
-                className="bg-transparent border-none resize-none focus-visible:ring-0 p-0 min-h-[100px] text-xl text-muted-foreground"
+                className="bg-transparent border-none resize-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 min-h-[100px] text-xl text-muted-foreground"
                 placeholder="Add some extra notes here..."
               />
             </div>
