@@ -72,5 +72,6 @@ export interface AccountSettings {
   defaultTripId: string;
   timezone?: string;
   customColors?: string[];
+  recentIcons?: string[];
 }
 

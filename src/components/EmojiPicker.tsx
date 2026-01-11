@@ -4,8 +4,9 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-import { Smile, X, Plane, UtensilsCrossed, Sparkles, TreePine, Clock, Heart, Building, Music, Gamepad2 } from 'lucide-react';
-import { useState } from 'react';
+import { Smile, X, Plane, UtensilsCrossed, Sparkles, TreePine, Clock, Heart, Building, Music, Gamepad2, History } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useKanban } from '@/contexts/KanbanContext';
 
 interface EmojiPickerProps {
     value?: string;
@@ -126,11 +127,23 @@ const CATEGORY_KEYS = Object.keys(EMOJI_CATEGORIES);
 
 export const EmojiPicker = ({ value, onChange, triggerClassName = '' }: EmojiPickerProps) => {
     const [open, setOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState(CATEGORY_KEYS[0]);
+    // Initialize active tab to 'recentes'
+    const [activeTab, setActiveTab] = useState('recentes');
+    const { accountSettings, updateAccountSettings } = useKanban();
+
+    const recentIcons = accountSettings?.recentIcons || [];
 
     const handleSelect = (emoji: string) => {
         onChange(emoji);
         setOpen(false);
+
+        // Update Recent Icons (MRU - Most Recently Used)
+        const newRecents = [emoji, ...recentIcons.filter(e => e !== emoji)].slice(0, 40);
+
+        // Only update if changed (optimization)
+        if (JSON.stringify(newRecents) !== JSON.stringify(recentIcons)) {
+            updateAccountSettings({ recentIcons: newRecents });
+        }
     };
 
     const handleClear = () => {
@@ -176,6 +189,21 @@ export const EmojiPicker = ({ value, onChange, triggerClassName = '' }: EmojiPic
 
                 {/* Tab Navigation */}
                 <div className="flex border-b border-white/10 px-1 py-1 gap-0.5 overflow-x-auto scrollbar-hide">
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('recentes')}
+                        className={`
+                        p-1.5 rounded-md transition-colors shrink-0
+                        ${activeTab === 'recentes'
+                                ? 'bg-white/15 text-white'
+                                : 'text-muted-foreground hover:bg-white/5 hover:text-white'
+                            }
+                        `}
+                        title="Recentes"
+                    >
+                        <History className="w-4 h-4" />
+                    </button>
+
                     {CATEGORY_KEYS.map((key) => (
                         <button
                             key={key}
@@ -201,7 +229,7 @@ export const EmojiPicker = ({ value, onChange, triggerClassName = '' }: EmojiPic
                     onWheel={(e) => e.stopPropagation()}
                 >
                     <div className="grid grid-cols-8 gap-0.5">
-                        {EMOJI_CATEGORIES[activeTab].emojis.map((emoji, idx) => (
+                        {(activeTab === 'recentes' ? recentIcons : EMOJI_CATEGORIES[activeTab].emojis).map((emoji, idx) => (
                             <button
                                 key={`${emoji}-${idx}`}
                                 type="button"
@@ -216,11 +244,17 @@ export const EmojiPicker = ({ value, onChange, triggerClassName = '' }: EmojiPic
                             </button>
                         ))}
                     </div>
+                    {activeTab === 'recentes' && recentIcons.length === 0 && (
+                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-xs gap-2">
+                            <History className="w-8 h-8 opacity-20" />
+                            <span className="opacity-50">Sem ícones recentes</span>
+                        </div>
+                    )}
                 </div>
 
                 {/* Footer - Category Label */}
                 <div className="px-3 py-1.5 border-t border-white/10 text-xs text-muted-foreground">
-                    {EMOJI_CATEGORIES[activeTab].label}
+                    {activeTab === 'recentes' ? 'Recentes' : EMOJI_CATEGORIES[activeTab].label}
                 </div>
             </PopoverContent>
         </Popover>
