@@ -20,6 +20,7 @@ import { DatePicker } from './DatePicker';
 import { DateRangePicker } from './DateRangePicker';
 import { ConfirmDialog } from './ConfirmDialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
 
 interface DashboardViewProps {
     dashboard: Dashboard;
@@ -36,9 +37,9 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
 
     // Settings State
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
     const [editDays, setEditDays] = useState(dashboard.days);
     const [editStartDate, setEditStartDate] = useState(dashboard.startDate || trip.startDate || new Date().toISOString());
-    const [editBackgroundColor, setEditBackgroundColor] = useState(dashboard.backgroundColor || 'transparent');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Calculate dates
@@ -61,10 +62,8 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
     const handleSettingsSave = () => {
         updateDashboard(dashboard.id, {
             days: editDays,
-            startDate: editStartDate,
-            backgroundColor: editBackgroundColor
+            startDate: editStartDate
         });
-        setSettingsOpen(false);
         setSettingsOpen(false);
     };
 
@@ -139,12 +138,32 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                             {dashboard.name}
                         </h2>
                     )}
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                    <span 
+                        className={`text-xs px-2 py-1 rounded-full ${!dashboard.backgroundColor || dashboard.backgroundColor === 'transparent' ? 'text-muted-foreground bg-muted' : ''}`}
+                        style={dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' ? {
+                            backgroundColor: chroma(dashboard.backgroundColor).alpha(0.5).css(),
+                            color: chroma(dashboard.backgroundColor).luminance() > 0.5 ? '#1a1a1a' : '#ffffff'
+                        } : undefined}
+                    >
                         {format(dates[0], 'MMM d')} - {format(dates[dates.length - 1], 'MMM d')}
                     </span>
                 </div>
 
-                <div className="flex items-center gap-2 opacity-0 group-hover/dash:opacity-100 transition-opacity">
+                <div className={cn("flex items-center gap-2 transition-opacity", (settingsOpen || isColorPickerOpen) ? "opacity-100" : "opacity-0 group-hover/dash:opacity-100")}>
+                    <ColorPicker
+                        open={isColorPickerOpen}
+                        onOpenChange={setIsColorPickerOpen}
+                        color={dashboard.backgroundColor || 'transparent'}
+                        onChange={(color) => updateDashboard(dashboard.id, { backgroundColor: color })}
+                        trigger={
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                                <div 
+                                    className="w-4 h-4 rounded-full border border-current/50" 
+                                    style={{ backgroundColor: dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' ? dashboard.backgroundColor : 'transparent' }}
+                                />
+                            </Button>
+                        }
+                    />
                     <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
                         <DialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
@@ -197,26 +216,6 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                                                 if (trip.endDate && date > new Date(trip.endDate)) return true;
                                                 return false;
                                             }}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-medium text-muted-foreground">Background Color</Label>
-                                    <div className="flex items-center gap-3">
-                                        <ColorPicker
-                                            color={editBackgroundColor}
-                                            onChange={setEditBackgroundColor}
-                                            trigger={
-                                                <Button variant="outline" className="w-full justify-start gap-2 bg-white/5 border-white/10 hover:bg-white/10 text-left font-normal text-muted-foreground hover:text-white">
-                                                    <div
-                                                        className="w-4 h-4 rounded-full border border-white/20"
-                                                        style={{ backgroundColor: editBackgroundColor === 'transparent' ? 'transparent' : editBackgroundColor }}
-                                                    />
-                                                    {editBackgroundColor === 'transparent' ? 'No Color' : ''}
-                                                    <Palette className="w-4 h-4 ml-auto opacity-50" />
-                                                </Button>
-                                            }
                                         />
                                     </div>
                                 </div>

@@ -11,13 +11,20 @@ interface ColorPickerProps {
     onChange: (color: string) => void;
     className?: string;
     trigger?: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
-export function ColorPicker({ color, onChange, className, trigger }: ColorPickerProps) {
+export function ColorPicker({ color, onChange, className, trigger, open: controlledOpen, onOpenChange: setControlledOpen }: ColorPickerProps) {
     const { accountSettings, addCustomColor } = useKanban();
     const [view, setView] = useState<'picker' | 'add'>('picker');
     const [newColor, setNewColor] = useState('#FFFFFF');
-    const [open, setOpen] = useState(false);
+    const [internalOpen, setInternalOpen] = useState(false);
+
+    const isControlled = controlledOpen !== undefined;
+    const open = isControlled ? controlledOpen : internalOpen;
+    const setOpen = isControlled ? setControlledOpen! : setInternalOpen;
+
 
     // Curated vibrant colors that look good with transparency
     const defaultColors = [
@@ -146,7 +153,7 @@ export function ColorPicker({ color, onChange, className, trigger }: ColorPicker
                 <PopoverTrigger asChild>
                     {trigger}
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 border-white/10 bg-[#0a0a0a]/95 backdrop-blur-xl rounded-xl shadow-2xl" sideOffset={5}>
+                <PopoverContent className="w-auto p-0 border-white/10 bg-[#0a0a0a]/95 backdrop-blur-xl rounded-xl shadow-2xl" sideOffset={5} align="end" collisionPadding={16}>
                     <ColorGrid />
                 </PopoverContent>
             </Popover>
