@@ -3,7 +3,7 @@ import { Card, Dashboard, Trip } from '@/types/kanban';
 import { DayColumn } from './DayColumn';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Trash2, X, Palette, Settings } from 'lucide-react';
+import { Trash2, X, Palette, Settings, Pencil, Calendar, Wallet } from 'lucide-react';
 import { useKanban } from '@/contexts/KanbanContext';
 import chroma from 'chroma-js';
 import { ColorPicker } from './ColorPicker';
@@ -21,6 +21,8 @@ import { DateRangePicker } from './DateRangePicker';
 import { ConfirmDialog } from './ConfirmDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+
+import { getCurrencySymbol } from '@/utils/currency';
 
 interface DashboardViewProps {
     dashboard: Dashboard;
@@ -103,6 +105,19 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
 
     const totalColumns = dates.length;
 
+    // Calculate total trip cost across all cards in this dashboard
+    const tripTotalCost = cards.reduce((acc, card) => {
+        // Filter out cards not in this dashboard (already filtered in props usually, but good to be safe if passed raw)
+        // Check if card belongs to visible dates? Or just all cards in dashboard?
+        // Usually cards passed here are all cards. Let's filter by dashboardId if needed.
+        if (card.dashboardId === dashboard.id && card.cost && !card.completed) {
+            const currency = card.currency || 'USD';
+            acc[currency] = (acc[currency] || 0) + card.cost;
+        }
+        return acc;
+    }, {} as Record<string, number>);
+
+
     // Width logic: if <= 5 columns, fill space (fluid). If > 5, fixed width (scroll).
     const isFluid = totalColumns <= 5;
     const containerClass = isFluid ? "flex gap-4 w-full h-full" : "flex gap-4 min-w-max h-full";
@@ -119,8 +134,9 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
             }}
         >
             {/* Dashboard Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-border/50">
-                <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between gap-4 pb-6 pt-2 border-b border-white/10">
+                {/* Left Side: Title */}
+                <div className="flex items-center gap-2 group/title flex-1 min-w-0">
                     {isEditingName ? (
                         <Input
                             value={name}
@@ -128,133 +144,162 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                             onBlur={handleNameSave}
                             onKeyDown={(e) => e.key === 'Enter' && handleNameSave()}
                             autoFocus
-                            className="text-xl font-bold h-9 w-64 bg-background"
+                            className="text-3xl md:text-3xl font-bold h-auto w-full bg-transparent border-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground shadow-none tracking-tight"
                         />
                     ) : (
-                        <h2
+                        <div 
                             onClick={() => setIsEditingName(true)}
-                            className="text-xl font-bold cursor-pointer hover:underline decoration-dashed underline-offset-4"
+                            className="flex items-center gap-3 cursor-pointer select-none min-w-0"
                         >
-                            {dashboard.name}
-                        </h2>
+                            <h2 className="text-3xl font-bold tracking-tight text-foreground truncate">
+                                {dashboard.name}
+                            </h2>
+                            <Pencil className="w-4 h-4 text-muted-foreground/50 opacity-0 -translate-x-2 group-hover/title:opacity-100 group-hover/title:translate-x-0 transition-all duration-200 flex-shrink-0 mt-1" />
+                        </div>
                     )}
-                    <span 
-                        className={`text-xs px-2 py-1 rounded-full ${!dashboard.backgroundColor || dashboard.backgroundColor === 'transparent' ? 'text-muted-foreground bg-muted' : ''}`}
-                        style={dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' ? {
-                            backgroundColor: chroma(dashboard.backgroundColor).alpha(0.5).css(),
-                            color: chroma(dashboard.backgroundColor).luminance() > 0.5 ? '#1a1a1a' : '#ffffff'
-                        } : undefined}
-                    >
-                        {format(dates[0], 'MMM d')} - {format(dates[dates.length - 1], 'MMM d')}
-                    </span>
                 </div>
 
-                <div className={cn("flex items-center gap-2 transition-opacity", (settingsOpen || isColorPickerOpen) ? "opacity-100" : "opacity-0 group-hover/dash:opacity-100")}>
-                    <ColorPicker
-                        open={isColorPickerOpen}
-                        onOpenChange={setIsColorPickerOpen}
-                        color={dashboard.backgroundColor || 'transparent'}
-                        onChange={(color) => updateDashboard(dashboard.id, { backgroundColor: color })}
-                        trigger={
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                                <div 
-                                    className="w-4 h-4 rounded-full border border-current/50" 
-                                    style={{ backgroundColor: dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' ? dashboard.backgroundColor : 'transparent' }}
-                                />
-                            </Button>
-                        }
-                    />
-                    <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-                        <DialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                                <Settings className="h-4 w-4" />
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
-                            <DialogTitle className="sr-only">Dashboard Settings</DialogTitle>
+                {/* Right Side: Metadata & Actions */}
+                <div className="flex items-center gap-6 flex-shrink-0">
+                     {/* Metadata: Dates & Cost */}
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground/80 hidden sm:flex">
+                        {/* Dates */}
+                        <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 opacity-70" />
+                            <span className="font-medium whitespace-nowrap">
+                                {format(dates[0], 'MMM d')} - {format(dates[dates.length - 1], 'MMM d')}
+                            </span>
+                        </div>
 
-                            <div className="flex items-center justify-between mb-6">
-                                <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                                    {dashboard.name}
-                                    <Settings className="w-4 h-4 text-muted-foreground" />
-                                </DialogTitle>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => setSettingsOpen(false)}>
-                                    <span className="sr-only">Close</span>
-                                    <X className="w-4 h-4" />
-                                </Button>
-                            </div>
-
-                            <div className="space-y-4 mb-6">
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-medium text-muted-foreground">Travel Dates</Label>
-                                    <div className="bg-white/5 p-1 pl-3 rounded-xl flex items-center gap-2 relative">
-                                        <DateRangePicker
-                                            date={{
-                                                from: editStartDate ? new Date(editStartDate) : undefined,
-                                                to: editStartDate && editDays ? addDays(new Date(editStartDate), editDays - 1) : undefined
-                                            }}
-                                            setDate={(range) => {
-                                                if (range?.from) {
-                                                    setEditStartDate(range.from.toISOString());
-                                                    if (range.to) {
-                                                        const diffTime = Math.abs(range.to.getTime() - range.from.getTime());
-                                                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                                                        setEditDays(diffDays);
-                                                    } else {
-                                                        setEditDays(1);
-                                                    }
-                                                } else {
-                                                    setEditStartDate('');
-                                                    setEditDays(1);
-                                                }
-                                            }}
-                                            fromDate={trip.startDate ? new Date(trip.startDate) : undefined}
-                                            toDate={trip.endDate ? new Date(trip.endDate) : undefined}
-                                            disabled={(date) => {
-                                                // Optional: Stronger validation
-                                                if (trip.startDate && date < new Date(trip.startDate)) return true;
-                                                if (trip.endDate && date > new Date(trip.endDate)) return true;
-                                                return false;
-                                            }}
-                                        />
+                        {/* Cost */}
+                        {Object.keys(tripTotalCost).length > 0 && (
+                            <>
+                                <div className="w-1 h-1 rounded-full bg-white/20" /> {/* Separator Dot */}
+                                <div className="flex items-center gap-2">
+                                    <Wallet className="w-4 h-4 opacity-70" />
+                                    <div className="flex items-center gap-3">
+                                        {Object.entries(tripTotalCost).map(([curr, amount]) => (
+                                            <div key={curr} className="flex items-baseline gap-1">
+                                                <span className="text-xs font-medium opacity-70">{getCurrencySymbol(curr)}</span>
+                                                <span className="font-bold font-mono">
+                                                    {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)}
+                                                </span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
-                            </div>
+                            </>
+                        )}
+                    </div>
 
-                            <div className="flex items-center justify-between">
-                                <Button
-                                    onClick={handleSettingsSave}
-                                    className="bg-[#304D73] hover:bg-[#264059] text-white rounded-full h-10 px-6 font-medium"
-                                >
-                                    Save
+                    {/* Actions */}
+                    <div className={cn("flex items-center gap-1 transition-opacity", (settingsOpen || isColorPickerOpen) ? "opacity-100" : "opacity-0 group-hover/dash:opacity-100")}>
+                        <ColorPicker
+                            open={isColorPickerOpen}
+                            onOpenChange={setIsColorPickerOpen}
+                            color={dashboard.backgroundColor || 'transparent'}
+                            onChange={(color) => updateDashboard(dashboard.id, { backgroundColor: color })}
+                            trigger={
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                                    <div 
+                                        className="w-4 h-4 rounded-full border border-current/50" 
+                                        style={{ backgroundColor: dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' ? dashboard.backgroundColor : 'transparent' }}
+                                    />
                                 </Button>
+                            }
+                        />
+                        <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                                    <Settings className="h-4 w-4" />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
+                                <DialogTitle className="sr-only">Dashboard Settings</DialogTitle>
 
-                                {trip.ownerId === user?.uid && (
-                                    <Button
-                                        variant="ghost"
-                                        onClick={() => setShowDeleteConfirm(true)}
-                                        className="text-red-400 hover:bg-red-400/10 hover:text-red-400 gap-2 rounded-full"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                        Delete Dashboard
+                                <div className="flex items-center justify-between mb-6">
+                                    <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                                        {dashboard.name}
+                                        <Settings className="w-4 h-4 text-muted-foreground" />
+                                    </DialogTitle>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => setSettingsOpen(false)}>
+                                        <span className="sr-only">Close</span>
+                                        <X className="w-4 h-4" />
                                     </Button>
-                                )}
-                            </div>
+                                </div>
 
-                            <ConfirmDialog
-                                open={showDeleteConfirm}
-                                onOpenChange={setShowDeleteConfirm}
-                                title="Delete Dashboard?"
-                                description="Delete this dashboard? Cards will be hidden/lost properly unless moved."
-                                onConfirm={() => {
-                                    deleteDashboard(dashboard.id);
-                                    setSettingsOpen(false); // Close settings dialog too if needed, though delete probably unmounts component
-                                }}
-                                confirmText="Delete"
-                                variant="destructive"
-                            />
-                        </DialogContent>
-                    </Dialog>
+                                <div className="space-y-4 mb-6">
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-medium text-muted-foreground">Travel Dates</Label>
+                                        <div className="bg-white/5 p-1 pl-3 rounded-xl flex items-center gap-2 relative">
+                                            <DateRangePicker
+                                                date={{
+                                                    from: editStartDate ? new Date(editStartDate) : undefined,
+                                                    to: editStartDate && editDays ? addDays(new Date(editStartDate), editDays - 1) : undefined
+                                                }}
+                                                setDate={(range) => {
+                                                    if (range?.from) {
+                                                        setEditStartDate(range.from.toISOString());
+                                                        if (range.to) {
+                                                            const diffTime = Math.abs(range.to.getTime() - range.from.getTime());
+                                                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                                                            setEditDays(diffDays);
+                                                        } else {
+                                                            setEditDays(1);
+                                                        }
+                                                    } else {
+                                                        setEditStartDate('');
+                                                        setEditDays(1);
+                                                    }
+                                                }}
+                                                fromDate={trip.startDate ? new Date(trip.startDate) : undefined}
+                                                toDate={trip.endDate ? new Date(trip.endDate) : undefined}
+                                                disabled={(date) => {
+                                                    // Optional: Stronger validation
+                                                    if (trip.startDate && date < new Date(trip.startDate)) return true;
+                                                    if (trip.endDate && date > new Date(trip.endDate)) return true;
+                                                    return false;
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <Button
+                                        onClick={handleSettingsSave}
+                                        className="bg-[#304D73] hover:bg-[#264059] text-white rounded-full h-10 px-6 font-medium"
+                                    >
+                                        Save
+                                    </Button>
+
+                                    {trip.ownerId === user?.uid && (
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => setShowDeleteConfirm(true)}
+                                            className="text-red-400 hover:bg-red-400/10 hover:text-red-400 gap-2 rounded-full"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                            Delete Dashboard
+                                        </Button>
+                                    )}
+                                </div>
+
+                                <ConfirmDialog
+                                    open={showDeleteConfirm}
+                                    onOpenChange={setShowDeleteConfirm}
+                                    title="Delete Dashboard?"
+                                    description="Delete this dashboard? Cards will be hidden/lost properly unless moved."
+                                    onConfirm={() => {
+                                        deleteDashboard(dashboard.id);
+                                        setSettingsOpen(false); // Close settings dialog too if needed, though delete probably unmounts component
+                                    }}
+                                    confirmText="Delete"
+                                    variant="destructive"
+                                />
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </div>
             </div>
 
@@ -266,13 +311,14 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                         const dateStr = date.toISOString().split('T')[0];
                         return (
                             <div key={dateStr} className={columnClass}>
-                                <DayColumn
+                                    <DayColumn
                                     dashboardId={dashboard.id}
                                     date={date}
                                     cards={cards.filter(c => c.date === dateStr)}
                                     isCurrentDay={dateStr === today}
                                     minSlots={unifiedMinSlots}
                                     isWeekend={date.getDay() === 0 || date.getDay() === 6} // Just styling
+                                    dashboardColor={dashboard.backgroundColor}
                                 />
                             </div>
                         );

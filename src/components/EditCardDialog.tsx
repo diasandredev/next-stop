@@ -29,6 +29,8 @@ import { ColorPicker } from './ColorPicker';
 import { TimePicker } from './TimePicker';
 import { EmojiPicker } from './EmojiPicker';
 import { createGoogleMapsLocationUrl } from '@/utils/googleMapsUtils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DollarSign } from 'lucide-react';
 
 interface EditCardDialogProps {
   open: boolean;
@@ -43,6 +45,8 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
   const [description, setDescription] = useState(card.description || '');
   const [color, setColor] = useState(card.color || 'transparent');
   const [time, setTime] = useState(card.time || '');
+  const [cost, setCost] = useState(card.cost?.toString() || '');
+  const [currency, setCurrency] = useState(card.currency || 'USD');
   const [location, setLocation] = useState(card.location);
 
   // Ref to track if we need to save on close
@@ -55,6 +59,8 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
       setDescription(card.description || '');
       setColor(card.color || 'transparent');
       setTime(card.time || '');
+      setCost(card.cost?.toString() || '');
+      setCurrency(card.currency || 'USD');
       setLocation(card.location);
       dirtyRef.current = false;
     }
@@ -68,6 +74,8 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
         description,
         color,
         time,
+        cost: cost ? parseFloat(cost) : undefined,
+        currency,
         location,
       };
       updateCard(card.id, updates);
@@ -136,6 +144,46 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                 }}
                 className="px-1 w-auto"
               />
+
+              <div className="w-px h-4 bg-white/10 mx-2" />
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="justify-start text-left font-medium p-2 text-base h-auto hover:bg-white/5 hover:text-white transition-all duration-200 hover:pl-4 hover:pr-4 focus:outline-none text-muted-foreground px-1 w-auto"
+                  >
+                    <DollarSign className="mr-2 h-4 w-4 opacity-50" />
+                    {cost ? (
+                      <span>{currency} {cost}</span>
+                    ) : (
+                      <span>--</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-3 bg-[#1a1a1a] border-white/10 shadow-2xl rounded-xl text-white" align="start">
+                  <div className="flex gap-2">
+                     <Select value={currency} onValueChange={(v) => { setCurrency(v); dirtyRef.current = true; }}>
+                        <SelectTrigger className="w-[80px] h-9 text-sm bg-[#252525] border-white/10">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#252525] border-white/10 text-white">
+                            <SelectItem value="USD">USD</SelectItem>
+                            <SelectItem value="EUR">EUR</SelectItem>
+                            <SelectItem value="BRL">BRL</SelectItem>
+                            <SelectItem value="GBP">GBP</SelectItem>
+                        </SelectContent>
+                     </Select>
+                     <Input
+                        type="number"
+                        value={cost}
+                        onChange={(e) => { setCost(e.target.value); dirtyRef.current = true; }}
+                        className="h-9 w-[100px] text-sm bg-[#252525] border-white/10 focus-visible:ring-0"
+                        placeholder="0.00"
+                     />
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="flex items-center gap-1">
               <Tooltip>

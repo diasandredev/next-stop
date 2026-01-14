@@ -303,7 +303,7 @@ const Board = () => {
                     {currentTrip ? currentTrip.name : 'Select a Trip'}
                   </h1>
                   {currentTrip?.startDate && (
-                    <div className="flex items-center gap-2 bg-secondary/60 text-secondary-foreground px-3 py-1.5 rounded-full border border-border/50">
+                    <div className="flex items-center gap-2 bg-secondary/60 text-secondary-foreground h-8 px-3 rounded-lg border border-border/50">
                       <Calendar className="w-4 h-4 text-primary" />
                       <span className="text-sm font-medium">
                         {formatInTimeZone(new Date(currentTrip.startDate), timeZone, 'MMM d')}

@@ -18,6 +18,11 @@ export interface Card {
   completed?: boolean; // Task completion status
   completedAt?: string; // ISO date string when task was completed
   time?: string; // Optional time for the card (HH:mm)
+  
+  // Cost tracking
+  cost?: number;
+  currency?: string;
+
   createdAt: string;
   dashboardId?: string;
 

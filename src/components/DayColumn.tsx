@@ -11,6 +11,8 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from './ui/t
 import { EmojiPicker } from './EmojiPicker';
 import { createGoogleMapsRouteUrl } from '@/utils/googleMapsUtils';
 import { CustomRouteDialog } from './CustomRouteDialog';
+import { getCurrencySymbol } from '@/utils/currency';
+import chroma from 'chroma-js';
 
 interface DayColumnProps {
   dashboardId: string;
@@ -20,6 +22,7 @@ interface DayColumnProps {
   isWeekend?: boolean;
   minSlots: number;
   headerHeight?: string;
+  dashboardColor?: string;
 }
 
 export const DayColumn = ({
@@ -29,7 +32,8 @@ export const DayColumn = ({
   isCurrentDay,
   isWeekend = false,
   minSlots,
-  headerHeight = 'h-12'
+  headerHeight = 'h-12',
+  dashboardColor
 }: DayColumnProps) => {
   const { addCard } = useKanban();
   const [isAdding, setIsAdding] = useState(false);
@@ -95,6 +99,15 @@ export const DayColumn = ({
     }
   };
 
+  // Calculate total cost
+  const totalCost = cards.reduce((acc, card) => {
+    if (card.cost && !card.completed) {
+      const currency = card.currency || 'USD';
+      acc[currency] = (acc[currency] || 0) + card.cost;
+    }
+    return acc;
+  }, {} as Record<string, number>);
+
   const MIN_SLOTS = minSlots;
 
   // Filter cards
@@ -103,12 +116,35 @@ export const DayColumn = ({
 
   return (
     <div className={`${isWeekend ? 'flex-none w-full md:w-auto' : 'w-full md:flex-1'} min-w-0 flex flex-col overflow-hidden`}>
-      <div className={`${headerHeight} border-b-2 ${isCurrentDay ? 'border-primary' : 'border-white'} relative z-[1] flex-shrink-0 flex items-end px-1 pb-1`}>
+      <div className={`${headerHeight} border-b-2 ${isCurrentDay ? 'border-primary' : 'border-white'} relative z-[1] flex-shrink-0 flex items-end px-1 pb-1 group/header`}>
         <div className="flex items-center justify-between w-full">
           <div className={`text-2xl font-bold ${isCurrentDay ? 'text-primary' : 'text-white'}`}>
             {dayNumber} {monthName}
           </div>
           <div className="flex items-center gap-1">
+            {/* Daily Total Cost Display - Hover only */}
+            {Object.keys(totalCost).length > 0 && (
+               <div 
+                  className={`hidden sm:flex items-baseline gap-2 mr-1 px-2 py-0.5 rounded-md ${!dashboardColor || dashboardColor === 'transparent' ? 'bg-white/5 border border-white/5' : ''} opacity-0 -translate-x-2 group-hover/header:opacity-100 group-hover/header:translate-x-0 transition-all duration-300 ease-out`}
+                  style={dashboardColor && dashboardColor !== 'transparent' ? {
+                      backgroundColor: chroma(dashboardColor).alpha(0.5).css(),
+                      color: chroma(dashboardColor).luminance() > 0.5 ? '#1a1a1a' : '#ffffff'
+                  } : undefined}
+               >
+                  <span className="text-[9px] font-bold text-white uppercase tracking-wider">Total</span>
+                  <div className="flex gap-2">
+                    {Object.entries(totalCost).map(([curr, amount]) => (
+                        <div key={curr} className="flex items-baseline gap-1">
+                             <span className="text-[11px] font-bold text-white">{getCurrencySymbol(curr)}</span>
+                             <span className="text-[12px] font-bold text-white font-mono">
+                                {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)}
+                             </span>
+                        </div>
+                    ))}
+                  </div>
+               </div>
+            )}
+
             <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -162,6 +198,10 @@ export const DayColumn = ({
             <div className={`text-base capitalize ${isCurrentDay ? 'text-primary' : 'text-muted-foreground'}`}>{dayName}</div>
           </div>
         </div>
+        
+        {/* Daily Total Cost Display - Removed absolute positioning */}
+
+
       </div>
       <div
         ref={setNodeRef}

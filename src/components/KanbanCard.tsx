@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { EditCardDialog } from './EditCardDialog';
 import { useKanban } from '@/contexts/KanbanContext';
 import { OptionsCard } from './OptionsCard';
+import { getCurrencySymbol } from '@/utils/currency';
 
 interface KanbanCardProps {
   card: CardType;
@@ -15,6 +16,7 @@ interface KanbanCardProps {
   isNested?: boolean;
   className?: string;
 }
+
 
 export const KanbanCard = ({ card, childrenCards = [], isNested = false, className = '' }: KanbanCardProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -108,6 +110,11 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
           </span>
           {card.location && (
             <MapPin className="w-3 h-3 text-white/70 ml-1.5 shrink-0" />
+          )}
+          {card.cost !== undefined && (
+            <span className={`text-white/80 font-normal ml-2 opacity-80 ${isNested ? 'text-[10px]' : 'text-xs'}`}>
+              {getCurrencySymbol(card.currency)} {card.cost}
+            </span>
           )}
         </div>
 
