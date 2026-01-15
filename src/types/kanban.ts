@@ -39,9 +39,16 @@ export interface Card {
     lng: number;
     placeId: string;
   };
+
+  // Checklist
+  checklist?: ChecklistItem[];
 }
 
-
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
 
 export interface WeekData {
   startDate: Date;

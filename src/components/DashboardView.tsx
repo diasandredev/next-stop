@@ -134,7 +134,7 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
             }}
         >
             {/* Dashboard Header */}
-            <div className="flex items-center justify-between gap-4 pb-6 pt-2 border-b border-white/10">
+            <div className="flex items-center justify-between gap-4 pb-6 pt-2 border-b border-white/10 group/header">
                 {/* Left Side: Title */}
                 <div className="flex items-center gap-2 group/title flex-1 min-w-0">
                     {isEditingName ? (
@@ -193,7 +193,7 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                     </div>
 
                     {/* Actions */}
-                    <div className={cn("flex items-center gap-1 transition-opacity", (settingsOpen || isColorPickerOpen) ? "opacity-100" : "opacity-0 group-hover/dash:opacity-100")}>
+                    <div className="flex items-center gap-1">
                         <ColorPicker
                             open={isColorPickerOpen}
                             onOpenChange={setIsColorPickerOpen}

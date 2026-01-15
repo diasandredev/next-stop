@@ -1,7 +1,7 @@
 import { Card as CardType } from '@/types/kanban';
 import chroma from 'chroma-js';
 
-import { Check, Circle, MapPin } from 'lucide-react';
+import { Check, Circle, MapPin, CheckSquare } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
@@ -113,8 +113,16 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
           )}
           {card.cost !== undefined && (
             <span className={`text-white/80 font-normal ml-2 opacity-80 ${isNested ? 'text-[10px]' : 'text-xs'}`}>
-              {getCurrencySymbol(card.currency)} {card.cost}
+              {getCurrencySymbol(card.currency)} {card.cost.toFixed(2).replace('.', ',')}
             </span>
+          )}
+          {card.checklist && card.checklist.length > 0 && (
+            <div className={`flex items-center gap-1 ml-2 opacity-80 ${isNested ? 'text-[10px]' : 'text-xs'}`}>
+               <CheckSquare className="w-3 h-3 text-white/70" />
+               <span className="text-white/80 font-normal">
+                 {card.checklist.filter(i => i.completed).length}/{card.checklist.length}
+               </span>
+            </div>
           )}
         </div>
 
