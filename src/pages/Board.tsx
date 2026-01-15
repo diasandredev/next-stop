@@ -397,7 +397,7 @@ const Board = () => {
                       <Button
                         variant="outline"
                         size="lg"
-                        className="w-full max-w-md border-dashed border-2 h-16 text-muted-foreground hover:text-primary hover:border-primary/50"
+                        className="w-full max-w-md border-dashed border-2 h-16 text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5"
                         onClick={() => {
                           // Logic moved to useDashboardOperations
                           addDashboard(currentTrip.id, `Dashboard ${tripDashboards.length + 1}`);
