@@ -100,7 +100,7 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
     dirtyRef.current = true;
   };
 
-  const handleLocationSelect = (newLocation: any) => {
+  const handleLocationSelect = (newLocation: NonNullable<Card['location']>) => {
     setLocation(newLocation);
     dirtyRef.current = true;
   };

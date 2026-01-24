@@ -4,9 +4,13 @@ import { useCardOperations } from './useCardOperations';
 import { Card } from '@/types/kanban';
 
 describe('useCardOperations', () => {
-    const mockSetCards = vi.fn();
-    const mockMarkDirty = vi.fn();
-    const currentCalendarId = 'calendar-1';
+    const mockSaveCard = vi.fn();
+    const mockDeleteCard = vi.fn();
+    const currentTripId = 'trip-1';
+    const initialCards: Card[] = [
+        { id: 'card-1', title: 'Card 1', createdAt: '2023-01-01' } as Card,
+        { id: 'card-2', title: 'Card 2', createdAt: '2023-01-02' } as Card
+    ];
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -14,72 +18,84 @@ describe('useCardOperations', () => {
         Object.defineProperty(global, 'crypto', {
             value: {
                 randomUUID: () => 'test-uuid'
-            }
+            },
+            writable: true
         });
     });
 
     it('should add a card', () => {
         const { result } = renderHook(() => useCardOperations({
-            setCards: mockSetCards,
-            currentCalendarId,
-            markDirty: mockMarkDirty
+            cards: initialCards,
+            userEmail: 'test@example.com',
+            saveCard: mockSaveCard,
+            deleteCard: mockDeleteCard,
+            currentTripId
         }));
 
-        const newCardData = { title: 'New Card', columnId: 'col1' } as any;
+        const newCardData = { title: 'New Card', columnId: 'col1' } as unknown as Card;
 
         act(() => {
             result.current.addCard(newCardData);
         });
 
-        expect(mockSetCards).toHaveBeenCalled();
-        expect(mockMarkDirty).toHaveBeenCalledWith('test-uuid', 'cards');
+        expect(mockSaveCard).toHaveBeenCalledWith(currentTripId, expect.objectContaining({
+            title: 'New Card',
+            id: 'test-uuid',
+            createdBy: 'test@example.com'
+        }));
     });
 
     it('should update a card', () => {
         const { result } = renderHook(() => useCardOperations({
-            setCards: mockSetCards,
-            currentCalendarId,
-            markDirty: mockMarkDirty
+            cards: initialCards,
+            userEmail: 'test@example.com',
+            saveCard: mockSaveCard,
+            deleteCard: mockDeleteCard,
+            currentTripId
         }));
 
         act(() => {
             result.current.updateCard('card-1', { title: 'Updated Title' });
         });
 
-        expect(mockSetCards).toHaveBeenCalled();
-        // We can't easily check the exact state update without a real state, 
-        // but we can verify the setter was called.
+        expect(mockSaveCard).toHaveBeenCalledWith(currentTripId, expect.objectContaining({
+            id: 'card-1',
+            title: 'Updated Title',
+            lastEditedBy: 'test@example.com'
+        }));
     });
 
     it('should delete a card', () => {
         const { result } = renderHook(() => useCardOperations({
-            setCards: mockSetCards,
-            currentCalendarId,
-            markDirty: mockMarkDirty
+            cards: initialCards,
+            userEmail: 'test@example.com',
+            saveCard: mockSaveCard,
+            deleteCard: mockDeleteCard,
+            currentTripId
         }));
 
         act(() => {
             result.current.deleteCard('card-1');
         });
 
-        expect(mockSetCards).toHaveBeenCalled();
-        expect(mockMarkDirty).toHaveBeenCalledWith('card-1', 'cards');
+        expect(mockDeleteCard).toHaveBeenCalledWith(currentTripId, 'card-1');
     });
 
     it('should delete all cards', () => {
         const { result } = renderHook(() => useCardOperations({
-            setCards: mockSetCards,
-            currentCalendarId,
-            markDirty: mockMarkDirty
+            cards: initialCards,
+            userEmail: 'test@example.com',
+            saveCard: mockSaveCard,
+            deleteCard: mockDeleteCard,
+            currentTripId
         }));
 
-        const cardsToDelete = [{ id: 'c1' }, { id: 'c2' }] as Card[];
-
         act(() => {
-            result.current.deleteAllCards(cardsToDelete);
+            result.current.deleteAllCards();
         });
 
-        expect(mockMarkDirty).toHaveBeenCalledTimes(2);
-        expect(mockSetCards).toHaveBeenCalledWith([]);
+        expect(mockDeleteCard).toHaveBeenCalledTimes(2);
+        expect(mockDeleteCard).toHaveBeenCalledWith(currentTripId, 'card-1');
+        expect(mockDeleteCard).toHaveBeenCalledWith(currentTripId, 'card-2');
     });
 });

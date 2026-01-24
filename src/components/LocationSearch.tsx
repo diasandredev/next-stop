@@ -11,9 +11,20 @@ import { MapPin, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
+interface GooglePlace {
+    id: string;
+    displayName: string;
+    formattedAddress: string;
+    location?: {
+        lat: (() => number) | number;
+        lng: (() => number) | number;
+    };
+}
+
 declare global {
     interface Window {
-        google: any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        google: any; // Keep any for simplicity as strictly typing the whole namespace is complex without types
     }
 }
 
@@ -33,7 +44,7 @@ export const LocationSearch = ({ onLocationSelect, defaultValue, className }: Lo
     const [open, setOpen] = useState(false);
     const [inputValue, setInputValue] = useState(defaultValue || "");
     const [isLoading, setIsLoading] = useState(false);
-    const [predictions, setPredictions] = useState<any[]>([]);
+    const [predictions, setPredictions] = useState<GooglePlace[]>([]);
 
     const handleSearch = (e?: React.MouseEvent | React.KeyboardEvent) => {
         // Prevent default if it's a form submission or similar
@@ -58,10 +69,10 @@ export const LocationSearch = ({ onLocationSelect, defaultValue, className }: Lo
             textQuery: inputValue,
             fields: ['id', 'displayName', 'formattedAddress', 'location'],
             maxResultCount: 5,
-        }).then(({ places }: { places: any[] }) => {
+        }).then(({ places }: { places: GooglePlace[] }) => {
             console.log("API Response places:", places);
             setPredictions(places);
-        }).catch((error: any) => {
+        }).catch((error: unknown) => {
             console.error("Search error:", error);
             setPredictions([]);
         }).finally(() => {
@@ -76,7 +87,7 @@ export const LocationSearch = ({ onLocationSelect, defaultValue, className }: Lo
         }
     };
 
-    const handleSelect = (place: any) => {
+    const handleSelect = (place: GooglePlace) => {
         if (!place) return;
 
         console.log("Selected place:", place);

@@ -200,7 +200,7 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                             color={dashboard.backgroundColor || 'transparent'}
                             onChange={(color) => updateDashboard(dashboard.id, { backgroundColor: color })}
                             trigger={
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/50">
                                     <div 
                                         className="w-4 h-4 rounded-full border border-current/50" 
                                         style={{ backgroundColor: dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' ? dashboard.backgroundColor : 'transparent' }}
@@ -210,12 +210,12 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                         />
                         <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
                             <DialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/50">
                                     <Settings className="h-4 w-4" />
                                 </Button>
                             </DialogTrigger>
                             <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
-                                <DialogTitle className="sr-only">Dashboard Settings</DialogTitle>
+                                <DialogTitle className="sr-only">City Settings</DialogTitle>
 
                                 <div className="flex items-center justify-between mb-6">
                                     <DialogTitle className="text-xl font-bold flex items-center gap-2">
@@ -280,7 +280,7 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                                             className="text-red-400 hover:bg-red-400/10 hover:text-red-400 gap-2 rounded-full"
                                         >
                                             <Trash2 className="w-4 h-4" />
-                                            Delete Dashboard
+                                            Delete City
                                         </Button>
                                     )}
                                 </div>
@@ -288,8 +288,8 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                                 <ConfirmDialog
                                     open={showDeleteConfirm}
                                     onOpenChange={setShowDeleteConfirm}
-                                    title="Delete Dashboard?"
-                                    description="Delete this dashboard? Cards will be hidden/lost properly unless moved."
+                                    title="Delete City?"
+                                    description="Delete this city? Cards will be hidden/lost properly unless moved."
                                     onConfirm={() => {
                                         deleteDashboard(dashboard.id);
                                         setSettingsOpen(false); // Close settings dialog too if needed, though delete probably unmounts component

@@ -29,14 +29,14 @@ interface NextStopDB extends DBSchema {
     };
     meta: {
         key: string;
-        value: any;
+        value: unknown;
     }
 }
 
 const DB_NAME = 'next-stop-db';
 const DB_VERSION = 4;
 
-let _dbPromise: Promise<NextStopDB> | null = null; // Type IDBPDatabase<NextStopDB> but Promise wrapper
+let _dbPromise: Promise<IDBPDatabase<NextStopDB>> | null = null;
 
 function getDB() {
     if (!_dbPromise) {
@@ -56,10 +56,14 @@ function getDB() {
 
                 if (oldVersion < 3) {
                     // Delete legacy stores
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     if (db.objectStoreNames.contains('extraColumns' as any)) {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         db.deleteObjectStore('extraColumns' as any);
                     }
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     if (db.objectStoreNames.contains('calendars' as any)) {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         db.deleteObjectStore('calendars' as any);
                     }
                 }
@@ -217,7 +221,7 @@ export const db = {
 
     // Meta
     async getLastTripId(): Promise<string | undefined> {
-        return (await getDB()).get('meta', 'currentTripId'); // renamed key
+        return (await getDB()).get('meta', 'currentTripId') as Promise<string | undefined>; // renamed key
     },
     async saveLastTripId(id: string): Promise<void> {
         await (await getDB()).put('meta', id, 'currentTripId');

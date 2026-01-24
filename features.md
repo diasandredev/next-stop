@@ -32,14 +32,14 @@ Compartilhar a viagem com quem não tem conta.
 - **Implementação:** Gerar link público readonly para um Board.
 - **UI:** Botão "Publicar" que gera uma URL compartilhável e uma view simplificada para visitantes.
 
-## 7. 📄 Exportar Relatório PDF
-Levar o roteiro impresso ou em PDF para segurança.
-- **Implementação:** Gerar um documento PDF formatado com cronograma, custos e checklists usando `jspdf` ou `react-pdf`.
-- **UI:** Botão "Exportar PDF" nas configurações da viagem.
-
 ---
 
 # ✅ Implementado
+
+## 📄 Exportar Relatório PDF
+Levar o roteiro impresso ou em PDF para segurança.
+- **Implementação:** Gerar um documento PDF formatado com cronograma, custos e checklists usando `jspdf` ou `react-pdf`.
+- **UI:** Botão "Exportar PDF" nas configurações da viagem.
 
 ## 💰 Gestão de Orçamento
 Atualmente, não há como rastrear custos. Adicionar um campo de valor em cada card permitiria uma visão financeira da viagem.

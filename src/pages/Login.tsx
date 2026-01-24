@@ -175,16 +175,17 @@ const Login = () => {
         toast.success('Login successful!');
       }
       navigate('/board');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       let message = isSignUp ? 'Error creating account' : 'Login failed';
-      if (error.code === 'auth/invalid-credential') {
+      const err = error as { code?: string };
+      if (err.code === 'auth/invalid-credential') {
         message = 'Invalid email or password';
-      } else if (error.code === 'auth/email-already-in-use') {
+      } else if (err.code === 'auth/email-already-in-use') {
         message = 'This email is already in use';
-      } else if (error.code === 'auth/weak-password') {
+      } else if (err.code === 'auth/weak-password') {
         message = 'Password must be at least 6 characters';
-      } else if (error.code === 'auth/too-many-requests') {
+      } else if (err.code === 'auth/too-many-requests') {
         message = 'Too many attempts. Please try again later.';
       }
       toast.error(message);
@@ -199,7 +200,7 @@ const Login = () => {
       await loginWithGoogle();
       navigate('/board');
       toast.success('Google login successful!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       toast.error('Google login failed');
     } finally {

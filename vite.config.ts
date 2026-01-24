@@ -13,6 +13,9 @@ export default defineConfig(() => ({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      workbox: {
+        maximumFileSizeToCacheInBytes: 5000000,
+      },
       includeAssets: ["favicon.png", "favicon1.png", "robots.txt", "placeholder.svg"],
       manifest: {
         name: "NextStop",

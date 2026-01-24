@@ -10,6 +10,7 @@ import {
     deleteDoc,
     getDocs,
     writeBatch,
+    deleteField,
     Unsubscribe,
     DocumentData
 } from 'firebase/firestore';
@@ -339,8 +340,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
     }, [unsubscribeFromTrip, state.trips, user?.uid]);
 
     const saveDashboard = useCallback(async (tripId: string, dashboard: Dashboard) => {
-        const dashboardData = { ...dashboard };
-        delete (dashboardData as any).tripId; // Don't duplicate tripId in subcollection
+        const { tripId: _, ...dashboardData } = dashboard;
         await setDoc(doc(db, `trips/${tripId}/dashboards`, dashboard.id), dashboardData, { merge: true });
     }, []);
 
@@ -390,8 +390,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         const dashboard = state.dashboards.find(d => d.id === dashboardId);
         if (!dashboard) return;
 
-        const groupData = { ...group };
-        delete (groupData as any).dashboardId; // Don't duplicate dashboardId in subcollection
+        const { dashboardId: _, ...groupData } = group;
         await setDoc(doc(db, `trips/${dashboard.tripId}/dashboards/${dashboardId}/groups`, group.id), groupData, { merge: true });
     }, [state.dashboards]);
 
@@ -404,12 +403,11 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
     }, [state.dashboards]);
 
     const saveCard = useCallback(async (tripId: string, card: Card) => {
-        const { deleteField } = await import('firebase/firestore');
-        const cardData: any = { ...card };
-        delete cardData.id; // Don't store id in document
+        const { id: _, ...cardRest } = card;
+        const cardData = cardRest as Record<string, unknown>;
 
         // Convert undefined values to deleteField() to remove them from Firestore
-        const updates: any = {};
+        const updates: Record<string, unknown> = {};
         Object.keys(cardData).forEach(key => {
             const value = cardData[key];
             if (value === undefined) {

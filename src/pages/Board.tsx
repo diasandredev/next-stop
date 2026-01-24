@@ -5,11 +5,19 @@ import { Button } from '@/components/ui/button';
 
 import { Sidebar } from '@/components/Sidebar';
 import { RightSidebar } from '@/components/RightSidebar';
-import { Calendar, Loader2, Plus, Settings, Users, PanelRight } from 'lucide-react';
+import { Calendar, Loader2, Plus, Settings, Users, PanelRight, FileDown, FileText } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Card, Trip } from '@/types/kanban';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { NewTripDialog } from '@/components/NewTripDialog';
 import { TripSettingsDialog } from '@/components/TripSettingsDialog';
 import { AccountSettingsDialog } from '@/components/AccountSettingsDialog';
@@ -17,6 +25,7 @@ import { ShareTripDialog } from '@/components/ShareTripDialog';
 import { formatInTimeZone } from 'date-fns-tz';
 import { DashboardView } from '@/components/DashboardView';
 import { NoTripsView } from '@/components/NoTripsView';
+import { generateTripPDF } from '@/utils/pdfExport';
 
 const Board = () => {
   const { logout, user } = useAuth();
@@ -260,6 +269,14 @@ const Board = () => {
     }
   };
 
+  const handleExportPDF = () => {
+    if (!currentTrip) return;
+    // tripDashboards is already filtered
+    const tripCards = cards.filter(c => tripDashboards.some(d => d.id === c.dashboardId));
+    const tripGroups = groups.filter(g => tripDashboards.some(d => d.id === g.dashboardId));
+    generateTripPDF(currentTrip, tripDashboards, tripCards, tripGroups);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen w-full bg-black flex items-center justify-center">
@@ -313,8 +330,38 @@ const Board = () => {
                   )}
                 </div>
 
-                {/* Right Section - Actions */}
+                  {/* Right Section - Actions */}
                 <div className="flex items-center gap-1 bg-secondary/40 rounded-xl p-1 border border-border/30">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
+                          >
+                            <FileDown className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 bg-[#1a1a1a] text-white border-white/10">
+                          <DropdownMenuLabel>Export Trip</DropdownMenuLabel>
+                          <DropdownMenuSeparator className="bg-white/10" />
+                          <DropdownMenuItem 
+                            onClick={handleExportPDF} 
+                            className="gap-2 cursor-pointer focus:bg-white/10 focus:text-white"
+                          >
+                            <FileText className="w-4 h-4" />
+                            <span>Export as PDF</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Export</p>
+                    </TooltipContent>
+                  </Tooltip>
+
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -397,14 +444,14 @@ const Board = () => {
                       <Button
                         variant="outline"
                         size="lg"
-                        className="w-full max-w-md border-dashed border-2 h-16 text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5"
+                        className="w-full max-w-md border-dashed border-2 h-16 text-muted-foreground hover:text-foreground hover:border-muted-foreground/50 hover:bg-muted/50"
                         onClick={() => {
                           // Logic moved to useDashboardOperations
-                          addDashboard(currentTrip.id, `Dashboard ${tripDashboards.length + 1}`);
+                          addDashboard(currentTrip.id, `City ${tripDashboards.length + 1}`);
                         }}
                       >
                         <Plus className="mr-2 h-5 w-5" />
-                        Add Dashboard
+                        Add City
                       </Button>
                     </div>
                   )}
