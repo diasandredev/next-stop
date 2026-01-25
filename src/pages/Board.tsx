@@ -1,15 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useKanban } from '@/contexts/KanbanContext';
 import { Button } from '@/components/ui/button';
 
+import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
 import { RightSidebar } from '@/components/RightSidebar';
-import { Calendar, Loader2, Plus, Settings, Users, PanelRight, FileDown, FileText } from 'lucide-react';
+import { Calendar, Loader2, Plus, Settings, Users, PanelRight, FileDown, FileText, Search, Layout, Map as MapIcon } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Card, Trip } from '@/types/kanban';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Input } from '@/components/ui/input';
+import { KanbanCard } from '@/components/KanbanCard';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +32,7 @@ import { generateTripPDF } from '@/utils/pdfExport';
 
 const Board = () => {
   const { logout, user } = useAuth();
+  const navigate = useNavigate();
   const {
     cards,
     trips,
@@ -62,6 +66,24 @@ const Board = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [isRightSidebarExpanded, setIsRightSidebarExpanded] = useState(false);
   const [activeDashboardId, setActiveDashboardId] = useState<string | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        window.dispatchEvent(new Event('kanban-new-card'));
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('board-search')?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Derived state
   const currentTrip = trips.find(t => t.id === currentTripId);
@@ -87,7 +109,8 @@ const Board = () => {
     const { active, over } = event;
 
     // Delay clearing activeCard to allow drop animation to complete
-    setTimeout(() => setActiveCard(null), 200);
+    // setTimeout(() => setActiveCard(null), 200);
+    setActiveCard(null);
 
     if (!over) return;
 
@@ -297,6 +320,7 @@ const Board = () => {
         isExpanded={isSidebarExpanded}
         toggleSidebar={() => setIsSidebarExpanded(!isSidebarExpanded)}
         trips={trips}
+        dashboards={dashboards}
         currentTripId={currentTripId}
         setCurrentTripId={setCurrentTripId}
         user={user}
@@ -312,7 +336,7 @@ const Board = () => {
         ) : (
           <>
             {/* Header */}
-            <header className="px-6 py-4 flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-md border-b border-border/30">
+            <header className="px-6 py-4 flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-md border-b border-border/30 relative">
               <div className="flex items-center justify-between">
                 {/* Left Section - Trip Info */}
                 <div className="flex items-center gap-4">
@@ -330,8 +354,29 @@ const Board = () => {
                   )}
                 </div>
 
+                {/* Center - Segmented Control - Removed */}
+
+
                   {/* Right Section - Actions */}
                 <div className="flex items-center gap-1 bg-secondary/40 rounded-xl p-1 border border-border/30">
+                   {/* Search */}
+                   <div className="relative hidden md:block">
+                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                        <Input 
+                            id="board-search"
+                            placeholder="Search..." 
+                            className="h-9 w-48 focus:w-64 pl-8 pr-10 bg-transparent border-none focus:bg-background/50 transition-all duration-300 placeholder:text-muted-foreground/50 text-sm"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none flex items-center gap-1">
+                            <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-white/10 bg-white/5 px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                                <span className="text-xs">⌘</span>K
+                            </kbd>
+                        </div>
+                   </div>
+                   <div className="w-px h-6 bg-white/10 mx-1 hidden md:block" />
+
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <DropdownMenu>
@@ -345,8 +390,6 @@ const Board = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 bg-[#1a1a1a] text-white border-white/10">
-                          <DropdownMenuLabel>Export Trip</DropdownMenuLabel>
-                          <DropdownMenuSeparator className="bg-white/10" />
                           <DropdownMenuItem 
                             onClick={handleExportPDF} 
                             className="gap-2 cursor-pointer focus:bg-white/10 focus:text-white"
@@ -435,6 +478,7 @@ const Board = () => {
                       trip={currentTrip!}
                       cards={cards.filter(c => c.dashboardId === dashboard.id)}
                       today={today}
+                      searchQuery={searchQuery}
                     />
                   ))}
 
@@ -470,11 +514,14 @@ const Board = () => {
                     onDeleteGroup={deleteGroup}
                   />
 
-                  <DragOverlay>
+                  <DragOverlay dropAnimation={null}>
                     {activeCard ? (
-                      <div className="bg-blue-900/50 rounded-md px-3 py-2 shadow-2xl cursor-grab inline-flex items-center max-w-md">
-                        {activeCard.icon && <span className="mr-1.5 text-sm">{activeCard.icon}</span>}
-                        <p className="text-sm font-medium text-white/50 whitespace-nowrap">{activeCard.title}</p>
+                      <div className="bg-black/40 border border-white/10 rounded-lg px-4 py-2 shadow-lg cursor-grabbing inline-flex items-center gap-3 backdrop-blur-sm min-w-[200px] z-50">
+                        {activeCard.icon && <span className="text-lg shadow-sm">{activeCard.icon}</span>}
+                        <div className="flex flex-col gap-0.5">
+                            <p className="text-sm font-medium text-white whitespace-nowrap">{activeCard.title}</p>
+                            {activeCard.time && <p className="text-[10px] text-white/50">{activeCard.time}</p>}
+                        </div>
                       </div>
                     ) : null}
                   </DragOverlay>

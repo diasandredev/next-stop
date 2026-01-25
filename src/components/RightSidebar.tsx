@@ -34,33 +34,6 @@ export const RightSidebar = ({
     const [newGroupId, setNewGroupId] = useState<string | null>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
 
-    // Click outside to close
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (isExpanded && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-                // Check if the click was on the toggle button itself (to prevent immediate reopen)
-                const toggleButton = document.getElementById('right-sidebar-toggle');
-                if (toggleButton && toggleButton.contains(event.target as Node)) {
-                    return;
-                }
-
-                // Allow interactions with dialogs or overlays (like dragging?)
-                // Usually click outside means "click on the background/board".
-                // If dragging, dnd-kit uses pointer events.
-                // If the user is just clicking on the board, we close.
-                onToggle();
-            }
-        };
-
-        if (isExpanded) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isExpanded, onToggle]);
-
     // Filter groups for active dashboard
     const dashboardGroups = groups
         .filter(g => g.dashboardId === activeDashboardId)

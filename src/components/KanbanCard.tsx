@@ -10,6 +10,8 @@ import { useKanban } from '@/contexts/KanbanContext';
 import { OptionsCard } from './OptionsCard';
 import { getCurrencySymbol } from '@/utils/currency';
 
+import { Input } from './ui/input';
+
 interface KanbanCardProps {
   card: CardType;
   childrenCards?: CardType[];
@@ -20,7 +22,16 @@ interface KanbanCardProps {
 
 export const KanbanCard = ({ card, childrenCards = [], isNested = false, className = '' }: KanbanCardProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(card.title);
   const { updateCard } = useKanban();
+
+  const handleSaveTitle = () => {
+      if (editTitle.trim() && editTitle !== card.title) {
+          updateCard(card.id, { title: editTitle.trim() });
+      }
+      setIsEditing(false);
+  };
 
   const {
     attributes,
@@ -105,9 +116,37 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
               {card.time}
             </span>
           )}
-          <span className={`truncate ${card.columnType === 'extra' ? 'max-w-[300px]' : (isNested ? 'max-w-[120px]' : 'max-w-[200px]')} ${card.completed ? 'line-through text-white/70' : ''}`}>
-            {card.title}
-          </span>
+          {isEditing ? (
+            <Input
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              onBlur={handleSaveTitle}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                    handleSaveTitle();
+                    e.currentTarget.blur(); // Trigger blur to save
+                }
+                if (e.key === 'Escape') {
+                    setEditTitle(card.title);
+                    setIsEditing(false);
+                }
+              }}
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()} // Prevent drag start
+              autoFocus
+              className={`h-5 p-0 bg-transparent border-none text-white focus-visible:ring-0 focus-visible:ring-offset-0 ${isNested ? 'text-sm' : 'text-sm'} w-full min-w-[60px]`}
+            />
+          ) : (
+            <span 
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditing(true);
+                }}
+                className={`truncate cursor-text hover:bg-white/10 px-1 -mx-1 rounded ${card.columnType === 'extra' ? 'max-w-[300px]' : (isNested ? 'max-w-[120px]' : 'max-w-[200px]')} ${card.completed ? 'line-through text-white/70' : ''}`}
+            >
+                {card.title}
+            </span>
+          )}
           {card.location && (
             <MapPin className="w-3 h-3 text-white/70 ml-1.5 shrink-0" />
           )}

@@ -26,7 +26,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Trip } from '@/types/kanban';
+import { Trip, Dashboard } from '@/types/kanban';
 import { User as UserType } from 'firebase/auth';
 
 import { Logo } from '@/components/Logo';
@@ -35,6 +35,7 @@ interface SidebarProps {
     isExpanded: boolean;
     toggleSidebar: () => void;
     trips: Trip[];
+    dashboards?: Dashboard[];
     currentTripId: string | null;
     setCurrentTripId: (id: string) => void;
     user: UserType | null;
@@ -47,6 +48,7 @@ export function Sidebar({
     isExpanded,
     toggleSidebar,
     trips,
+    dashboards = [],
     currentTripId,
     setCurrentTripId,
     user,
@@ -57,12 +59,21 @@ export function Sidebar({
     const navigate = useNavigate();
     const location = useLocation();
     const [expandedTripId, setExpandedTripId] = useState<string | null>(null);
+    const [isMapExpanded, setIsMapExpanded] = useState(true);
+
+    // Get dashboardId from URL query params
+    const searchParams = new URLSearchParams(location.search);
+    const currentDashboardId = searchParams.get('dashboardId');
 
     useEffect(() => {
         if (currentTripId) {
             setExpandedTripId(currentTripId);
         }
     }, [currentTripId]);
+
+    const handleDashboardClick = (dashboardId: string) => {
+        navigate(`/map?dashboardId=${dashboardId}`);
+    };
 
     return (
         <aside
@@ -129,20 +140,49 @@ export function Sidebar({
 
                                         {isExpanded && (
                                             <>
-                                                <span className="text-sm font-medium truncate flex-1 text-left">
+                                            <span className="text-sm font-medium truncate flex-1 text-left">
                                                     {trip.name}
                                                 </span>
-                                                <div className="flex items-center gap-1">
-                                                    {/* Share Button */}
-
-
-                                                    {/* Chevron */}
-                                                    {isTripExpanded ? (
-                                                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                                                    ) : (
-                                                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                                                    )}
-                                                </div>
+                                                {isTripActive ? (
+                                                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <button
+                                                                    onClick={() => navigate('/board')}
+                                                                    className={cn(
+                                                                        "p-1 rounded-md hover:bg-white/10 transition-colors",
+                                                                        location.pathname === '/board' ? "text-[#5a8fc4]" : "text-muted-foreground"
+                                                                    )}
+                                                                >
+                                                                    <LayoutDashboard className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>Board</TooltipContent>
+                                                        </Tooltip>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <button
+                                                                    onClick={() => navigate('/map')}
+                                                                    className={cn(
+                                                                        "p-1 rounded-md hover:bg-white/10 transition-colors",
+                                                                        location.pathname === '/map' ? "text-[#5a8fc4]" : "text-muted-foreground"
+                                                                    )}
+                                                                >
+                                                                    <MapIcon className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>Map</TooltipContent>
+                                                        </Tooltip>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-1">
+                                                        {isTripExpanded ? (
+                                                            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                                                        ) : (
+                                                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                                                        )}
+                                                    </div>
+                                                )}
                                             </>
                                         )}
 
@@ -177,21 +217,56 @@ export function Sidebar({
                                         Board
                                     </button>
 
-                                    <button
-                                        onClick={() => {
-                                            setCurrentTripId(trip.id);
-                                            navigate('/map');
-                                        }}
-                                        className={cn(
-                                            "w-full flex items-center gap-3 p-2 rounded-lg text-sm transition-colors",
-                                            location.pathname === '/map' && isTripActive
-                                                ? "bg-[#304D73]/20 text-[#5a8fc4] font-medium"
-                                                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                    <div>
+                                        <button
+                                            onClick={() => setIsMapExpanded(!isMapExpanded)}
+                                            className={cn(
+                                                "w-full flex items-center justify-between p-2 rounded-lg text-sm transition-colors",
+                                                "text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
+                                            )}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <MapIcon className="w-4 h-4" />
+                                                Map
+                                            </div>
+                                            {isMapExpanded ? (
+                                                <ChevronDown className="w-3 h-3 opacity-50" />
+                                            ) : (
+                                                <ChevronRight className="w-3 h-3 opacity-50" />
+                                            )}
+                                        </button>
+                                        
+                                        {/* Dashboards List under Map */}
+                                        {isMapExpanded && (
+                                            <div className="ml-4 pl-4 border-l border-border/50 mt-1 space-y-0.5">
+                                                {dashboards
+                                                    .filter(d => d.tripId === trip.id)
+                                                    .sort((a, b) => {
+                                                        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                                                        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                                                        return timeA - timeB;
+                                                    })
+                                                    .map(dashboard => (
+                                                    <button
+                                                        key={dashboard.id}
+                                                        onClick={() => {
+                                                            setCurrentTripId(trip.id);
+                                                            handleDashboardClick(dashboard.id);
+                                                        }}
+                                                        className={cn(
+                                                            "w-full flex items-center gap-2 p-1.5 rounded-md text-xs transition-colors",
+                                                            location.pathname === '/map' && currentDashboardId === dashboard.id
+                                                                ? "text-[#5a8fc4] font-medium bg-[#304D73]/10"
+                                                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                                        )}
+                                                    >
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-current opacity-50" />
+                                                        <span className="truncate">{dashboard.name}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
                                         )}
-                                    >
-                                        <MapIcon className="w-4 h-4" />
-                                        Map
-                                    </button>
+                                    </div>
 
                                     <button
                                         disabled

@@ -3,7 +3,7 @@ import { Card, Dashboard, Trip } from '@/types/kanban';
 import { DayColumn } from './DayColumn';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Trash2, X, Palette, Settings, Pencil, Calendar, Wallet } from 'lucide-react';
+import { Trash2, X, Palette, Settings, Pencil, Calendar, Wallet, Maximize2, Minimize2 } from 'lucide-react';
 import { useKanban } from '@/contexts/KanbanContext';
 import chroma from 'chroma-js';
 import { ColorPicker } from './ColorPicker';
@@ -14,6 +14,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Label } from './ui/label';
 import { addDays, format, parseISO } from 'date-fns';
 import { DatePicker } from './DatePicker';
@@ -29,9 +30,10 @@ interface DashboardViewProps {
     trip: Trip;
     cards: Card[];
     today: string;
+    searchQuery?: string;
 }
 
-export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewProps) => {
+export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' }: DashboardViewProps) => {
     const { updateDashboard, deleteDashboard } = useKanban();
     const { user } = useAuth();
     const [isEditingName, setIsEditingName] = useState(false);
@@ -43,6 +45,7 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
     const [editDays, setEditDays] = useState(dashboard.days);
     const [editStartDate, setEditStartDate] = useState(dashboard.startDate || trip.startDate || new Date().toISOString());
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isFluidOverride, setIsFluidOverride] = useState<boolean | null>(null);
 
     // Calculate dates
     const startDateStr = dashboard.startDate || trip.startDate || new Date().toISOString();
@@ -119,7 +122,7 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
 
 
     // Width logic: if <= 5 columns, fill space (fluid). If > 5, fixed width (scroll).
-    const isFluid = totalColumns <= 5;
+    const isFluid = isFluidOverride !== null ? isFluidOverride : totalColumns <= 5;
     const containerClass = isFluid ? "flex gap-4 w-full h-full" : "flex gap-4 min-w-max h-full";
     const columnClass = isFluid
         ? `flex-1 min-w-0 h-full ${totalColumns === 1 ? 'max-w-[50%]' : ''}`
@@ -194,6 +197,25 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
 
                     {/* Actions */}
                     <div className="flex items-center gap-1">
+                        <TooltipProvider delayDuration={0}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/50 hidden md:flex"
+                                        onClick={() => setIsFluidOverride(prev => {
+                                            const current = prev !== null ? prev : totalColumns <= 5;
+                                            return !current;
+                                        })}
+                                    >
+                                        {isFluid ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>{isFluid ? "Switch to Scroll View" : "Switch to Fit View"}</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+
                         <ColorPicker
                             open={isColorPickerOpen}
                             onOpenChange={setIsColorPickerOpen}
@@ -319,6 +341,7 @@ export const DashboardView = ({ dashboard, trip, cards, today }: DashboardViewPr
                                     minSlots={unifiedMinSlots}
                                     isWeekend={date.getDay() === 0 || date.getDay() === 6} // Just styling
                                     dashboardColor={dashboard.backgroundColor}
+                                    searchQuery={searchQuery}
                                 />
                             </div>
                         );

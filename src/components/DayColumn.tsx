@@ -2,10 +2,10 @@ import { Card } from '@/types/kanban';
 import { KanbanCard } from './KanbanCard';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useKanban } from '@/contexts/KanbanContext';
 import { Input } from './ui/input';
-import { Split, Map, MapPinned } from 'lucide-react';
+import { Split, Map, MapPinned, Plus } from 'lucide-react';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from './ui/tooltip';
 import { EmojiPicker } from './EmojiPicker';
@@ -23,6 +23,7 @@ interface DayColumnProps {
   minSlots: number;
   headerHeight?: string;
   dashboardColor?: string;
+  searchQuery?: string;
 }
 
 export const DayColumn = ({
@@ -33,7 +34,8 @@ export const DayColumn = ({
   isWeekend = false,
   minSlots,
   headerHeight = 'h-12',
-  dashboardColor
+  dashboardColor,
+  searchQuery = ''
 }: DayColumnProps) => {
   const { addCard } = useKanban();
   const [isAdding, setIsAdding] = useState(false);
@@ -108,9 +110,29 @@ export const DayColumn = ({
     return acc;
   }, {} as Record<string, number>);
 
+  const [costHighlight, setCostHighlight] = useState(false);
+  const totalCostValue = Object.values(totalCost).reduce((a, b) => a + b, 0);
+
+  useEffect(() => {
+    if (totalCostValue > 0) {
+        setCostHighlight(true);
+        const timer = setTimeout(() => setCostHighlight(false), 300);
+        return () => clearTimeout(timer);
+    }
+  }, [totalCostValue]);
+
+  useEffect(() => {
+    const handleShortcut = () => {
+        if (isCurrentDay) {
+            setIsAdding(true);
+        }
+    };
+    window.addEventListener('kanban-new-card', handleShortcut);
+    return () => window.removeEventListener('kanban-new-card', handleShortcut);
+  }, [isCurrentDay]);
+
   const MIN_SLOTS = minSlots;
 
-  // Filter cards
   const rootCards = cards.filter(c => !c.parentId).sort((a, b) => (a.order || 0) - (b.order || 0));
   const childCards = cards.filter(c => c.parentId);
 
@@ -125,18 +147,18 @@ export const DayColumn = ({
             {/* Daily Total Cost Display - Hover only */}
             {Object.keys(totalCost).length > 0 && (
                <div 
-                  className={`hidden sm:flex items-baseline gap-2 mr-1 px-2 py-0.5 rounded-md ${!dashboardColor || dashboardColor === 'transparent' ? 'bg-white/5 border border-white/5' : ''} opacity-0 -translate-x-2 group-hover/header:opacity-100 group-hover/header:translate-x-0 transition-all duration-300 ease-out`}
+                  className={`hidden sm:flex items-baseline gap-2 mr-1 px-2 py-0.5 rounded-md ${!dashboardColor || dashboardColor === 'transparent' ? 'bg-white/5 border border-white/5' : ''} opacity-0 -translate-x-2 group-hover/header:opacity-100 group-hover/header:translate-x-0 transition-all duration-300 ease-out ${costHighlight ? 'scale-110 bg-green-500/20 text-green-400' : ''}`}
                   style={dashboardColor && dashboardColor !== 'transparent' ? {
                       backgroundColor: chroma(dashboardColor).alpha(0.5).css(),
                       color: chroma(dashboardColor).luminance() > 0.5 ? '#1a1a1a' : '#ffffff'
                   } : undefined}
                >
-                  <span className="text-[9px] font-bold text-white uppercase tracking-wider">Total</span>
+                  <span className={`text-[9px] font-bold uppercase tracking-wider ${costHighlight ? 'text-green-400' : 'text-white'}`}>Total</span>
                   <div className="flex gap-2">
                     {Object.entries(totalCost).map(([curr, amount]) => (
                         <div key={curr} className="flex items-baseline gap-1">
-                             <span className="text-[11px] font-bold text-white">{getCurrencySymbol(curr)}</span>
-                             <span className="text-[12px] font-bold text-white font-mono">
+                             <span className={`text-[11px] font-bold ${costHighlight ? 'text-green-400' : 'text-white'}`}>{getCurrencySymbol(curr)}</span>
+                             <span className={`text-[12px] font-bold font-mono ${costHighlight ? 'text-green-400' : 'text-white'}`}>
                                 {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)}
                              </span>
                         </div>
@@ -206,17 +228,29 @@ export const DayColumn = ({
       <div
         ref={setNodeRef}
         className={`px-1 pt-0 space-y-0 flex-1 transition-all duration-300 ease-out mx-0.5
-          ${isOver ? 'bg-accent/20 ring-2 ring-accent/50 ring-inset rounded-lg' : ''}
+          ${isOver ? 'bg-white/5 ring-1 ring-white/10 rounded-lg' : ''}
         `}
       >
         <SortableContext items={rootCards.map(c => c.id)} strategy={verticalListSortingStrategy}>
-          {rootCards.map(card => (
-            <KanbanCard
-              key={card.id}
-              card={card}
-              childrenCards={childCards.filter(c => c.parentId === card.id)}
-            />
-          ))}
+          {rootCards.length === 0 && !isAdding && (
+            <div 
+                onClick={() => setIsAdding(true)}
+                className="h-24 m-2 border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center text-muted-foreground/50 hover:text-muted-foreground hover:border-white/20 hover:bg-white/5 transition-all cursor-pointer group/empty"
+            >
+                <span className="text-xs font-medium group-hover/empty:scale-110 transition-transform">Plan this day</span>
+            </div>
+          )}
+          {rootCards.map((card, index) => {
+            const isDimmed = searchQuery && !card.title.toLowerCase().includes(searchQuery.toLowerCase());
+            return (
+            <div key={card.id} className={`relative group/gap transition-opacity duration-300 ${isDimmed ? 'opacity-10 grayscale' : 'opacity-100'}`}>
+                <KanbanCard
+                  card={card}
+                  childrenCards={childCards.filter(c => c.parentId === card.id)}
+                />
+            </div>
+            );
+          })}
         </SortableContext>
 
         {isAdding && (
@@ -263,6 +297,11 @@ export const DayColumn = ({
           });
 
           if (isAdding) usedSlots += 1;
+
+          // If there are no cards and we are not adding, only show the "Plan this day" box (hide empty lines)
+          if (rootCards.length === 0 && !isAdding) {
+            return null;
+          }
 
           const slotsToRender = Math.max(0, MIN_SLOTS - usedSlots);
 

@@ -15,7 +15,18 @@ interface NewTripDialogProps {
 export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
     const { addTrip, addDashboard, setCurrentTripId } = useKanban();
     const [name, setName] = useState('');
-    const [dateRange, setDateRange] = useState<DateRange | undefined>();
+    
+    // Smart Defaults: Next Friday to Sunday
+    const getSmartDates = () => {
+        const today = new Date();
+        const nextFriday = new Date(today);
+        nextFriday.setDate(today.getDate() + (5 + 7 - today.getDay()) % 7);
+        const nextSunday = new Date(nextFriday);
+        nextSunday.setDate(nextFriday.getDate() + 2);
+        return { from: nextFriday, to: nextSunday };
+    };
+
+    const [dateRange, setDateRange] = useState<DateRange | undefined>(getSmartDates());
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
