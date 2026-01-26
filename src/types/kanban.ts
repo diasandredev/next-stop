@@ -79,6 +79,13 @@ export interface Dashboard {
   startDate?: string; // ISO Date string
   backgroundColor?: string; // Hex color for dashboard background
   createdAt?: string;
+  accommodation?: {
+    name: string;
+    address: string;
+    lat: number;
+    lng: number;
+    placeId: string;
+  };
 }
 
 export interface AccountSettings {

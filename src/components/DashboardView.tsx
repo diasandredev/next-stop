@@ -3,10 +3,11 @@ import { Card, Dashboard, Trip } from '@/types/kanban';
 import { DayColumn } from './DayColumn';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Trash2, X, Palette, Settings, Pencil, Calendar, Wallet, Maximize2, Minimize2 } from 'lucide-react';
+import { Trash2, X, Palette, Settings, Pencil, Calendar, Wallet, Maximize2, Minimize2, Bed } from 'lucide-react';
 import { useKanban } from '@/contexts/KanbanContext';
 import chroma from 'chroma-js';
 import { ColorPicker } from './ColorPicker';
+import { LocationSearch } from './LocationSearch';
 import {
     Dialog,
     DialogContent,
@@ -193,6 +194,34 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                 </div>
                             </>
                         )}
+
+                        {/* Accommodation Info */}
+                        {dashboard.accommodation && (
+                            <>
+                                <div className="w-1 h-1 rounded-full bg-white/20" />
+                                <TooltipProvider delayDuration={0}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <a 
+                                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dashboard.accommodation.address)}&query_place_id=${dashboard.accommodation.placeId}`}
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-2 hover:text-white transition-colors cursor-pointer group/hotel"
+                                            >
+                                                <Bed className="w-4 h-4 opacity-70 group-hover/hotel:opacity-100" />
+                                                <span className="font-medium truncate max-w-[150px]">
+                                                    {dashboard.accommodation.name}
+                                                </span>
+                                            </a>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="bottom" className="max-w-[300px] break-words">
+                                            <p className="font-semibold">{dashboard.accommodation.name}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">{dashboard.accommodation.address}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </>
+                        )}
                     </div>
 
                     {/* Actions */}
@@ -284,6 +313,16 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                                 }}
                                             />
                                         </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-medium text-muted-foreground">Where are you staying?</Label>
+                                        <LocationSearch
+                                            defaultValue={dashboard.accommodation?.name}
+                                            onLocationSelect={(location) => {
+                                                updateDashboard(dashboard.id, { accommodation: location });
+                                            }}
+                                        />
                                     </div>
                                 </div>
 

@@ -6,7 +6,7 @@ import maplibregl from 'maplibre-gl';
 import { Card } from "@/types/kanban";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { Bed, ArrowLeft, MapPin } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Sidebar } from "@/components/Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -72,6 +72,21 @@ export default function TripMap() {
         return filteredCards;
     }, [cards, dashboardId, currentTripId, tripDashboards]);
 
+
+    // Get accommodations for these dashboards
+    const accommodations = useMemo(() => {
+        return tripDashboards
+            .filter(d => d.accommodation && d.accommodation.lat && d.accommodation.lng)
+            .map(d => ({
+                ...d.accommodation!,
+                dashboardName: d.name,
+                dashboardId: d.id,
+                // If a specific dashboard is selected, only show its accommodation (or if viewing all, show all)
+                visible: !dashboardId || d.id === dashboardId
+            }))
+            .filter(h => h.visible);
+    }, [tripDashboards, dashboardId]);
+
     // Separate cards into route cards (with dates) and standalone cards (in groups)
     const routeCards = useMemo(() => {
         return cardsWithLocation.filter(card => card.date && !card.groupId);
@@ -121,7 +136,13 @@ export default function TripMap() {
     // Calculate initial view state (bounds)
     const initialViewState = useMemo(() => {
         const allCards = [...routeCards, ...standaloneCards];
-        if (allCards.length === 0) {
+        // Include accommodations in bounds calculation
+        const allPoints = [
+            ...allCards.map(c => c.location!),
+            ...accommodations
+        ];
+
+        if (allPoints.length === 0) {
             return {
                 longitude: -58.3816, // Buenos Aires fallback (based on user context :) or London -0.1276
                 latitude: -34.6037,
@@ -129,8 +150,8 @@ export default function TripMap() {
             };
         }
 
-        const lngs = allCards.map(c => c.location!.lng);
-        const lats = allCards.map(c => c.location!.lat);
+        const lngs = allPoints.map(p => p.lng);
+        const lats = allPoints.map(p => p.lat);
         const centerLng = lngs.reduce((a, b) => a + b, 0) / lngs.length;
         const centerLat = lats.reduce((a, b) => a + b, 0) / lats.length;
 
@@ -139,7 +160,7 @@ export default function TripMap() {
             latitude: centerLat,
             zoom: 13
         };
-    }, [routeCards, standaloneCards]); // Re-calculate when cards change (e.g. dashboard filter changes)
+    }, [routeCards, standaloneCards, accommodations]); // Re-calculate when cards change (e.g. dashboard filter changes)
 
     return (
         <div className="min-h-screen bg-background text-foreground flex overflow-hidden">
@@ -293,6 +314,40 @@ export default function TripMap() {
                         </Marker>
                     ))}
 
+                    {/* Accommodation Markers */}
+                    {accommodations.map((accommodation) => (
+                        <Marker
+                            key={`accommodation-${accommodation.placeId}`}
+                            longitude={accommodation.lng}
+                            latitude={accommodation.lat}
+                            anchor="bottom"
+                            onClick={e => {
+                                e.originalEvent.stopPropagation();
+                                // Create a pseudo-card for the popup
+                                setPopupInfo({
+                                    id: `accommodation-${accommodation.placeId}`,
+                                    title: accommodation.name,
+                                    location: accommodation,
+                                    icon: "🏨", // Or use Bed icon in popup
+                                    description: `Accommodation for ${accommodation.dashboardName}`,
+                                    createdAt: "",
+                                    // other required fields
+                                } as any);
+                            }}
+                        >
+                            <div className="group relative flex flex-col items-center hover:z-50 cursor-pointer">
+                                <div className="relative">
+                                    <div
+                                        className="bg-white p-2.5 rounded-full shadow-xl border-3 transition-all duration-200 group-hover:scale-110 group-hover:shadow-2xl text-2xl z-20"
+                                        style={{ borderColor: '#8b5cf6', borderWidth: '3px' }} // Purple for hotels
+                                    >
+                                        <Bed className="w-5 h-5 text-purple-600" />
+                                    </div>
+                                </div>
+                            </div>
+                        </Marker>
+                    ))}
+
                     {/* Popups */}
                     {popupInfo && (
                         <Popup
@@ -316,7 +371,11 @@ export default function TripMap() {
                                 <div className="p-4 pt-5">
                                     {/* Header with icon and title */}
                                     <div className="flex items-start gap-3 mb-3">
-                                        {popupInfo.icon ? (
+                                        {popupInfo.icon === "🏨" ? (
+                                        <div className="p-2 rounded-lg shrink-0 bg-purple-100">
+                                            <Bed className="w-5 h-5 text-purple-600" />
+                                        </div>
+                                    ) : popupInfo.icon ? (
                                             <div className="text-3xl shrink-0 mt-0.5">
                                                 {popupInfo.icon}
                                             </div>
