@@ -377,9 +377,9 @@ const Board = () => {
                    </div>
                    <div className="w-px h-6 bg-white/10 mx-1 hidden md:block" />
 
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <DropdownMenu>
+                  <DropdownMenu>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
@@ -389,21 +389,21 @@ const Board = () => {
                             <FileDown className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 bg-[#1a1a1a] text-white border-white/10">
-                          <DropdownMenuItem 
-                            onClick={handleExportPDF} 
-                            className="gap-2 cursor-pointer focus:bg-white/10 focus:text-white"
-                          >
-                            <FileText className="w-4 h-4" />
-                            <span>Export as PDF</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">
-                      <p>Export</p>
-                    </TooltipContent>
-                  </Tooltip>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        <p>Export</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <DropdownMenuContent align="end" className="w-48 bg-[#1a1a1a] text-white border-white/10">
+                      <DropdownMenuItem 
+                        onClick={handleExportPDF} 
+                        className="gap-2 cursor-pointer focus:bg-white/10 focus:text-white"
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span>Export as PDF</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
                   <Tooltip>
                     <TooltipTrigger asChild>
