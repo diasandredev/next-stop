@@ -143,46 +143,13 @@ export function Sidebar({
                                             <span className="text-sm font-medium truncate flex-1 text-left">
                                                     {trip.name}
                                                 </span>
-                                                {isTripActive ? (
-                                                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <button
-                                                                    onClick={() => navigate('/board')}
-                                                                    className={cn(
-                                                                        "p-1 rounded-md hover:bg-white/10 transition-colors",
-                                                                        location.pathname === '/board' ? "text-[#5a8fc4]" : "text-muted-foreground"
-                                                                    )}
-                                                                >
-                                                                    <LayoutDashboard className="w-3.5 h-3.5" />
-                                                                </button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>Board</TooltipContent>
-                                                        </Tooltip>
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <button
-                                                                    onClick={() => navigate('/map')}
-                                                                    className={cn(
-                                                                        "p-1 rounded-md hover:bg-white/10 transition-colors",
-                                                                        location.pathname === '/map' ? "text-[#5a8fc4]" : "text-muted-foreground"
-                                                                    )}
-                                                                >
-                                                                    <MapIcon className="w-3.5 h-3.5" />
-                                                                </button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>Map</TooltipContent>
-                                                        </Tooltip>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center gap-1">
-                                                        {isTripExpanded ? (
-                                                            <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                                                        ) : (
-                                                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                                                        )}
-                                                    </div>
-                                                )}
+                                                <div className="flex items-center gap-1">
+                                                    {isTripExpanded ? (
+                                                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                                                    ) : (
+                                                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                                                    )}
+                                                </div>
                                             </>
                                         )}
 
