@@ -99,7 +99,7 @@ export function Sidebar({
             <div className={cn("flex items-center py-6", isExpanded ? "justify-center" : "justify-center")}>
                 <Logo 
                     showText={false} 
-                    iconSize={isExpanded ? 200 : 56} 
+                    iconSize={isExpanded ? 200 : 42} 
                 />
             </div>
 
