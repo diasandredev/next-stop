@@ -1,4 +1,7 @@
-# Next Stop
+<div align="center">
+  <img src="public/logo.png" alt="Next Stop Logo" width="120" />
+  <h1>Next Stop</h1>
+</div>
 
 Next Stop is a comprehensive travel planning application designed to help you organize your trips with ease. It combines a powerful Kanban board for daily itineraries with map integration and real-time synchronization.
 
@@ -7,7 +10,13 @@ Next Stop is a comprehensive travel planning application designed to help you or
 ### ✈️ Trip Management
 - **Create Trips**: Organize your travels into distinct trips.
 - **Dashboards**: Each trip can have multiple dashboards, representing days or phases of your trip.
+- **Daily Accommodation**: Link specific accommodations to each day of your trip for easy access.
 - **Kanban Flow**: Drag and drop cards to organize activities, spots to visit, and reservations.
+
+### 💰 Budget & Organization
+- **Budget Management**: Track costs for every activity and view daily/trip totals. Support for multiple currencies.
+- **Checklists**: Create sub-tasks within cards to manage detailed to-dos (e.g., "Buy tickets", "Pack gear").
+- **PDF Export**: Generate and download comprehensive PDF reports of your itinerary for offline reference.
 
 ### 🗺️ Map Integration
 - **Interactive Map**: Visualize your trip with an integrated map view (powered by MapLibre/React Map GL).
@@ -16,11 +25,13 @@ Next Stop is a comprehensive travel planning application designed to help you or
 ### 🔄 Real-time Sync & Offline Support
 - **Firebase Backend**: Your data is securely stored and synced across devices in real-time.
 - **Offline Capable**: Continue planning even without an internet connection; changes sync automatically when you're back online.
+- **PWA Support**: Installable as a Progressive Web App for a native-like experience.
 
 ### 🎨 Modern UI
 - **Responsive Design**: Built for desktop and tablet usage.
 - **Dark/Light Mode**: Supports system theme preferences.
-- **Refined Aesthetics**: Clean, modern interface using Tailwind CSS and Shadcn UI components.
+- **Refined Aesthetics**: Clean, modern interface using Tailwind CSS, Shadcn UI, and smooth animations.
+- **SEO Optimized**: Improved meta tags and structure for better visibility.
 
 ## Getting Started
 
