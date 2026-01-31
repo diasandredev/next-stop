@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { SEO } from '@/components/SEO';
+
 
 // Custom airplane SVG for better aesthetics
 const AirplaneSvg = ({ size, opacity }: { size: number; opacity: number }) => (
@@ -209,7 +211,9 @@ const Login = () => {
 
   return (
     <div className="login-container">
+      <SEO title="Login" />
       {/* Stars background - static twinkling */}
+
       <div className="stars-container">
         {stars.map((star) => (
           <Star key={star.id} {...star} />

@@ -20,6 +20,7 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { DashboardView } from '@/components/DashboardView';
 import { NoTripsView } from '@/components/NoTripsView';
 import { generateTripPDF } from '@/utils/pdfExport';
+import { SEO } from '@/components/SEO';
 
 const Board = () => {
   const {
@@ -287,6 +288,7 @@ const Board = () => {
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <SEO title="Dashboard" />
         {/* Header */}
         <header className="px-6 py-4 flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-md border-b border-border/30 relative">
             <div className="flex items-center justify-between">
