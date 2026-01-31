@@ -52,4 +52,18 @@ export default defineConfig(() => ({
     globals: true,
     environment: 'jsdom',
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes("node_modules")) {
+            if (id.includes("firebase")) return "firebase";
+            if (id.includes("maplibre-gl") || id.includes("react-map-gl")) return "maps";
+            if (id.includes("jspdf") || id.includes("html2canvas")) return "pdf";
+          }
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
 }));
