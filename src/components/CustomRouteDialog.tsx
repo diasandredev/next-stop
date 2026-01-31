@@ -55,10 +55,10 @@ const SortableCardItem = ({ card, isSelected, onToggle }: SortableCardItemProps)
         <div
             ref={setNodeRef}
             style={style}
-            className={`
+        className={`
         flex items-center gap-3 p-3 rounded-lg transition-all
         ${isSelected
-                    ? 'bg-[#304D73]/30 border border-[#304D73]'
+                    ? 'bg-primary/20 border border-primary'
                     : 'bg-white/5 hover:bg-white/10 border border-transparent'
                 }
       `}
@@ -73,7 +73,7 @@ const SortableCardItem = ({ card, isSelected, onToggle }: SortableCardItemProps)
 
             <div className="shrink-0 cursor-pointer" onClick={onToggle}>
                 {isSelected ? (
-                    <CheckSquare className="w-5 h-5 text-[#5a8fc4]" />
+                    <CheckSquare className="w-5 h-5 text-primary" />
                 ) : (
                     <Square className="w-5 h-5 text-white/30" />
                 )}
@@ -100,7 +100,7 @@ const SortableCardItem = ({ card, isSelected, onToggle }: SortableCardItemProps)
             </div>
 
             {isSelected && (
-                <Check className="w-4 h-4 text-[#5a8fc4] shrink-0" />
+                <Check className="w-4 h-4 text-primary shrink-0" />
             )}
         </div>
     );
@@ -250,7 +250,7 @@ export const CustomRouteDialog = ({ open, onOpenChange, cards, dayDate }: Custom
                         <Button
                             onClick={handleCreateRoute}
                             disabled={selectedCardIds.size === 0}
-                            className="w-full bg-[#304D73] hover:bg-[#264059] disabled:opacity-50"
+                            className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50"
                         >
                             Create Route ({selectedCardIds.size} location{selectedCardIds.size !== 1 ? 's' : ''})
                         </Button>

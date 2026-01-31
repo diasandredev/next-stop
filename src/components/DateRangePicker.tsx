@@ -34,7 +34,7 @@ export function DateRangePicker({
                         id="date"
                         variant={"ghost"}
                         className={cn(
-                            "w-full justify-start text-left font-medium p-2 text-base h-auto hover:bg-white/5 hover:text-white",
+                            "w-full justify-start text-left font-medium p-2 text-base h-auto hover:bg-transparent hover:text-white",
                             !date && "text-muted-foreground"
                         )}
                     >
@@ -65,7 +65,7 @@ export function DateRangePicker({
                         classNames={{
                             head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
                             day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-white/10 rounded-md transition-colors text-white",
-                            day_selected: "bg-[#304D73] text-white hover:bg-[#304D73]/90 focus:bg-[#304D73] focus:text-white rounded-md",
+                            day_selected: "bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary focus:text-primary-foreground rounded-md",
                             day_today: "bg-white/10 text-white font-semibold",
                             day_outside: "text-muted-foreground opacity-50",
                             day_disabled: "text-muted-foreground opacity-50",

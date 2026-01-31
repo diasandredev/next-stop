@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, Trip, Dashboard, AccountSettings } from '@/types/kanban';
 import { Group } from '@/types/group';
+import { Expense } from '@/types/finance';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRealtimeSync } from './useRealtimeSync';
 import { db, dbPromise } from '@/utils/db';
@@ -16,6 +17,7 @@ export const useKanbanData = () => {
         dashboards: syncDashboards,
         groups: syncGroups,
         cards: syncCards,
+        expenses: syncExpenses,
         isLoading: isSyncLoading,
         saveTrip,
         deleteTrip,
@@ -24,7 +26,9 @@ export const useKanbanData = () => {
         saveGroup,
         deleteGroup,
         saveCard,
-        deleteCard
+        deleteCard,
+        saveExpense,
+        deleteExpense
     } = useRealtimeSync();
 
     const [isLoading, setIsLoading] = useState(true);
@@ -34,6 +38,7 @@ export const useKanbanData = () => {
     const [trips, setTrips] = useState<Trip[]>([]);
     const [dashboards, setDashboards] = useState<Dashboard[]>([]);
     const [groups, setGroups] = useState<Group[]>([]);
+    const [expenses, setExpenses] = useState<Expense[]>([]);
 
     const [accountSettings, setAccountSettings] = useState<AccountSettings | null>(null);
     const [currentTripId, setCurrentTripId] = useState<string>('1');
@@ -48,6 +53,7 @@ export const useKanbanData = () => {
                 const dbTrips = await db.getTrips();
                 const dbDashboards = await db.getDashboards();
                 const dbGroups = await db.getGroups();
+                const dbExpenses = await db.getExpenses();
                 const dbSettings = await db.getAccountSettings();
                 const dbCurrentTripId = await db.getLastTripId();
 
@@ -63,6 +69,10 @@ export const useKanbanData = () => {
 
                 if (dbGroups.length > 0) {
                     setGroups(dbGroups);
+                }
+                
+                if (dbExpenses.length > 0) {
+                    setExpenses(dbExpenses);
                 }
 
                 if (dbSettings) {
@@ -100,6 +110,7 @@ export const useKanbanData = () => {
             setDashboards(syncDashboards);
             setGroups(syncGroups);
             setCards(syncCards);
+            setExpenses(syncExpenses);
 
             // Persist to IndexedDB for offline support
             const persistToLocal = async () => {
@@ -114,13 +125,17 @@ export const useKanbanData = () => {
 
                 // Cards
                 await db.syncCards(syncCards);
+                
+                // Expenses
+                await db.syncExpenses(syncExpenses);
             };
 
             persistToLocal();
         }
-    }, [syncTrips, syncDashboards, syncGroups, syncCards, isSyncLoading, user]);
+    }, [syncTrips, syncDashboards, syncGroups, syncCards, syncExpenses, isSyncLoading, user]);
 
     // Persistence Effects for AccountSettings (Local DB + Firestore)
+
     useEffect(() => {
         if (accountSettings && !isLoading) {
             // 1. Local Persistence
@@ -167,6 +182,10 @@ export const useKanbanData = () => {
         saveGroup,
         deleteGroup,
         saveCard,
-        deleteCard
+        deleteCard,
+        expenses,
+        saveExpense,
+        deleteExpense
     };
 };
+

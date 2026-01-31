@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Loader2, MapPin } from 'lucide-react';
-import { Logo } from '@/components/Logo';
+import { Loader2 } from 'lucide-react';
 
 // Custom airplane SVG for better aesthetics
 const AirplaneSvg = ({ size, opacity }: { size: number; opacity: number }) => (
@@ -243,11 +242,12 @@ const Login = () => {
         {/* Logo / Branding */}
 
         <div className="login-header">
-          <Logo
-            variant="large"
-            className="justify-center mb-8 scale-125"
-            textClassName="text-white"
+          <img 
+            src="/logo.png" 
+            alt="Next Stop" 
+            className="login-logo"
           />
+          <h1 className="brand-name">Next Stop</h1>
         </div>
 
         {/* Form */}
@@ -434,8 +434,8 @@ const Login = () => {
           position: absolute;
           inset: 0;
           background-image: 
-            linear-gradient(rgba(48, 77, 115, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(48, 77, 115, 0.03) 1px, transparent 1px);
+            linear-gradient(rgba(232, 93, 4, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(232, 93, 4, 0.02) 1px, transparent 1px);
           background-size: 60px 60px;
           pointer-events: none;
         }
@@ -451,7 +451,7 @@ const Login = () => {
         .orb-1 {
           width: 600px;
           height: 600px;
-          background: radial-gradient(circle, rgba(48, 77, 115, 0.15) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(232, 93, 4, 0.12) 0%, transparent 70%);
           top: -200px;
           right: -200px;
         }
@@ -459,7 +459,7 @@ const Login = () => {
         .orb-2 {
           width: 500px;
           height: 500px;
-          background: radial-gradient(circle, rgba(48, 77, 115, 0.1) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(255, 186, 8, 0.08) 0%, transparent 70%);
           bottom: -150px;
           left: -150px;
         }
@@ -477,14 +477,52 @@ const Login = () => {
           z-index: 10;
           box-shadow: 
             0 0 0 1px rgba(255, 255, 255, 0.05),
-            0 20px 50px -20px rgba(0, 0, 0, 0.5),
-            0 0 100px -50px rgba(48, 77, 115, 0.3);
+            0 20px 50px -20px rgba(0, 0, 0, 0.5);
         }
 
         /* Header */
         .login-header {
           text-align: center;
           margin-bottom: 32px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .login-logo {
+          width: 140px;
+          height: 140px;
+          border-radius: 28px;
+          object-fit: cover;
+          animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+
+        .brand-name {
+          font-family: 'Pacifico', cursive;
+          font-size: 42px;
+          background: linear-gradient(135deg, #FFBA08 0%, #E85D04 50%, #DC2F02 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin: 0;
+          animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         .logo-container {
@@ -561,14 +599,14 @@ const Login = () => {
 
         .login-input:focus {
           background: rgba(255, 255, 255, 0.08) !important;
-          border-color: hsl(214 41% 40%) !important;
-          box-shadow: 0 0 0 3px rgba(48, 77, 115, 0.2);
+          border-color: #E85D04 !important;
+          box-shadow: 0 0 0 3px rgba(232, 93, 4, 0.2);
           outline: none;
         }
 
         .submit-button {
           height: 48px;
-          background: linear-gradient(135deg, hsl(214 41% 35%) 0%, hsl(214 45% 28%) 100%) !important;
+          background: linear-gradient(135deg, #E85D04 0%, #DC2F02 100%) !important;
           border: none;
           border-radius: 12px;
           color: white;
@@ -580,9 +618,9 @@ const Login = () => {
         }
 
         .submit-button:hover:not(:disabled) {
-          background: linear-gradient(135deg, hsl(214 41% 40%) 0%, hsl(214 45% 32%) 100%) !important;
+          background: linear-gradient(135deg, #F97316 0%, #E85D04 100%) !important;
           transform: translateY(-1px);
-          box-shadow: 0 8px 20px -8px rgba(48, 77, 115, 0.4);
+          box-shadow: 0 8px 20px -8px rgba(232, 93, 4, 0.5);
         }
 
         .submit-button:disabled {
@@ -602,14 +640,14 @@ const Login = () => {
         .toggle-button {
           background: none;
           border: none;
-          color: hsl(214 60% 55%);
+          color: #FFBA08;
           font-weight: 500;
           cursor: pointer;
           transition: color 0.2s ease;
         }
 
         .toggle-button:hover {
-          color: hsl(214 70% 65%);
+          color: #E85D04;
           text-decoration: underline;
         }
 

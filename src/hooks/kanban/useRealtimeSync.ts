@@ -17,12 +17,14 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { Trip, Dashboard, Card } from '@/types/kanban';
 import { Group } from '@/types/group';
+import { Expense } from '@/types/finance';
 
 interface RealtimeSyncState {
     trips: Trip[];
     dashboards: Dashboard[];
     groups: Group[];
     cards: Card[];
+    expenses: Expense[];
     isLoading: boolean;
     error: Error | null;
 }
@@ -36,7 +38,10 @@ interface UseRealtimeSyncReturn extends RealtimeSyncState {
     deleteGroup: (dashboardId: string, groupId: string) => Promise<void>;
     saveCard: (tripId: string, card: Card) => Promise<void>;
     deleteCard: (tripId: string, cardId: string) => Promise<void>;
+    saveExpense: (tripId: string, expense: Expense) => Promise<void>;
+    deleteExpense: (tripId: string, expenseId: string) => Promise<void>;
 }
+
 
 /**
  * Hook for real-time sync with Firestore for shared trips.
@@ -50,6 +55,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         dashboards: [],
         groups: [],
         cards: [],
+        expenses: [],
         isLoading: true,
         error: null,
     });
@@ -58,6 +64,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
     const dashboardUnsubscribersRef = useRef<Map<string, Unsubscribe>>(new Map());
     const groupUnsubscribersRef = useRef<Map<string, Unsubscribe>>(new Map());
     const cardUnsubscribersRef = useRef<Map<string, Unsubscribe>>(new Map());
+    const expenseUnsubscribersRef = useRef<Map<string, Unsubscribe>>(new Map());
 
     // Clean up all listeners
     const cleanupListeners = useCallback(() => {
@@ -69,6 +76,8 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         groupUnsubscribersRef.current.clear();
         cardUnsubscribersRef.current.forEach(unsub => unsub());
         cardUnsubscribersRef.current.clear();
+        expenseUnsubscribersRef.current.forEach(unsub => unsub());
+        expenseUnsubscribersRef.current.clear();
     }, []);
 
     // Subscribe to a trip's dashboards
@@ -163,6 +172,31 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         cardUnsubscribersRef.current.set(tripId, unsub);
     }, []);
 
+    // Subscribe to a trip's expenses
+    const subscribeToExpenses = useCallback((tripId: string) => {
+        if (expenseUnsubscribersRef.current.has(tripId)) return;
+
+        const expensesRef = collection(db, `trips/${tripId}/expenses`);
+        const unsub = onSnapshot(expensesRef, (snapshot) => {
+            const expensesData = snapshot.docs.map(doc => ({
+                ...doc.data(),
+                id: doc.id,
+            })) as Expense[];
+
+            setState(prev => {
+                const otherExpenses = prev.expenses.filter(e => e.tripId !== tripId);
+                return {
+                    ...prev,
+                    expenses: [...otherExpenses, ...expensesData],
+                };
+            });
+        }, (error) => {
+            console.error(`Error subscribing to expenses for trip ${tripId}:`, error);
+        });
+
+        expenseUnsubscribersRef.current.set(tripId, unsub);
+    }, []);
+
     // Unsubscribe from a trip's subcollections
     const unsubscribeFromTrip = useCallback((tripId: string) => {
         const dashboardUnsub = dashboardUnsubscribersRef.current.get(tripId);
@@ -181,6 +215,12 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         if (cardUnsub) {
             cardUnsub();
             cardUnsubscribersRef.current.delete(tripId);
+        }
+
+        const expenseUnsub = expenseUnsubscribersRef.current.get(tripId);
+        if (expenseUnsub) {
+            expenseUnsub();
+            expenseUnsubscribersRef.current.delete(tripId);
         }
     }, []);
 
@@ -224,6 +264,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
                     subscribeToDashboards(trip.id);
                     subscribeToGroups(trip.id);
                     subscribeToCards(trip.id);
+                    subscribeToExpenses(trip.id);
                 });
 
                 return {
@@ -257,6 +298,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
                     subscribeToDashboards(trip.id);
                     subscribeToGroups(trip.id);
                     subscribeToCards(trip.id);
+                    subscribeToExpenses(trip.id);
                 });
 
                 return {
@@ -275,7 +317,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         return () => {
             cleanupListeners();
         };
-    }, [user?.email, user?.uid, cleanupListeners, subscribeToDashboards, subscribeToGroups, subscribeToCards]);
+    }, [user?.email, user?.uid, cleanupListeners, subscribeToDashboards, subscribeToGroups, subscribeToCards, subscribeToExpenses]);
 
     // CRUD operations
     const saveTrip = useCallback(async (trip: Trip) => {
@@ -332,6 +374,13 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
             // Delete the dashboard doc
             batch.delete(dashboardDoc.ref);
         }
+
+        // 4. Delete all expenses
+        const expensesRef = collection(db, `trips/${tripId}/expenses`);
+        const expensesSnapshot = await getDocs(expensesRef);
+        expensesSnapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
 
         // 3. Delete the trip doc
         batch.delete(doc(db, 'trips', tripId));
@@ -424,6 +473,20 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         await deleteDoc(doc(db, `trips/${tripId}/cards`, cardId));
     }, []);
 
+    const saveExpense = useCallback(async (tripId: string, expense: Expense) => {
+        const { id: _, ...expenseRest } = expense;
+        const expenseData = expenseRest as Record<string, unknown>;
+        
+        // Ensure tripId is set in the data
+        expenseData.tripId = tripId;
+
+        await setDoc(doc(db, `trips/${tripId}/expenses`, expense.id), expenseData, { merge: true });
+    }, []);
+
+    const deleteExpense = useCallback(async (tripId: string, expenseId: string) => {
+        await deleteDoc(doc(db, `trips/${tripId}/expenses`, expenseId));
+    }, []);
+
     return {
         ...state,
         saveTrip,
@@ -434,5 +497,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         deleteGroup,
         saveCard,
         deleteCard,
+        saveExpense,
+        deleteExpense,
     };
 };

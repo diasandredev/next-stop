@@ -15,14 +15,17 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode }> = ({ children
         trips, setTrips,
         dashboards, setDashboards,
         groups,
+        expenses,
         accountSettings, setAccountSettings,
         currentTripId, setCurrentTripId,
         isLoading,
         saveTrip, deleteTrip,
         saveDashboard, deleteDashboard,
         saveGroup, deleteGroup,
-        saveCard, deleteCard
+        saveCard, deleteCard,
+        saveExpense, deleteExpense
     } = useKanbanData();
+
 
     const { user } = useAuth();
 
@@ -137,7 +140,10 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         updateAccountSettings,
         addCustomColor,
-        setCards // Still exposed in context?
+        setCards, // Still exposed in context?
+        expenses,
+        saveExpense,
+        deleteExpense
     };
 
     return (
@@ -146,6 +152,7 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode }> = ({ children
         </KanbanContext.Provider>
     );
 };
+
 
 // Outer KanbanProvider that wraps SyncProvider
 // Outer KanbanProvider

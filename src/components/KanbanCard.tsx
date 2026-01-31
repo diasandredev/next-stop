@@ -1,7 +1,6 @@
 import { Card as CardType } from '@/types/kanban';
 import chroma from 'chroma-js';
-
-import { Check, Circle, MapPin, CheckSquare } from 'lucide-react';
+import { Check, Circle, MapPin, CheckSquare, GripVertical, Clock, DollarSign } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
@@ -9,8 +8,8 @@ import { EditCardDialog } from './EditCardDialog';
 import { useKanban } from '@/contexts/KanbanContext';
 import { OptionsCard } from './OptionsCard';
 import { getCurrencySymbol } from '@/utils/currency';
-
 import { Input } from './ui/input';
+import { cn } from '@/lib/utils';
 
 interface KanbanCardProps {
   card: CardType;
@@ -18,7 +17,6 @@ interface KanbanCardProps {
   isNested?: boolean;
   className?: string;
 }
-
 
 export const KanbanCard = ({ card, childrenCards = [], isNested = false, className = '' }: KanbanCardProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -49,11 +47,6 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
     }
   });
 
-  const customStyle = (card.color && card.color !== 'transparent') ? {
-    backgroundColor: chroma(card.color).alpha(0.2).css(),
-    borderColor: chroma(card.color).alpha(0.3).css()
-  } : {};
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition: transition || 'transform 250ms ease',
@@ -76,6 +69,12 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
     );
   }
 
+  // Card Color Logic
+  const hasColor = card.color && card.color !== 'transparent';
+  const bgColor = hasColor ? chroma(card.color!).alpha(0.15).css() : 'rgba(255, 255, 255, 0.03)';
+  const borderColor = hasColor ? chroma(card.color!).alpha(0.3).css() : 'rgba(255, 255, 255, 0.08)';
+  const hoverBorderColor = hasColor ? chroma(card.color!).alpha(0.5).css() : 'rgba(255, 255, 255, 0.2)';
+
   return (
     <>
       <div
@@ -84,108 +83,139 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
         {...attributes}
         {...listeners}
         onClick={() => setShowEditDialog(true)}
-        className={`
-          group cursor-grab relative
-          ${isDragging ? 'invisible' : 'z-0'}
-          ${isNested ? 'h-12 text-sm' : 'h-12'} 
-          border-b border-border/40 hover:border-[#5a8fc4] flex items-center justify-between pr-2
-          transition-colors duration-200
-          ${card.completed ? 'opacity-60' : ''}
-          ${isNested ? 'bg-black/20' : ''}
-          ${className}
-        `}
-      >
-        <div
-          style={customStyle}
-          className={`
-            inline-flex items-center gap-2 ${isNested ? 'px-2 py-0.5' : 'px-3 py-1'} rounded-full text-white font-medium shadow-sm
-            transition-all duration-200 ease-out
-            hover:scale-105 hover:shadow-md w-fit
-            ${card.completed ? 'opacity-50' : ''}
-            ${isNested ? 'text-sm' : 'text-sm'}
-          `}
-        >
-
-          {card.icon && (
-            <span className={`mr-1 ${isNested ? 'text-sm' : 'text-base'}`}>
-              {card.icon}
-            </span>
-          )}
-          {card.time && (
-            <span className={`text-white/80 font-normal mr-1 ${isNested ? 'text-[10px]' : 'text-xs'}`}>
-              {card.time}
-            </span>
-          )}
-          {isEditing ? (
-            <Input
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              onBlur={handleSaveTitle}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                    handleSaveTitle();
-                    e.currentTarget.blur(); // Trigger blur to save
-                }
-                if (e.key === 'Escape') {
-                    setEditTitle(card.title);
-                    setIsEditing(false);
-                }
-              }}
-              onClick={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()} // Prevent drag start
-              autoFocus
-              className={`h-5 p-0 bg-transparent border-none text-white focus-visible:ring-0 focus-visible:ring-offset-0 ${isNested ? 'text-sm' : 'text-sm'} w-full min-w-[60px]`}
-            />
-          ) : (
-            <span 
-                onClick={(e) => {
-                    e.stopPropagation();
-                    setIsEditing(true);
-                }}
-                className={`truncate cursor-text hover:bg-white/10 px-1 -mx-1 rounded ${card.columnType === 'extra' ? 'max-w-[300px]' : (isNested ? 'max-w-[120px]' : 'max-w-[200px]')} ${card.completed ? 'line-through text-white/70' : ''}`}
-            >
-                {card.title}
-            </span>
-          )}
-          {card.location && (
-            <MapPin className="w-3 h-3 text-white/70 ml-1.5 shrink-0" />
-          )}
-          {card.cost !== undefined && (
-            <span className={`text-white/80 font-normal ml-2 opacity-80 ${isNested ? 'text-[10px]' : 'text-xs'}`}>
-              {getCurrencySymbol(card.currency)} {card.cost.toFixed(2).replace('.', ',')}
-            </span>
-          )}
-          {card.checklist && card.checklist.length > 0 && (
-            <div className={`flex items-center gap-1 ml-2 opacity-80 ${isNested ? 'text-[10px]' : 'text-xs'}`}>
-               <CheckSquare className="w-3 h-3 text-white/70" />
-               <span className="text-white/80 font-normal">
-                 {card.checklist.filter(i => i.completed).length}/{card.checklist.length}
-               </span>
-            </div>
-          )}
-        </div>
-
-        {/* Completion Button - Only for day columns */}
-        {card.columnType !== 'extra' && (
-          <button
-            onClick={handleToggleComplete}
-            className={`
-              p-1 rounded-full transition-all duration-200
-              ${card.completed
-                ? 'text-muted-foreground hover:text-white opacity-100'
-                : 'text-muted-foreground hover:text-white opacity-0 group-hover:opacity-100'
-              }
-            `}
-          >
-            {card.completed ? (
-              <div className="bg-white rounded-full p-0.5">
-                <Check className={`text-black ${isNested ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} strokeWidth={4} />
-              </div>
-            ) : (
-              <Circle className={isNested ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
-            )}
-          </button>
+        className={cn(
+            "group relative w-full mb-2 touch-none select-none outline-none",
+            isDragging ? "z-50 opacity-0" : "z-0",
+            className
         )}
+      >
+          <div 
+            className={cn(
+                "relative w-full rounded-xl border transition-all duration-200 ease-out overflow-hidden flex flex-col gap-1.5",
+                isNested ? "p-2 min-h-[3rem]" : "p-3 min-h-[4rem]",
+                card.completed ? "opacity-60 grayscale-[0.5]" : "hover:shadow-lg hover:-translate-y-0.5"
+            )}
+            style={{ 
+                backgroundColor: bgColor,
+                borderColor: isDragging ? 'var(--primary)' : borderColor,
+                boxShadow: isDragging ? '0 10px 30px -10px rgba(0,0,0,0.5)' : 'none'
+            }}
+          >
+              {/* Left Stripe for completion status or category color */}
+              {hasColor && (
+                  <div 
+                    className="absolute left-0 top-0 bottom-0 w-1 opacity-60" 
+                    style={{ backgroundColor: card.color }} 
+                  />
+              )}
+
+              {/* Header: Title and Checkbox */}
+              <div className="flex items-start gap-3">
+                  {/* Completion Circle */}
+                  {card.columnType !== 'extra' && (
+                    <button
+                        onClick={handleToggleComplete}
+                        className={cn(
+                            "mt-0.5 shrink-0 transition-colors duration-200 rounded-full hover:bg-white/10 p-0.5",
+                            card.completed ? "text-emerald-400" : "text-muted-foreground group-hover:text-white"
+                        )}
+                    >
+                        {card.completed ? (
+                            <div className="w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center">
+                                <Check className="w-2.5 h-2.5" />
+                            </div>
+                        ) : (
+                            <Circle className="w-4 h-4 opacity-50 hover:opacity-100" />
+                        )}
+                    </button>
+                  )}
+
+                  <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                        <div className="flex items-center gap-2">
+                             {card.icon && (
+                                <span className="text-base leading-none">{card.icon}</span>
+                             )}
+                             
+                             {isEditing ? (
+                                <Input
+                                    value={editTitle}
+                                    onChange={(e) => setEditTitle(e.target.value)}
+                                    onBlur={handleSaveTitle}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleSaveTitle();
+                                            e.currentTarget.blur();
+                                        }
+                                        if (e.key === 'Escape') {
+                                            setEditTitle(card.title);
+                                            setIsEditing(false);
+                                        }
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    autoFocus
+                                    className="h-6 p-0 bg-transparent border-none text-foreground text-sm font-medium focus-visible:ring-0 px-1 -ml-1 w-full"
+                                />
+                             ) : (
+                                <span 
+                                    className={cn(
+                                        "font-medium text-sm text-foreground/90 truncate leading-snug cursor-text",
+                                        card.completed && "line-through text-muted-foreground"
+                                    )}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsEditing(true);
+                                    }}
+                                >
+                                    {card.title}
+                                </span>
+                             )}
+                        </div>
+
+                        {/* Metadata Row */}
+                        {(card.time || card.location || card.cost !== undefined || (card.checklist && card.checklist.length > 0)) && (
+                            <div className="flex items-center gap-3 text-[10px] text-muted-foreground mt-1">
+                                {card.time && (
+                                    <div className="flex items-center gap-1 bg-white/5 px-1.5 py-0.5 rounded-[4px]">
+                                        <Clock className="w-2.5 h-2.5" />
+                                        <span>{card.time}</span>
+                                    </div>
+                                )}
+                                
+                                {card.location && (
+                                    <div className="flex items-center gap-1 max-w-[100px] truncate">
+                                        <MapPin className="w-2.5 h-2.5 shrink-0" />
+                                        <span className="truncate">{card.location.name}</span>
+                                    </div>
+                                )}
+
+                                {card.cost !== undefined && (
+                                    <div className="flex items-center gap-0.5">
+                                        <span className="font-mono text-foreground/70">
+                                            {getCurrencySymbol(card.currency)}
+                                            {card.cost.toFixed(0)}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {card.checklist && card.checklist.length > 0 && (
+                                    <div className="flex items-center gap-1">
+                                        <CheckSquare className="w-2.5 h-2.5" />
+                                        <span>
+                                            {card.checklist.filter(i => i.completed).length}/{card.checklist.length}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                  </div>
+                  
+                  {/* Drag Handle - Visible on hover */}
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing p-1 hover:bg-white/5 rounded">
+                      <GripVertical className="w-3 h-3 text-muted-foreground" />
+                  </div>
+              </div>
+          </div>
       </div>
 
       <EditCardDialog

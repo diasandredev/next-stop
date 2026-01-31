@@ -79,7 +79,7 @@ export function TimePicker({ time, onChange, className }: TimePickerProps) {
                                         size="sm"
                                         className={cn(
                                             "w-full justify-center font-normal h-8 mb-1 last:mb-0",
-                                            hours === hour ? "bg-[#304D73] text-white hover:bg-[#304D73]/90 hover:text-white font-medium" : "text-muted-foreground hover:text-white hover:bg-white/10"
+                                            hours === hour ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium" : "text-muted-foreground hover:text-white hover:bg-white/10"
                                         )}
                                         onClick={() => handleTimeChange('hour', hour)}
                                     >
@@ -102,7 +102,7 @@ export function TimePicker({ time, onChange, className }: TimePickerProps) {
                                         size="sm"
                                         className={cn(
                                             "w-full justify-center font-normal h-8 mb-1 last:mb-0",
-                                            minutes === minute ? "bg-[#304D73] text-white hover:bg-[#304D73]/90 hover:text-white font-medium" : "text-muted-foreground hover:text-white hover:bg-white/10"
+                                            minutes === minute ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium" : "text-muted-foreground hover:text-white hover:bg-white/10"
                                         )}
                                         onClick={() => handleTimeChange('minute', minute)}
                                     >

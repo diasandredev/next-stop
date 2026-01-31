@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { MapPin } from 'lucide-react';
+// import { MapPin } from 'lucide-react'; // Removed MapPin
 
 interface LogoProps {
     className?: string; // Additional classes for the container
@@ -15,28 +15,27 @@ export const Logo = ({
     textClassName,
     showIcon = true,
     showText = true,
-    iconSize = 24,
+    iconSize = 32,
     variant = 'default'
 }: LogoProps) => {
     return (
         <div className={cn("flex items-center gap-2", className)}>
             {showIcon && (
-                <div className="flex items-center justify-center bg-primary rounded-lg p-1">
-                    <MapPin
-                        size={iconSize}
-                        className="text-primary-foreground"
-                        strokeWidth={2.5}
-                    />
-                </div>
+                <img 
+                    src="/logo.png" 
+                    alt="Next Stop" 
+                    style={{ width: iconSize, height: iconSize }} 
+                    className="rounded-lg object-contain"
+                />
             )}
             {showText && (
                 <span
-                    style={{ fontFamily: "'Outfit', sans-serif" }}
+                    style={{ fontFamily: "'Pacifico', cursive" }}
                     className={cn(
-                        "font-bold tracking-tight text-foreground uppercase",
-                        variant === 'large' && "text-3xl",
-                        variant === 'default' && "text-xl",
-                        variant === 'small' && "text-lg",
+                        "font-normal tracking-wide bg-gradient-to-r from-[#FFBA08] via-[#E85D04] to-[#DC2F02] bg-clip-text text-transparent pb-1",
+                        variant === 'large' && "text-4xl",
+                        variant === 'default' && "text-2xl",
+                        variant === 'small' && "text-xl",
                         textClassName
                     )}
                 >

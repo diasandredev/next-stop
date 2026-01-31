@@ -69,7 +69,7 @@ export function ConfirmDialog({
                         }}
                         className={`${variant === 'destructive'
                             ? 'bg-red-600 hover:bg-red-500'
-                            : 'bg-[#304D73] hover:bg-[#264059]'
+                            : 'bg-primary hover:bg-primary/90'
                             } text-white rounded-full h-10 px-6 font-medium`}
                     >
                         {confirmText}

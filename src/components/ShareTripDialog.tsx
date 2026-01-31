@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Trip, TripShare } from '@/types/kanban';
 import { useAuth } from '@/contexts/AuthContext';
-import { Trash2, UserPlus, Eye, Edit3 } from 'lucide-react';
+import { Trash2, UserPlus, Eye, Edit3, X, Users, MoreHorizontal, Mail } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -13,6 +12,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from 'sonner';
 
 interface ShareTripDialogProps {
@@ -94,124 +105,194 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
         toast.success(`Permission updated for ${emailToUpdate}`);
     };
 
+    const handleClearAll = () => {
+        onUpdateTrip(trip.id, { sharedWith: [] });
+        toast.success('All shares removed');
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-[#1a1a1a] border-none text-white sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
-                <DialogHeader className="pb-4">
-                    <DialogTitle className="text-xl font-bold">Share "{trip.name}"</DialogTitle>
-                    <DialogDescription className="text-muted-foreground">
-                        Invite other people to collaborate on this trip by entering their email address.
-                    </DialogDescription>
-                </DialogHeader>
+            <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
+                <DialogTitle className="sr-only">Share Trip</DialogTitle>
+                <DialogDescription className="sr-only">Invite other people to collaborate on this trip.</DialogDescription>
+                
+                <TooltipProvider>
+                    {/* Header / Actions Bar */}
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Users className="w-4 h-4" />
+                            <span>Share "{trip.name}"</span>
+                        </div>
 
-                <div className="space-y-6">
-                    {/* Add new share */}
-                    <div className="space-y-3">
-                        <Label className="text-sm font-medium text-muted-foreground">Add person</Label>
-                        <div className="flex gap-2">
-                            <Input
-                                type="email"
-                                placeholder="email@example.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-muted-foreground"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        handleAddShare();
-                                    }
-                                }}
-                            />
-                            <Select value={permission} onValueChange={(v) => setPermission(v as 'view' | 'edit')}>
-                                <SelectTrigger className="w-[130px] bg-white/5 border-white/10">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-[#2a2a2a] border-white/10">
-                                    <SelectItem value="view" className="text-white focus:bg-white/10 focus:text-white">
-                                        <div className="flex items-center gap-2">
-                                            <Eye className="w-4 h-4" />
-                                            <span>View</span>
-                                        </div>
-                                    </SelectItem>
-                                    <SelectItem value="edit" className="text-white focus:bg-white/10 focus:text-white">
-                                        <div className="flex items-center gap-2">
-                                            <Edit3 className="w-4 h-4" />
-                                            <span>Edit</span>
-                                        </div>
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <Button
-                                onClick={handleAddShare}
-                                disabled={isLoading || !email.trim()}
-                                className="bg-[#304D73] hover:bg-[#264059]"
-                            >
-                                <UserPlus className="w-4 h-4" />
-                            </Button>
+                        <div className="flex items-center gap-1">
+                            {/* More Menu */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white hover:bg-white/10 rounded-full h-8 w-8">
+                                        <MoreHorizontal className="w-4 h-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="bg-[#2a2a2a] border-white/10 text-white">
+                                    <DropdownMenuItem 
+                                        onClick={handleClearAll} 
+                                        disabled={shares.length === 0}
+                                        className="text-red-400 focus:text-red-400 focus:bg-white/10 cursor-pointer"
+                                    >
+                                        Remove all shares
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            {/* Close */}
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => onOpenChange(false)}>
+                                        <X className="w-4 h-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>Close</p></TooltipContent>
+                            </Tooltip>
                         </div>
                     </div>
 
-                    {/* Current shares list */}
-                    {shares.length > 0 && (
-                        <div className="space-y-3">
-                            <Label className="text-sm font-medium text-muted-foreground">People with access</Label>
-                            <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                                {shares.map((share) => (
-                                    <div
-                                        key={share.email}
-                                        className="flex items-center justify-between p-3 bg-white/5 rounded-lg group"
-                                    >
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <div className="w-8 h-8 rounded-full bg-[#304D73]/30 flex items-center justify-center text-sm font-medium text-[#5a8fc4]">
-                                                {share.email.charAt(0).toUpperCase()}
+                    {/* Content */}
+                    <div className="p-6 space-y-6 max-h-[85vh] overflow-y-auto">
+                        <p className="text-sm text-muted-foreground -mt-2">
+                            Invite other people to collaborate on this trip by entering their email address.
+                        </p>
+                        
+                        {/* Add new share - Properties Grid */}
+                        <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-4">
+                            <Label className="text-xs font-medium text-muted-foreground">Add person</Label>
+                            
+                            <div className="grid grid-cols-[1fr_auto_auto] gap-2">
+                                {/* Email Input */}
+                                <div className="flex items-center bg-[#1a1a1a] rounded-lg border border-white/10 px-3 h-10 gap-2">
+                                    <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                                    <div className="w-px h-4 bg-white/10" />
+                                    <input
+                                        type="email"
+                                        placeholder="email@example.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="bg-transparent border-none text-white placeholder:text-muted-foreground/50 focus:outline-none flex-1 text-sm"
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleAddShare();
+                                            }
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Permission Selector */}
+                                <Select value={permission} onValueChange={(v) => setPermission(v as 'view' | 'edit')}>
+                                    <SelectTrigger className="w-[120px] h-10 bg-[#1a1a1a] border-white/10 rounded-lg">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-[#2a2a2a] border-white/10">
+                                        <SelectItem value="view" className="text-white focus:bg-white/10 focus:text-white">
+                                            <div className="flex items-center gap-2">
+                                                <Eye className="w-4 h-4" />
+                                                <span>View</span>
                                             </div>
-                                            <div className="min-w-0">
-                                                <p className="text-sm font-medium truncate">{share.email}</p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Added by {share.addedBy}
-                                                </p>
+                                        </SelectItem>
+                                        <SelectItem value="edit" className="text-white focus:bg-white/10 focus:text-white">
+                                            <div className="flex items-center gap-2">
+                                                <Edit3 className="w-4 h-4" />
+                                                <span>Edit</span>
                                             </div>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Select
-                                                value={share.permission}
-                                                onValueChange={(v) => handleUpdatePermission(share.email, v as 'view' | 'edit')}
-                                            >
-                                                <SelectTrigger className="w-[110px] h-8 text-xs bg-transparent border-white/10">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent className="bg-[#2a2a2a] border-white/10">
-                                                    <SelectItem value="view" className="text-white text-xs focus:bg-white/10 focus:text-white">
-                                                        View
-                                                    </SelectItem>
-                                                    <SelectItem value="edit" className="text-white text-xs focus:bg-white/10 focus:text-white">
-                                                        Edit
-                                                    </SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                onClick={() => handleRemoveShare(share.email)}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+
+                                {/* Add Button */}
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            onClick={handleAddShare}
+                                            disabled={isLoading || !email.trim()}
+                                            className="bg-primary hover:bg-primary/90 rounded-lg h-10 w-10 p-0"
+                                        >
+                                            <UserPlus className="w-4 h-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>Add person</p></TooltipContent>
+                                </Tooltip>
                             </div>
                         </div>
-                    )}
 
-                    {shares.length === 0 && (
-                        <div className="text-center py-8 text-muted-foreground">
-                            <UserPlus className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                            <p className="text-sm">No people added yet</p>
-                            <p className="text-xs mt-1">Add someone's email to share this trip</p>
-                        </div>
-                    )}
-                </div>
+                        <div className="w-full h-px bg-white/5" />
+
+                        {/* Current shares list */}
+                        {shares.length > 0 && (
+                            <div className="space-y-3">
+                                <Label className="text-xs font-medium text-muted-foreground">People with access</Label>
+                                <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                                    {shares.map((share) => (
+                                        <div
+                                            key={share.email}
+                                            className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 group hover:bg-white/10 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-sm font-medium text-primary">
+                                                    {share.email.charAt(0).toUpperCase()}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-medium truncate text-white">{share.email}</p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Added by {share.addedBy.split('@')[0]}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Select
+                                                    value={share.permission}
+                                                    onValueChange={(v) => handleUpdatePermission(share.email, v as 'view' | 'edit')}
+                                                >
+                                                    <SelectTrigger className="w-[100px] h-8 text-xs bg-transparent border-white/10 rounded-lg">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-[#2a2a2a] border-white/10">
+                                                        <SelectItem value="view" className="text-white text-xs focus:bg-white/10 focus:text-white">
+                                                            View
+                                                        </SelectItem>
+                                                        <SelectItem value="edit" className="text-white text-xs focus:bg-white/10 focus:text-white">
+                                                            Edit
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-400/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
+                                                            onClick={() => handleRemoveShare(share.email)}
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent><p>Remove access</p></TooltipContent>
+                                                </Tooltip>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {shares.length === 0 && (
+                            <div className="text-center py-10 text-muted-foreground">
+                                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                                    <UserPlus className="w-8 h-8 opacity-30" />
+                                </div>
+                                <p className="text-sm font-medium">No people added yet</p>
+                                <p className="text-xs mt-1 text-muted-foreground/70">Add someone's email above to share this trip</p>
+                            </div>
+                        )}
+                    </div>
+                </TooltipProvider>
             </DialogContent>
         </Dialog>
     );

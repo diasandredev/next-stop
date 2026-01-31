@@ -3,7 +3,7 @@ import { Card, Dashboard, Trip } from '@/types/kanban';
 import { DayColumn } from './DayColumn';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Trash2, X, Palette, Settings, Pencil, Calendar, Wallet, Maximize2, Minimize2, Bed } from 'lucide-react';
+import { Trash2, X, Settings, Pencil, Calendar, Wallet, Maximize2, Minimize2, Bed, MapPin } from 'lucide-react';
 import { useKanban } from '@/contexts/KanbanContext';
 import chroma from 'chroma-js';
 import { ColorPicker } from './ColorPicker';
@@ -11,20 +11,17 @@ import { LocationSearch } from './LocationSearch';
 import {
     Dialog,
     DialogContent,
-    DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Label } from './ui/label';
-import { addDays, format, parseISO } from 'date-fns';
-import { DatePicker } from './DatePicker';
+import { addDays, format } from 'date-fns';
 import { DateRangePicker } from './DateRangePicker';
 import { ConfirmDialog } from './ConfirmDialog';
 import { useAuth } from '@/contexts/AuthContext';
-import { cn } from '@/lib/utils';
-
 import { getCurrencySymbol } from '@/utils/currency';
+import { cn } from '@/lib/utils';
 
 interface DashboardViewProps {
     dashboard: Dashboard;
@@ -78,11 +75,6 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
         const dateStr = date.toISOString().split('T')[0];
         const dayCards = cards.filter(c => c.date === dateStr && c.dashboardId === dashboard.id);
 
-        // Calculate "visual slots" used
-        // Standard card = 1 slot
-        // Options card = header (1) + max(branches) + footer (1) + margins(~0.5) ~ roughly 2 + max
-        // Since we unified styles to ~48px (1 slot) for header, etc.
-        // Let's approximate: Options = 2 (Header+Footer) + Max(ChildCount)
         let visualCount = 0;
         dayCards.forEach(c => {
             if (c.parentId) return; // Skip children, they are counted within parent container
@@ -101,8 +93,6 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
         return visualCount;
     });
 
-
-
     const maxCards = Math.max(0, ...dayCardCounts);
     // Ensure at least a minimum visual height (e.g. 5) but extend if there are more cards
     const unifiedMinSlots = Math.max(5, maxCards + 1);
@@ -111,9 +101,6 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
 
     // Calculate total trip cost across all cards in this dashboard
     const tripTotalCost = cards.reduce((acc, card) => {
-        // Filter out cards not in this dashboard (already filtered in props usually, but good to be safe if passed raw)
-        // Check if card belongs to visible dates? Or just all cards in dashboard?
-        // Usually cards passed here are all cards. Let's filter by dashboardId if needed.
         if (card.dashboardId === dashboard.id && card.cost && !card.completed) {
             const currency = card.currency || 'USD';
             acc[currency] = (acc[currency] || 0) + card.cost;
@@ -121,271 +108,302 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
         return acc;
     }, {} as Record<string, number>);
 
-
     // Width logic: if <= 5 columns, fill space (fluid). If > 5, fixed width (scroll).
     const isFluid = isFluidOverride !== null ? isFluidOverride : totalColumns <= 5;
-    const containerClass = isFluid ? "flex gap-4 w-full h-full" : "flex gap-4 min-w-max h-full";
+    const containerClass = isFluid ? "flex gap-6 w-full h-full" : "flex gap-6 min-w-max h-full";
     const columnClass = isFluid
         ? `flex-1 min-w-0 h-full ${totalColumns === 1 ? 'max-w-[50%]' : ''}`
         : "w-80 flex-shrink-0 h-full";
 
+    const dashboardColor = dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' 
+        ? dashboard.backgroundColor 
+        : '#A1A1AA'; // Light Gray fallback for "No Color"
+
+    const hasCustomColor = dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent';
+
     return (
-        <div
-            className="flex flex-col gap-4 p-4 border rounded-xl backdrop-blur-sm shadow-sm relative group/dash transition-colors duration-500"
-            style={{
-                borderColor: dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' ? chroma(dashboard.backgroundColor).alpha(0.3).css() : 'hsl(var(--border))',
-                backgroundColor: dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' ? chroma(dashboard.backgroundColor).alpha(0.15).css() : 'bg-background/40'
-            }}
-        >
-            {/* Dashboard Header */}
-            <div className="flex items-center justify-between gap-4 pb-6 pt-2 border-b border-white/10 group/header">
-                {/* Left Side: Title */}
-                <div className="flex items-center gap-2 group/title flex-1 min-w-0">
-                    {isEditingName ? (
-                        <Input
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            onBlur={handleNameSave}
-                            onKeyDown={(e) => e.key === 'Enter' && handleNameSave()}
-                            autoFocus
-                            className="text-3xl md:text-3xl font-bold h-auto w-full bg-transparent border-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground shadow-none tracking-tight"
-                        />
-                    ) : (
+        <div className="flex flex-col gap-6 p-1">
+            {/* Glassmorphic Dashboard Header */}
+            <div 
+                className={cn(
+                    "rounded-2xl border border-white/5 backdrop-blur-xl p-5 relative overflow-hidden group/dash",
+                    hasCustomColor ? "" : "bg-secondary/40"
+                )}
+                style={hasCustomColor ? { backgroundColor: chroma(dashboard.backgroundColor!).alpha(0.15).css() } : undefined}
+            >
+                {/* Decorative background glow - Removed */}
+
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                    
+                    {/* Title Section */}
+                    <div className="flex items-start gap-4 flex-1 min-w-0">
                         <div 
-                            onClick={() => setIsEditingName(true)}
-                            className="flex items-center gap-3 cursor-pointer select-none min-w-0"
+                            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg ring-1 ring-white/10"
+                            style={{ 
+                                backgroundColor: chroma(dashboardColor).alpha(0.1).css(),
+                                color: dashboardColor
+                            }}
                         >
-                            <h2 className="text-3xl font-bold tracking-tight text-foreground truncate">
-                                {dashboard.name}
-                            </h2>
-                            <Pencil className="w-4 h-4 text-muted-foreground/50 opacity-0 -translate-x-2 group-hover/title:opacity-100 group-hover/title:translate-x-0 transition-all duration-200 flex-shrink-0 mt-1" />
+                            <MapPin className="w-6 h-6" />
                         </div>
-                    )}
-                </div>
-
-                {/* Right Side: Metadata & Actions */}
-                <div className="flex items-center gap-6 flex-shrink-0">
-                     {/* Metadata: Dates & Cost */}
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground/80 hidden sm:flex">
-                        {/* Dates */}
-                        <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 opacity-70" />
-                            <span className="font-medium whitespace-nowrap">
-                                {format(dates[0], 'MMM d')} - {format(dates[dates.length - 1], 'MMM d')}
-                            </span>
-                        </div>
-
-                        {/* Cost */}
-                        {Object.keys(tripTotalCost).length > 0 && (
-                            <>
-                                <div className="w-1 h-1 rounded-full bg-white/20" /> {/* Separator Dot */}
-                                <div className="flex items-center gap-2">
-                                    <Wallet className="w-4 h-4 opacity-70" />
-                                    <div className="flex items-center gap-3">
-                                        {Object.entries(tripTotalCost).map(([curr, amount]) => (
-                                            <div key={curr} className="flex items-baseline gap-1">
-                                                <span className="text-xs font-medium opacity-70">{getCurrencySymbol(curr)}</span>
-                                                <span className="font-bold font-mono">
-                                                    {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
+                        
+                        <div className="flex flex-col gap-1 flex-1 min-w-0">
+                            <div className="flex items-center gap-2 group/title">
+                                {isEditingName ? (
+                                    <input
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        onBlur={handleNameSave}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleNameSave()}
+                                        autoFocus
+                                        className="bg-transparent border-none outline-none text-foreground w-full"
+                                        style={{ 
+                                            fontFamily: "'Space Grotesk', sans-serif",
+                                            fontSize: '1.5rem',
+                                            fontWeight: 700,
+                                            letterSpacing: '-0.025em',
+                                            lineHeight: 1.2
+                                        }}
+                                    />
+                                ) : (
+                                    <h2 
+                                        onClick={() => setIsEditingName(true)}
+                                        className="text-2xl font-display font-bold tracking-tight text-foreground truncate cursor-pointer hover:opacity-80 transition-opacity"
+                                    >
+                                        {dashboard.name}
+                                    </h2>
+                                )}
+                                {!isEditingName && <Pencil onClick={() => setIsEditingName(true)} className="w-3.5 h-3.5 text-muted-foreground/50 opacity-0 group-hover/title:opacity-100 transition-opacity cursor-pointer" />}
+                            </div>
+                            
+                            <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground">
+                                <div className="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-md border border-white/5">
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    <span>
+                                        {format(dates[0], 'MMM d')} - {format(dates[dates.length - 1], 'MMM d')}
+                                    </span>
                                 </div>
-                            </>
-                        )}
 
-                        {/* Accommodation Info */}
-                        {dashboard.accommodation && (
-                            <>
-                                <div className="w-1 h-1 rounded-full bg-white/20" />
-                                <TooltipProvider delayDuration={0}>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <a 
-                                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dashboard.accommodation.address)}&query_place_id=${dashboard.accommodation.placeId}`}
-                                                target="_blank" 
-                                                rel="noopener noreferrer"
-                                                className="flex items-center gap-2 hover:text-white transition-colors cursor-pointer group/hotel"
-                                            >
-                                                <Bed className="w-4 h-4 opacity-70 group-hover/hotel:opacity-100" />
-                                                <span className="font-medium truncate max-w-[150px]">
-                                                    {dashboard.accommodation.name}
-                                                </span>
-                                            </a>
-                                        </TooltipTrigger>
-                                        <TooltipContent side="bottom" className="max-w-[300px] break-words">
-                                            <p className="font-semibold">{dashboard.accommodation.name}</p>
-                                            <p className="text-xs text-muted-foreground mt-1">{dashboard.accommodation.address}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            </>
-                        )}
+                                {dashboard.accommodation && (
+                                     <a 
+                                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dashboard.accommodation.address)}&query_place_id=${dashboard.accommodation.placeId}`}
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-md border border-white/5 hover:bg-white/10 hover:text-foreground transition-colors max-w-[200px]"
+                                    >
+                                        <Bed className="w-3.5 h-3.5 text-purple-400" />
+                                        <span className="truncate">{dashboard.accommodation.name}</span>
+                                    </a>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-1">
-                        <TooltipProvider delayDuration={0}>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/50 hidden md:flex"
-                                        onClick={() => setIsFluidOverride(prev => {
-                                            const current = prev !== null ? prev : totalColumns <= 5;
-                                            return !current;
-                                        })}
-                                    >
-                                        {isFluid ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>{isFluid ? "Switch to Scroll View" : "Switch to Fit View"}</TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-
-                        <ColorPicker
-                            open={isColorPickerOpen}
-                            onOpenChange={setIsColorPickerOpen}
-                            color={dashboard.backgroundColor || 'transparent'}
-                            onChange={(color) => updateDashboard(dashboard.id, { backgroundColor: color })}
-                            trigger={
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                                    <div 
-                                        className="w-4 h-4 rounded-full border border-current/50" 
-                                        style={{ backgroundColor: dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' ? dashboard.backgroundColor : 'transparent' }}
-                                    />
-                                </Button>
-                            }
-                        />
-                        <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-                            <DialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                                    <Settings className="h-4 w-4" />
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
-                                <DialogTitle className="sr-only">City Settings</DialogTitle>
-
-                                <div className="flex items-center justify-between mb-6">
-                                    <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                                        {dashboard.name}
-                                        <Settings className="w-4 h-4 text-muted-foreground" />
-                                    </DialogTitle>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => setSettingsOpen(false)}>
-                                        <span className="sr-only">Close</span>
-                                        <X className="w-4 h-4" />
-                                    </Button>
+                    {/* Actions & Stats */}
+                    <div className="flex items-center gap-3">
+                         {/* Stats Pill */}
+                         {Object.keys(tripTotalCost).length > 0 && (
+                            <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-sm mr-2">
+                                <Wallet className="w-4 h-4 text-muted-foreground" />
+                                <div className="flex items-center gap-3">
+                                    {Object.entries(tripTotalCost).map(([curr, amount]) => (
+                                        <div key={curr} className="flex items-baseline gap-1">
+                                            <span className="text-[10px] font-bold text-muted-foreground uppercase">{getCurrencySymbol(curr)}</span>
+                                            <span className="text-sm font-mono font-bold text-foreground">
+                                                {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)}
+                                            </span>
+                                        </div>
+                                    ))}
                                 </div>
+                            </div>
+                        )}
 
-                                <div className="space-y-4 mb-6">
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-medium text-muted-foreground">Travel Dates</Label>
-                                        <div className="bg-white/5 p-1 pl-3 rounded-xl flex items-center gap-2 relative">
-                                            <DateRangePicker
-                                                date={{
-                                                    from: editStartDate ? new Date(editStartDate) : undefined,
-                                                    to: editStartDate && editDays ? addDays(new Date(editStartDate), editDays - 1) : undefined
+                        <div className="flex items-center gap-1 bg-white/5 p-1 rounded-lg border border-white/5 backdrop-blur-sm">
+                            <TooltipProvider delayDuration={0}>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-md"
+                                            onClick={() => setIsFluidOverride(prev => {
+                                                const current = prev !== null ? prev : totalColumns <= 5;
+                                                return !current;
+                                            })}
+                                        >
+                                            {isFluid ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>{isFluid ? "Switch to Scroll View" : "Switch to Fit View"}</TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+
+                            <div className="w-px h-4 bg-white/10 mx-1" />
+
+                            <ColorPicker
+                                open={isColorPickerOpen}
+                                onOpenChange={setIsColorPickerOpen}
+                                color={dashboard.backgroundColor || 'transparent'}
+                                onChange={(color) => updateDashboard(dashboard.id, { backgroundColor: color })}
+                                trigger={
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-md group/color">
+                                        <div 
+                                            className="w-3.5 h-3.5 rounded-full ring-2 ring-white/10 group-hover/color:scale-110 transition-transform" 
+                                            style={{ backgroundColor: dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' ? dashboard.backgroundColor : 'transparent' }}
+                                        />
+                                    </Button>
+                                }
+                            />
+                            
+                            <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-md">
+                                        <Settings className="h-4 w-4" />
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
+                                    <DialogTitle className="sr-only">{dashboard.name} Settings</DialogTitle>
+                                    
+                                    {/* Header Bar */}
+                                    <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+                                        <div className="flex items-center gap-3">
+                                            <div 
+                                                className="w-10 h-10 rounded-xl flex items-center justify-center ring-1 ring-white/10"
+                                                style={{ 
+                                                    backgroundColor: chroma(dashboardColor).alpha(0.15).css(),
+                                                    color: dashboardColor
                                                 }}
-                                                setDate={(range) => {
-                                                    if (range?.from) {
-                                                        setEditStartDate(range.from.toISOString());
-                                                        if (range.to) {
-                                                            const diffTime = Math.abs(range.to.getTime() - range.from.getTime());
-                                                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                                                            setEditDays(diffDays);
-                                                        } else {
-                                                            setEditDays(1);
-                                                        }
-                                                    } else {
-                                                        setEditStartDate('');
-                                                        setEditDays(1);
-                                                    }
-                                                }}
-                                                fromDate={trip.startDate ? new Date(trip.startDate) : undefined}
-                                                toDate={trip.endDate ? new Date(trip.endDate) : undefined}
-                                                disabled={(date) => {
-                                                    // Optional: Stronger validation
-                                                    if (trip.startDate && date < new Date(trip.startDate)) return true;
-                                                    if (trip.endDate && date > new Date(trip.endDate)) return true;
-                                                    return false;
-                                                }}
-                                            />
+                                            >
+                                                <MapPin className="w-5 h-5" />
+                                            </div>
+                                            <span className="text-lg font-semibold text-white">{dashboard.name}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            {trip.ownerId === user?.uid && (
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="icon" 
+                                                    className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-full"
+                                                    onClick={() => setShowDeleteConfirm(true)}
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            )}
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => setSettingsOpen(false)}>
+                                                <X className="w-4 h-4" />
+                                            </Button>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-medium text-muted-foreground">Where are you staying?</Label>
-                                        <LocationSearch
-                                            defaultValue={dashboard.accommodation?.name}
-                                            onLocationSelect={(location) => {
-                                                updateDashboard(dashboard.id, { accommodation: location });
-                                            }}
-                                        />
+                                    {/* Content */}
+                                    <div className="p-6 space-y-6 max-h-[85vh] overflow-y-auto">
+                                        {/* Properties */}
+                                        <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-4">
+                                            {/* Duration */}
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                                    <Calendar className="w-3.5 h-3.5" />
+                                                    Duration
+                                                </Label>
+                                                <div className="bg-[#1a1a1a] rounded-lg border border-white/10 overflow-hidden">
+                                                    <DateRangePicker
+                                                        date={{
+                                                            from: editStartDate ? new Date(editStartDate) : undefined,
+                                                            to: editStartDate && editDays ? addDays(new Date(editStartDate), editDays - 1) : undefined
+                                                        }}
+                                                        setDate={(range) => {
+                                                            if (range?.from) {
+                                                                setEditStartDate(range.from.toISOString());
+                                                                if (range.to) {
+                                                                    const diffTime = Math.abs(range.to.getTime() - range.from.getTime());
+                                                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                                                                    setEditDays(diffDays);
+                                                                } else {
+                                                                    setEditDays(1);
+                                                                }
+                                                            } else {
+                                                                setEditStartDate('');
+                                                                setEditDays(1);
+                                                            }
+                                                        }}
+                                                        fromDate={trip.startDate ? new Date(trip.startDate) : undefined}
+                                                        toDate={trip.endDate ? new Date(trip.endDate) : undefined}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Divider */}
+                                            <div className="w-full h-px bg-white/5" />
+
+                                            {/* Accommodation */}
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                                    <Bed className="w-3.5 h-3.5" />
+                                                    Accommodation
+                                                </Label>
+                                                <div className="bg-[#1a1a1a] rounded-lg border border-white/10 overflow-hidden">
+                                                    <LocationSearch
+                                                        defaultValue={dashboard.accommodation?.name || dashboard.accommodation?.address}
+                                                        onLocationSelect={(location) => {
+                                                            updateDashboard(dashboard.id, { accommodation: location });
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className="flex items-center justify-between">
-                                    <Button
-                                        onClick={handleSettingsSave}
-                                        className="bg-[#304D73] hover:bg-[#264059] text-white rounded-full h-10 px-6 font-medium"
-                                    >
-                                        Save
-                                    </Button>
-
-                                    {trip.ownerId === user?.uid && (
+                                    {/* Footer */}
+                                    <div className="px-6 py-4 border-t border-white/5 bg-white/[0.02] flex justify-end">
                                         <Button
-                                            variant="ghost"
-                                            onClick={() => setShowDeleteConfirm(true)}
-                                            className="text-red-400 hover:bg-red-400/10 hover:text-red-400 gap-2 rounded-full"
+                                            onClick={handleSettingsSave}
+                                            className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg h-10 px-6 text-sm font-medium"
                                         >
-                                            <Trash2 className="w-4 h-4" />
-                                            Delete City
+                                            Save Changes
                                         </Button>
-                                    )}
-                                </div>
-
-                                <ConfirmDialog
-                                    open={showDeleteConfirm}
-                                    onOpenChange={setShowDeleteConfirm}
-                                    title="Delete City?"
-                                    description="Delete this city? Cards will be hidden/lost properly unless moved."
-                                    onConfirm={() => {
-                                        deleteDashboard(dashboard.id);
-                                        setSettingsOpen(false); // Close settings dialog too if needed, though delete probably unmounts component
-                                    }}
-                                    confirmText="Delete"
-                                    variant="destructive"
-                                />
-                            </DialogContent>
-                        </Dialog>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     </div>
                 </div>
             </div>
+            
+            <ConfirmDialog
+                open={showDeleteConfirm}
+                onOpenChange={setShowDeleteConfirm}
+                title="Delete City?"
+                description="Delete this city? Cards will be hidden/lost properly unless moved."
+                onConfirm={() => {
+                    deleteDashboard(dashboard.id);
+                    setSettingsOpen(false); 
+                }}
+                confirmText="Delete"
+                variant="destructive"
+            />
 
             {/* Content: Horizontal Scroll */}
-            <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4">
+            <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4 pt-1 -mx-1 px-1 custom-scrollbar">
                 <div className={containerClass}>
                     {/* Day Columns */}
-                    {dates.map(date => {
+                    {dates.map((date, index) => {
                         const dateStr = date.toISOString().split('T')[0];
                         return (
                             <div key={dateStr} className={columnClass}>
                                     <DayColumn
                                     dashboardId={dashboard.id}
                                     date={date}
+                                    dayIndex={index + 1}
                                     cards={cards.filter(c => c.date === dateStr)}
                                     isCurrentDay={dateStr === today}
                                     minSlots={unifiedMinSlots}
-                                    isWeekend={date.getDay() === 0 || date.getDay() === 6} // Just styling
-                                    dashboardColor={dashboard.backgroundColor}
+                                    isWeekend={date.getDay() === 0 || date.getDay() === 6} 
+                                    dashboardColor={dashboardColor}
                                     searchQuery={searchQuery}
                                 />
                             </div>
                         );
                     })}
-
                 </div>
             </div>
         </div>

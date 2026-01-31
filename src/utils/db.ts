@@ -1,6 +1,7 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import { Card, Trip, Dashboard, AccountSettings } from '@/types/kanban';
 import { Group } from '@/types/group';
+import { Expense } from '@/types/finance';
 import { v4 as uuidv4 } from 'uuid';
 
 interface NextStopDB extends DBSchema {
@@ -20,6 +21,10 @@ interface NextStopDB extends DBSchema {
         key: string;
         value: Group;
     };
+    expenses: {
+        key: string;
+        value: Expense;
+    };
     // Legacy store for migration, will be deleted or ignored
     // tables removed
 
@@ -34,7 +39,7 @@ interface NextStopDB extends DBSchema {
 }
 
 const DB_NAME = 'next-stop-db';
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 let _dbPromise: Promise<IDBPDatabase<NextStopDB>> | null = null;
 
@@ -71,6 +76,11 @@ function getDB() {
                 if (oldVersion < 4) {
                     // Add groups store
                     db.createObjectStore('groups', { keyPath: 'id' });
+                }
+
+                if (oldVersion < 5) {
+                    // Add expenses store
+                    db.createObjectStore('expenses', { keyPath: 'id' });
                 }
             },
             terminated() {
@@ -206,6 +216,37 @@ export const db = {
 
         for (const g of groups) {
             await store.put(g);
+        }
+
+        await tx.done;
+    },
+
+    // Expenses
+    async getExpenses(): Promise<Expense[]> {
+        return (await getDB()).getAll('expenses');
+    },
+    async saveExpense(expense: Expense): Promise<void> {
+        await (await getDB()).put('expenses', expense);
+    },
+    async deleteExpense(id: string): Promise<void> {
+        await (await getDB()).delete('expenses', id);
+    },
+    async syncExpenses(expenses: Expense[]): Promise<void> {
+        const db = await getDB();
+        const tx = db.transaction('expenses', 'readwrite');
+        const store = tx.objectStore('expenses');
+
+        const existingKeys = await store.getAllKeys();
+        const incomingIds = new Set(expenses.map(e => e.id));
+
+        for (const key of existingKeys) {
+            if (!incomingIds.has(key)) {
+                await store.delete(key);
+            }
+        }
+
+        for (const e of expenses) {
+            await store.put(e);
         }
 
         await tx.done;

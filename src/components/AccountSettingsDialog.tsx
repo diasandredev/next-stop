@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-
 import { Label } from '@/components/ui/label';
 import { useKanban } from '@/contexts/KanbanContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Settings, Trash2, Globe, User, X } from 'lucide-react';
+import { Settings, Trash2, Globe, User, X, MoreHorizontal, Mail } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -13,6 +12,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ConfirmDialog } from './ConfirmDialog';
 
 interface AccountSettingsDialogProps {
@@ -48,87 +59,132 @@ export function AccountSettingsDialog({ open, onOpenChange }: AccountSettingsDia
     return (
         <>
             <Dialog open={open} onOpenChange={onOpenChange}>
-                <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
+                <DialogContent 
+                    hideCloseButton 
+                    className="bg-[#1a1a1a] border-none text-white sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden"
+                    onOpenAutoFocus={(e) => e.preventDefault()}
+                >
                     <DialogTitle className="sr-only">Account Settings</DialogTitle>
                     <DialogDescription className="sr-only">Manage your account settings.</DialogDescription>
 
-                    <div className="flex items-center justify-between mb-6">
-                        <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                            Account settings
-                            <Settings className="w-4 h-4 text-muted-foreground" />
-                        </DialogTitle>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => onOpenChange(false)}>
-                            <span className="sr-only">Close</span>
-                            <X className="w-4 h-4" />
-                        </Button>
-                    </div>
-
-                    {/* Information Section */}
-                    <div className="space-y-4 mb-6">
-                        <Label className="text-sm font-medium text-muted-foreground">Information</Label>
-
-                        <div className="space-y-3">
-                            <div className="space-y-2">
-                                <Label className="text-xs font-medium text-muted-foreground">Name</Label>
-                                <div className="flex items-center gap-3 bg-white/5 p-3 rounded-xl">
-                                    <User className="w-5 h-5 text-muted-foreground" />
-                                    <span className="font-medium">{user?.displayName || 'User'}</span>
-                                </div>
+                    <TooltipProvider>
+                        {/* Header / Actions Bar */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Settings className="w-4 h-4" />
+                                <span>Account Settings</span>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label className="text-xs font-medium text-muted-foreground">Email</Label>
-                                <div className="flex items-center gap-3 bg-white/5 p-3 rounded-xl">
-                                    <span className="font-medium">{user?.email || 'email@example.com'}</span>
-                                </div>
+                            <div className="flex items-center gap-1">
+                                {/* Delete Cards */}
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-full h-8 w-8" 
+                                            onClick={() => setShowDeleteAlert(true)}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>Delete all cards</p></TooltipContent>
+                                </Tooltip>
+
+                                {/* More Menu */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white hover:bg-white/10 rounded-full h-8 w-8">
+                                            <MoreHorizontal className="w-4 h-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="bg-[#2a2a2a] border-white/10 text-white">
+                                        <DropdownMenuItem 
+                                            onClick={() => setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)} 
+                                            className="focus:bg-white/10 focus:text-white cursor-pointer"
+                                        >
+                                            Reset to system timezone
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+
+                                {/* Close */}
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => onOpenChange(false)}>
+                                            <X className="w-4 h-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>Close</p></TooltipContent>
+                                </Tooltip>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Settings Section */}
-                    <div className="space-y-4 mb-6">
-                        <Label className="text-sm font-medium text-muted-foreground">Configuration</Label>
-                        <div className="space-y-2">
-                            <Label className="text-xs font-medium text-muted-foreground">Timezone</Label>
-                            <div className="bg-white/5 rounded-xl">
-                                <Select value={timezone} onValueChange={setTimezone}>
-                                    <SelectTrigger className="bg-transparent border-none h-12 text-base font-medium focus:ring-0">
-                                        <div className="flex items-center gap-2">
-                                            <Globe className="w-4 h-4 text-muted-foreground" />
+                        {/* Content */}
+                        <div className="p-6 space-y-6 max-h-[85vh] overflow-y-auto">
+                            {/* User Info Card */}
+                            <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-4">
+                                <Label className="text-xs font-medium text-muted-foreground">Account Information</Label>
+                                
+                                <div className="grid grid-cols-1 gap-3">
+                                    <div className="flex items-center gap-3 bg-[#1a1a1a] rounded-lg border border-white/10 px-4 h-12">
+                                        <User className="w-4 h-4 text-muted-foreground shrink-0" />
+                                        <div className="w-px h-5 bg-white/10" />
+                                        <span className="text-sm font-medium text-white">{user?.displayName || 'User'}</span>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-3 bg-[#1a1a1a] rounded-lg border border-white/10 px-4 h-12">
+                                        <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                                        <div className="w-px h-5 bg-white/10" />
+                                        <span className="text-sm font-medium text-white">{user?.email || 'email@example.com'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="w-full h-px bg-white/5" />
+
+                            {/* Configuration */}
+                            <div className="space-y-2">
+                                <Label className="text-xs font-medium text-muted-foreground ml-1">Timezone</Label>
+                                <div className="flex items-center bg-[#1a1a1a] rounded-lg border border-white/10 px-3 h-12 gap-2">
+                                    <Globe className="w-4 h-4 text-muted-foreground shrink-0" />
+                                    <div className="w-px h-5 bg-white/10" />
+                                    <Select value={timezone} onValueChange={setTimezone}>
+                                        <SelectTrigger className="bg-transparent border-none h-10 text-sm font-medium focus:ring-0 flex-1">
                                             <SelectValue placeholder="Select timezone" />
-                                        </div>
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-[#2a2a2a] border-white/10">
-                                        {Intl.supportedValuesOf('timeZone').map((tz) => (
-                                            <SelectItem key={tz} value={tz} className="text-white focus:bg-white/10 focus:text-white">
-                                                {tz.replace(/_/g, ' ')}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-[#2a2a2a] border-white/10 max-h-[300px]">
+                                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                            {(Intl as any).supportedValuesOf('timeZone').map((tz: string) => (
+                                                <SelectItem key={tz} value={tz} className="text-white focus:bg-white/10 focus:text-white">
+                                                    {tz.replace(/_/g, ' ')}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="w-full h-px bg-white/5" />
+
+                            {/* Footer Actions */}
+                            <div className="flex items-center justify-end gap-3">
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => onOpenChange(false)}
+                                    className="rounded-full hover:bg-white/5"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={handleSave}
+                                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full h-10 px-6 font-medium"
+                                >
+                                    Save Changes
+                                </Button>
                             </div>
                         </div>
-                    </div>
-
-                    {/* Footer Actions */}
-                    <div className="flex items-center justify-between">
-                        <Button
-                            onClick={handleSave}
-                            className="bg-[#304D73] hover:bg-[#264059] text-white rounded-full h-10 px-6 font-medium"
-                        >
-                            Save
-                        </Button>
-
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => setShowDeleteAlert(true)}
-                            className="text-red-400 hover:bg-red-400/10 hover:text-red-400 gap-2 rounded-full"
-                        >
-                            <Trash2 className="w-4 h-4" />
-                            Delete cards
-                        </Button>
-                    </div>
+                    </TooltipProvider>
                 </DialogContent>
             </Dialog>
 

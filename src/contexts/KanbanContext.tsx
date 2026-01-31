@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { Card, Trip, Dashboard, AccountSettings } from '@/types/kanban';
 import { Group } from '@/types/group';
+import { Expense } from '@/types/finance';
 
 export interface KanbanContextType {
   cards: Card[];
@@ -8,6 +9,7 @@ export interface KanbanContextType {
   trips: Trip[];
   dashboards: Dashboard[];
   groups: Group[];
+  expenses: Expense[];
   currentTripId: string;
   accountSettings: AccountSettings | null;
   isLoading: boolean;
@@ -35,7 +37,11 @@ export interface KanbanContextType {
   updateAccountSettings: (settings: Partial<AccountSettings>) => void;
   addCustomColor: (color: string) => void;
   setCards: React.Dispatch<React.SetStateAction<Card[]>>;
+
+  saveExpense: (tripId: string, expense: Expense) => Promise<void>;
+  deleteExpense: (tripId: string, expenseId: string) => Promise<void>;
 }
+
 
 export const KanbanContext = createContext<KanbanContextType | undefined>(undefined);
 
