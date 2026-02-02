@@ -147,7 +147,7 @@ export default function TripMap() {
     }, [routeCards, standaloneCards, accommodations]);
 
     return (
-        <div className="flex-1 h-screen w-full relative bg-[#09090b] flex flex-col overflow-hidden">
+        <div className="flex-1 h-screen w-full relative bg-background flex flex-col overflow-hidden">
             
             {/* Map HUD / Overlay */}
             <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between p-6">
@@ -157,7 +157,7 @@ export default function TripMap() {
                     {/* Itinerary Panel */}
                     {routes.length > 0 && (
                         <div className="glass-panel rounded-2xl p-4 w-72 animate-slide-in">
-                            <div className="flex items-center gap-2 mb-4 text-white/80">
+                            <div className="flex items-center gap-2 mb-4 text-foreground/80">
                                 <Layers className="w-4 h-4" />
                                 <h3 className="text-sm font-bold uppercase tracking-wider">Itinerary</h3>
                             </div>
@@ -170,8 +170,8 @@ export default function TripMap() {
                                         className={cn(
                                             "w-full flex items-center gap-3 p-2 rounded-xl transition-all duration-200 border border-transparent group",
                                             activeRouteId === route.id 
-                                                ? "bg-white/10 border-white/10" 
-                                                : "hover:bg-white/5"
+                                                ? "bg-muted border-border" 
+                                                : "hover:bg-muted/50"
                                         )}
                                     >
                                         <div 
@@ -182,13 +182,13 @@ export default function TripMap() {
                                             style={{ backgroundColor: route.color }}
                                         />
                                         <div className="flex flex-col items-start flex-1 min-w-0">
-                                            <span className="text-xs font-bold text-white/90">{route.name}</span>
+                                            <span className="text-xs font-bold text-foreground/90">{route.name}</span>
                                             <span className="text-[10px] text-muted-foreground truncate w-full text-left">
                                                 {route.cards.length} stops
                                             </span>
                                         </div>
                                         {activeRouteId === route.id && (
-                                            <div className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]" />
+                                            <div className="w-1.5 h-1.5 rounded-full bg-foreground shadow-[0_0_10px_currentColor]" />
                                         )}
                                     </button>
                                 ))}
@@ -251,22 +251,22 @@ export default function TripMap() {
                                             <div className="relative transition-transform duration-300 hover:scale-110">
                                                 {card.icon ? (
                                                     <div
-                                                        className="bg-[#09090b] p-2 rounded-xl shadow-2xl border transition-all duration-200 text-xl"
+                                                        className="bg-background p-2 rounded-xl shadow-2xl border transition-all duration-200 text-xl"
                                                         style={{ borderColor: route.color, borderWidth: '2px' }}
                                                     >
                                                         {card.icon}
                                                     </div>
                                                 ) : (
                                                     <div
-                                                        className="bg-[#09090b] p-2 rounded-full shadow-2xl border transition-all duration-200"
+                                                        className="bg-background p-2 rounded-full shadow-2xl border transition-all duration-200"
                                                         style={{ borderColor: route.color, borderWidth: '2px' }}
                                                     >
-                                                        <MapPin className="w-5 h-5 text-white" />
+                                                        <MapPin className="w-5 h-5 text-foreground" />
                                                     </div>
                                                 )}
                                                 {/* Number Badge */}
                                                 <div
-                                                    className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-[#09090b] shadow-md border border-[#09090b]"
+                                                    className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-background shadow-md border border-background"
                                                     style={{ backgroundColor: route.color }}
                                                 >
                                                     {index + 1}
@@ -302,7 +302,7 @@ export default function TripMap() {
                         <div className="group relative flex flex-col items-center hover:z-50 cursor-pointer">
                             <div className="relative hover:scale-110 transition-transform">
                                 <div
-                                    className="bg-[#09090b] p-2 rounded-xl shadow-2xl border border-purple-500/50 text-xl z-20"
+                                    className="bg-background p-2 rounded-xl shadow-2xl border border-purple-500/50 text-xl z-20"
                                 >
                                     <Bed className="w-5 h-5 text-purple-400" />
                                 </div>
@@ -323,7 +323,7 @@ export default function TripMap() {
                         maxWidth="320px"
                         className="custom-popup"
                     >
-                        <div className="bg-[#09090b]/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl min-w-[280px]">
+                        <div className="bg-popover/90 backdrop-blur-xl border border-border rounded-2xl overflow-hidden shadow-2xl min-w-[280px]">
                             {/* Color Bar */}
                             <div
                                 className="h-1.5 w-full"
@@ -335,9 +335,9 @@ export default function TripMap() {
                             <div className="p-4">
                                 <div className="flex items-start justify-between gap-4 mb-3">
                                     <div className="flex items-start gap-3">
-                                        <div className="text-2xl mt-0.5">{popupInfo.icon || <MapPin className="w-6 h-6 text-white/50" />}</div>
+                                        <div className="text-2xl mt-0.5">{popupInfo.icon || <MapPin className="w-6 h-6 text-muted-foreground" />}</div>
                                         <div>
-                                            <h3 className="font-bold text-white leading-tight mb-0.5">{popupInfo.title}</h3>
+                                            <h3 className="font-bold text-foreground leading-tight mb-0.5">{popupInfo.title}</h3>
                                             {popupInfo.location?.name && (
                                                 <p className="text-xs text-muted-foreground">{popupInfo.location.name}</p>
                                             )}
@@ -345,7 +345,7 @@ export default function TripMap() {
                                     </div>
                                     <button 
                                         onClick={() => setPopupInfo(null)}
-                                        className="text-white/20 hover:text-white transition-colors"
+                                        className="text-muted-foreground/50 hover:text-foreground transition-colors"
                                     >
                                         <span className="sr-only">Close</span>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -353,9 +353,9 @@ export default function TripMap() {
                                 </div>
 
                                 {(popupInfo.time || popupInfo.location?.address) && (
-                                    <div className="space-y-2 mt-4 pt-4 border-t border-white/10">
+                                    <div className="space-y-2 mt-4 pt-4 border-t border-border">
                                         {popupInfo.time && (
-                                            <div className="flex items-center gap-2 text-xs text-white/80">
+                                            <div className="flex items-center gap-2 text-xs text-foreground/80">
                                                 <Calendar className="w-3.5 h-3.5 opacity-50" />
                                                 <span>{popupInfo.time}</span>
                                             </div>

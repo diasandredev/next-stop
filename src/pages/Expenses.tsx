@@ -92,7 +92,7 @@ export default function Expenses() {
     };
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#09090b] relative">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-background relative">
              
             {!currentTrip ? (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-4 relative z-10">
@@ -106,7 +106,7 @@ export default function Expenses() {
                         <div className="flex items-center justify-between">
                             {/* Left Section - Trip Info */}
                             <div className="flex items-center gap-4">
-                                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+                                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                                     {currentTrip.name}
                                 </h1>
                                 {currentTrip.startDate && (
@@ -126,7 +126,7 @@ export default function Expenses() {
                                     <Wallet className="w-4 h-4" />
                                     <span className="hidden sm:inline">Expenses</span>
                                 </div>
-                                <div className="w-px h-6 bg-white/10 mx-1" />
+                                <div className="w-px h-6 bg-border mx-1" />
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
@@ -164,14 +164,14 @@ export default function Expenses() {
                                     </h2>
                                     
                                     {/* Month Switcher */}
-                                    <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/5">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/5 hover:text-white rounded-lg" onClick={handlePrevMonth}>
+                                    <div className="flex items-center gap-2 bg-muted/20 p-1 rounded-xl border border-border">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted/50 hover:text-foreground rounded-lg" onClick={handlePrevMonth}>
                                             <ChevronLeft className="h-4 w-4" />
                                         </Button>
-                                        <div className="px-4 font-mono font-bold min-w-[140px] text-center text-white">
+                                        <div className="px-4 font-mono font-bold min-w-[140px] text-center text-foreground">
                                             {format(parseISO(selectedMonth + '-01'), 'MMMM yyyy')}
                                         </div>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/5 hover:text-white rounded-lg" onClick={handleNextMonth}>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted/50 hover:text-foreground rounded-lg" onClick={handleNextMonth}>
                                             <ChevronRight className="h-4 w-4" />
                                         </Button>
                                     </div>
@@ -179,21 +179,21 @@ export default function Expenses() {
 
                                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                                     {balances.debts.length === 0 ? (
-                                        <div className="col-span-full border border-dashed border-white/10 rounded-2xl p-12 flex flex-col items-center justify-center text-center bg-white/[0.02]">
-                                            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                                        <div className="col-span-full border border-dashed border-border rounded-2xl p-12 flex flex-col items-center justify-center text-center bg-muted/5">
+                                            <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center mb-4">
                                                 <CheckIcon className="w-8 h-8 text-emerald-500/50" />
                                             </div>
-                                            <h3 className="text-lg font-medium text-white mb-1">All Settled Up</h3>
+                                            <h3 className="text-lg font-medium text-foreground mb-1">All Settled Up</h3>
                                             <p className="text-muted-foreground">No debts calculated for {format(parseISO(selectedMonth + '-01'), 'MMMM')}.</p>
                                         </div>
                                     ) : (
                                         balances.debts.map((debt, idx) => (
-                                            <div key={idx} className="group relative overflow-hidden rounded-2xl bg-[#121214] border border-white/5 p-6 hover:border-primary/30 transition-all duration-300 shadow-xl">
+                                            <div key={idx} className="group relative overflow-hidden rounded-2xl bg-card border border-border p-6 hover:border-primary/30 transition-all duration-300 shadow-xl">
                                                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-transparent opacity-50" />
                                                 
                                                 <div className="flex items-center justify-between mb-6">
                                                     <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Settlement</span>
-                                                    <Badge variant="outline" className="font-mono text-[10px] border-white/10 bg-white/5 text-white/70">
+                                                    <Badge variant="outline" className="font-mono text-[10px] border-border bg-muted/20 text-muted-foreground">
                                                         {debt.currency}
                                                     </Badge>
                                                 </div>
@@ -206,18 +206,18 @@ export default function Expenses() {
                                                             </div>
                                                             <div className="flex flex-col">
                                                                 <span className="text-xs text-muted-foreground">From</span>
-                                                                <span className="font-medium text-white">{debt.debtorId.split('@')[0]}</span>
+                                                                <span className="font-medium text-foreground">{debt.debtorId.split('@')[0]}</span>
                                                             </div>
                                                         </div>
                                                         
-                                                        <div className="h-px flex-1 bg-white/10 mx-4 relative">
-                                                            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white/20" />
+                                                        <div className="h-px flex-1 bg-border mx-4 relative">
+                                                            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-border" />
                                                         </div>
 
                                                         <div className="flex items-center gap-3">
                                                             <div className="flex flex-col items-end">
                                                                 <span className="text-xs text-muted-foreground">To</span>
-                                                                <span className="font-medium text-white">{debt.creditorId.split('@')[0]}</span>
+                                                                <span className="font-medium text-foreground">{debt.creditorId.split('@')[0]}</span>
                                                             </div>
                                                             <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold border border-emerald-500/20">
                                                                 {debt.creditorId.substring(0, 2).toUpperCase()}
@@ -225,9 +225,9 @@ export default function Expenses() {
                                                         </div>
                                                     </div>
 
-                                                    <div className="mt-2 pt-4 border-t border-white/5 flex items-center justify-between">
+                                                    <div className="mt-2 pt-4 border-t border-border flex items-center justify-between">
                                                         <span className="text-sm text-muted-foreground">Amount Due</span>
-                                                        <span className="text-2xl font-bold font-mono text-white tracking-tight">
+                                                        <span className="text-2xl font-bold font-mono text-foreground tracking-tight">
                                                             {formatCurrency(debt.amount, debt.currency)}
                                                         </span>
                                                     </div>
@@ -256,15 +256,15 @@ export default function Expenses() {
                                     }).map(expense => (
                                         <div 
                                             key={expense.id} 
-                                            className="group flex items-center justify-between p-4 rounded-xl bg-[#121214] border border-white/5 hover:bg-white/5 transition-all duration-200"
+                                            className="group flex items-center justify-between p-4 rounded-xl bg-card border border-border hover:bg-muted/30 transition-all duration-200"
                                         >
                                             <div className="flex items-center gap-5">
-                                                <div className="h-12 w-12 rounded-xl bg-white/5 flex items-center justify-center text-white/50 group-hover:text-white group-hover:bg-primary/20 transition-colors">
+                                                <div className="h-12 w-12 rounded-xl bg-muted/30 flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:bg-primary/20 transition-colors">
                                                     <DollarSign className="w-5 h-5" />
                                                 </div>
                                                 
                                                 <div>
-                                                    <div className="font-bold text-lg text-white leading-tight mb-1">{expense.description}</div>
+                                                    <div className="font-bold text-lg text-foreground leading-tight mb-1">{expense.description}</div>
                                                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                                         <span className="flex items-center gap-1.5">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-primary/50" />
@@ -272,7 +272,7 @@ export default function Expenses() {
                                                         </span>
                                                         
                                                         {expense.installments > 1 && (
-                                                            <span className="bg-white/5 px-2 py-0.5 rounded text-white/70">
+                                                            <span className="bg-muted/30 px-2 py-0.5 rounded text-muted-foreground">
                                                                 {expense.installments}x installments
                                                             </span>
                                                         )}
@@ -282,7 +282,7 @@ export default function Expenses() {
                                             
                                             <div className="flex items-center gap-8">
                                                 <div className="text-right">
-                                                    <div className="font-bold font-mono text-lg text-white tracking-tight">
+                                                    <div className="font-bold font-mono text-lg text-foreground tracking-tight">
                                                         {formatCurrency(expense.amount / expense.installments, expense.currency)}
                                                         {expense.installments > 1 && <span className="text-xs text-muted-foreground ml-1">/mo</span>}
                                                     </div>
@@ -293,15 +293,15 @@ export default function Expenses() {
                                                 
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                                                             <MoreVertical className="w-4 h-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="bg-[#1a1a1a] border-white/10 text-white">
+                                                    <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
                                                         <DropdownMenuItem onClick={() => {
                                                             setEditingExpense(expense);
                                                             setIsAddExpenseOpen(true);
-                                                        }} className="focus:bg-white/10 focus:text-white cursor-pointer">
+                                                        }} className="focus:bg-accent focus:text-accent-foreground cursor-pointer">
                                                             <Pencil className="w-4 h-4 mr-2" />
                                                             Edit
                                                         </DropdownMenuItem>
@@ -324,7 +324,7 @@ export default function Expenses() {
                                         const diff = differenceInMonths(current, startOfMonth(start));
                                         return diff >= 0 && diff < e.installments;
                                     }).length === 0 && (
-                                        <div className="flex flex-col items-center justify-center py-16 border border-dashed border-white/5 rounded-2xl bg-white/[0.02]">
+                                        <div className="flex flex-col items-center justify-center py-16 border border-dashed border-border rounded-2xl bg-muted/5">
                                             <TrendingUp className="w-10 h-10 text-muted-foreground/20 mb-3" />
                                             <p className="text-muted-foreground">No active expenses for {format(parseISO(selectedMonth + '-01'), 'MMMM')}.</p>
                                             <Button variant="link" onClick={() => setIsAddExpenseOpen(true)} className="mt-2 text-primary">
@@ -339,19 +339,19 @@ export default function Expenses() {
 
                     {/* Add/Edit Expense Dialog */}
                     <Dialog open={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen}>
-                        <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
+                        <DialogContent hideCloseButton className="bg-background border-none text-foreground sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
                             <DialogTitle className="sr-only">{editingExpense ? 'Edit Expense' : 'Add New Expense'}</DialogTitle>
                             
                             <TooltipProvider>
                                 {/* Header Bar */}
-                                <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+                                <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                         <Receipt className="w-4 h-4" />
                                         <span>{editingExpense ? 'Edit Expense' : 'New Expense'}</span>
                                     </div>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => setIsAddExpenseOpen(false)}>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full" onClick={() => setIsAddExpenseOpen(false)}>
                                                 <X className="w-4 h-4" />
                                             </Button>
                                         </TooltipTrigger>
@@ -375,7 +375,7 @@ export default function Expenses() {
 
                     {/* Delete Confirmation */}
                     <AlertDialog open={!!deletingExpenseId} onOpenChange={(open) => !open && setDeletingExpenseId(null)}>
-                        <AlertDialogContent className="bg-[#121214] border-white/10 text-white">
+                        <AlertDialogContent className="bg-background border-border text-foreground">
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                 <AlertDialogDescription className="text-muted-foreground">
@@ -383,7 +383,7 @@ export default function Expenses() {
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel className="bg-transparent border-white/10 hover:bg-white/5 text-white hover:text-white">Cancel</AlertDialogCancel>
+                                <AlertDialogCancel className="bg-transparent border-border hover:bg-accent text-foreground hover:text-foreground">Cancel</AlertDialogCancel>
                                 <AlertDialogAction onClick={handleDeleteExpense} className="bg-red-600 hover:bg-red-700 text-white border-none">Delete</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>

@@ -85,8 +85,10 @@ export const DayColumn = ({
     const allCards = cards;
 
     // Header Color Logic
-    const borderClass = isCurrentDay ? 'border-primary shadow-[0_0_15px_-3px_rgba(59,130,246,0.5)]' : 'border-white/5';
-    const bgClass = isCurrentDay ? 'bg-primary/5' : (isWeekend ? 'bg-black/20' : 'bg-[#09090b]/20');
+    const borderClass = isCurrentDay ? 'border-primary shadow-[0_0_15px_-3px_rgba(59,130,246,0.5)]' : 'border-border';
+    const bgClass = isCurrentDay 
+        ? 'bg-primary/5' 
+        : (isWeekend ? 'bg-muted/50 dark:bg-black/20' : 'bg-card/30 dark:bg-[#09090b]/20');
 
     return (
         <div
@@ -105,7 +107,7 @@ export const DayColumn = ({
              {/* "Passport" Header */}
             <div 
                 className={cn(
-                    "relative p-3 border-b border-white/5 flex flex-col gap-1 transition-colors",
+                    "relative p-3 border-b border-border flex flex-col gap-1 transition-colors",
                     isCurrentDay && "bg-primary text-primary-foreground"
                 )}
             >
@@ -133,7 +135,7 @@ export const DayColumn = ({
                             "w-7 h-7 flex items-center justify-center rounded-lg transition-all",
                             isCurrentDay 
                                 ? "bg-white/20 hover:bg-white/30 text-white" 
-                                : "bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-white"
+                                : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
                         )}
                     >
                         <Plus className="w-4 h-4" />
@@ -173,12 +175,12 @@ export const DayColumn = ({
                 
                 {/* Inline Add Card Input */}
                 {isAdding && (
-                    <div className="bg-[#121214] rounded-xl p-2 animate-fade-in">
+                    <div className="bg-muted rounded-xl p-2 animate-fade-in">
                         <div className="flex items-center gap-2">
                             <EmojiPicker
                                 value={newCardIcon}
                                 onChange={setNewCardIcon}
-                                triggerClassName="h-8 w-8 shrink-0 hover:bg-white/5 rounded-lg"
+                                triggerClassName="h-8 w-8 shrink-0 hover:bg-background/50 rounded-lg text-foreground"
                             />
                             <Input
                                 value={newCardTitle}
@@ -198,7 +200,7 @@ export const DayColumn = ({
                                 }}
                                 placeholder="What's the plan?"
                                 autoFocus
-                                className="h-8 border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-0 text-sm placeholder:text-muted-foreground/50 shadow-none"
+                                className="h-8 border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-0 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-none"
                             />
                         </div>
                     </div>
@@ -210,7 +212,7 @@ export const DayColumn = ({
                         onClick={() => setIsAdding(true)}
                         className={cn(
                             "flex flex-col items-center justify-center h-24 text-muted-foreground/20 border-2 border-dashed rounded-xl transition-all cursor-pointer group/empty",
-                            !isOver && "hover:border-white/10 hover:bg-white/5"
+                            !isOver && "hover:border-border hover:bg-muted/50"
                         )}
                         style={{ borderColor: `${dashboardColor}30` }}
                     >

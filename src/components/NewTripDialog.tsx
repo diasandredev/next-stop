@@ -67,13 +67,13 @@ export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
+            <DialogContent hideCloseButton className="bg-background border-none text-foreground sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
                 <DialogTitle className="sr-only">Create New Trip</DialogTitle>
                 <DialogDescription className="sr-only">Create a new trip with name and dates.</DialogDescription>
                 
                 <TooltipProvider>
                     {/* Header / Actions Bar */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Plus className="w-4 h-4" />
                             <span>New Trip</span>
@@ -83,12 +83,12 @@ export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
                             {/* More Menu */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white hover:bg-white/10 rounded-full h-8 w-8">
+                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-accent rounded-full h-8 w-8">
                                         <MoreHorizontal className="w-4 h-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-[#2a2a2a] border-white/10 text-white">
-                                    <DropdownMenuItem onClick={handleClear} className="focus:bg-white/10 focus:text-white cursor-pointer">
+                                <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
+                                    <DropdownMenuItem onClick={handleClear} className="focus:bg-accent focus:text-accent-foreground cursor-pointer">
                                         Clear form
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -97,7 +97,7 @@ export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
                             {/* Close */}
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => onOpenChange(false)}>
+                                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full" onClick={() => onOpenChange(false)}>
                                         <X className="w-4 h-4" />
                                     </Button>
                                 </TooltipTrigger>
@@ -114,18 +114,18 @@ export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
                                 autoFocus
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="font-bold bg-transparent border-none p-0 focus:outline-none focus:ring-0 placeholder:text-muted-foreground/50 h-auto w-full text-3xl leading-tight text-white"
+                                className="font-bold bg-transparent border-none p-0 focus:outline-none focus:ring-0 placeholder:text-muted-foreground/50 h-auto w-full text-3xl leading-tight text-foreground"
                                 placeholder="Trip name"
                             />
                         </div>
 
                         {/* Properties Grid */}
-                        <div className="grid grid-cols-1 gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
+                        <div className="grid grid-cols-1 gap-4 bg-muted/20 p-4 rounded-xl border border-border">
                             <div className="space-y-1.5">
                                 <Label className="text-xs font-medium text-muted-foreground ml-1">Dates</Label>
-                                <div className="flex items-center bg-[#1a1a1a] rounded-lg border border-white/10 px-3 h-12 gap-2">
+                                <div className="flex items-center bg-card rounded-lg border border-border px-3 h-12 gap-2">
                                     <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
-                                    <div className="w-px h-5 bg-white/10" />
+                                    <div className="w-px h-5 bg-border" />
                                     <DateRangePicker 
                                         date={dateRange} 
                                         setDate={setDateRange}
@@ -134,7 +134,7 @@ export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
                             </div>
                         </div>
 
-                        <div className="w-full h-px bg-white/5" />
+                        <div className="w-full h-px bg-border" />
 
                         {/* Footer Actions */}
                         <div className="flex items-center justify-end gap-3">
@@ -142,7 +142,7 @@ export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
                                 type="button"
                                 variant="ghost"
                                 onClick={() => onOpenChange(false)}
-                                className="rounded-full hover:bg-white/5"
+                                className="rounded-full hover:bg-muted"
                             >
                                 Cancel
                             </Button>

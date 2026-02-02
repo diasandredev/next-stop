@@ -69,7 +69,7 @@ export function ColorPicker({ color, onChange, className, trigger, open: control
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 -ml-1 text-muted-foreground hover:text-white"
+                            className="h-6 w-6 -ml-1 text-muted-foreground hover:text-foreground"
                             onClick={() => setView('picker')}
                         >
                             <ChevronLeft className="w-4 h-4" />
@@ -77,7 +77,7 @@ export function ColorPicker({ color, onChange, className, trigger, open: control
                         <span className="text-sm font-medium">Add Custom Color</span>
                     </div>
 
-                    <div className="relative h-24 rounded-lg w-full border border-white/10 shadow-inner overflow-hidden group">
+                    <div className="relative h-24 rounded-lg w-full border border-border shadow-inner overflow-hidden group">
                         <div
                             className="absolute inset-0 z-0 transition-colors duration-300"
                             style={{ backgroundColor: newColor.startsWith('#') ? newColor : `#${newColor}` }}
@@ -99,7 +99,7 @@ export function ColorPicker({ color, onChange, className, trigger, open: control
                             <Input
                                 value={newColor}
                                 onChange={(e) => setNewColor(e.target.value)}
-                                className="pl-10 bg-[#1a1a1a] border-white/10 h-9 text-sm font-mono focus-visible:ring-1 focus-visible:ring-white/20"
+                                className="pl-10 bg-card border-border h-9 text-sm font-mono focus-visible:ring-1 focus-visible:ring-ring text-foreground"
                                 placeholder="#000000"
                                 autoFocus
                                 onKeyDown={(e) => {
@@ -120,8 +120,8 @@ export function ColorPicker({ color, onChange, className, trigger, open: control
                                 key={c}
                                 onClick={() => onChange(c)}
                                 className={cn(
-                                    "w-8 h-8 rounded-full border border-white/10 transition-all hover:scale-110 flex items-center justify-center relative group",
-                                    color === c ? "ring-2 ring-white border-transparent" : "hover:border-white/50"
+                                    "w-8 h-8 rounded-full border border-border transition-all hover:scale-110 flex items-center justify-center relative group",
+                                    color === c ? "ring-2 ring-primary border-transparent" : "hover:border-primary/50"
                                 )}
                                 style={{ backgroundColor: c === 'transparent' ? 'transparent' : c }}
                                 title={c === 'transparent' ? 'No Color' : c}
@@ -136,7 +136,7 @@ export function ColorPicker({ color, onChange, className, trigger, open: control
                         ))}
                         <button
                             onClick={() => setView('add')}
-                            className="w-8 h-8 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-all flex items-center justify-center text-muted-foreground hover:text-white group"
+                            className="w-8 h-8 rounded-full border border-border bg-muted hover:bg-muted/80 transition-all flex items-center justify-center text-muted-foreground hover:text-foreground group"
                             title="Add custom color"
                         >
                             <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
@@ -153,7 +153,7 @@ export function ColorPicker({ color, onChange, className, trigger, open: control
                 <PopoverTrigger asChild>
                     {trigger}
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 border-white/10 bg-[#0a0a0a]/95 backdrop-blur-xl rounded-xl shadow-2xl" sideOffset={5} align="end" collisionPadding={16}>
+                <PopoverContent className="w-auto p-0 border-border bg-popover backdrop-blur-xl rounded-xl shadow-2xl" sideOffset={5} align="end" collisionPadding={16}>
                     <ColorGrid />
                 </PopoverContent>
             </Popover>
@@ -161,8 +161,9 @@ export function ColorPicker({ color, onChange, className, trigger, open: control
     }
 
     return (
-        <div className={cn("inline-block p-2 bg-[#0a0a0a]/50 rounded-xl border border-white/5", className)}>
+        <div className={cn("inline-block p-2 bg-muted/20 rounded-xl border border-border", className)}>
             <ColorGrid />
         </div>
     );
 }
+

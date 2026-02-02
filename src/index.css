@@ -6,6 +6,55 @@
 
 @layer base {
   :root {
+    /* Base - Light Mode */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    /* Brand / Primary - Warm Orange */
+    --primary: 24 95% 46%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 5% 92%;
+    --secondary-foreground: 240 5.9% 10%;
+
+    --muted: 240 5% 94%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 24 95% 46%;
+
+    --radius: 0.75rem;
+
+    --current-day: 24 95% 46%;
+    --weekend: 240 4.8% 95.9%;
+
+    /* Status Colors */
+    --chip-blue: 221.2 83.2% 53.3%;
+    --chip-green: 142.1 76.2% 36.3%;
+    --chip-red: 346.8 77.2% 49.8%;
+    --chip-purple: 262.1 83.3% 57.8%;
+    --chip-orange: 24.6 95% 53.1%;
+
+    /* Overlay Colors (Light Mode) */
+    --overlay-bg: 0 0% 0%;
+    --glass-border: 240 5.9% 90%;
+    --glass-bg: 0 0% 100%;
+  }
+
+  .dark {
     /* Base - Cinematic Dark Mode */
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -16,7 +65,7 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    /* Brand / Primary - Warm Orange (inspired by logo pin) */
+    /* Brand / Primary - Warm Orange */
     --primary: 24 95% 46%;
     --primary-foreground: 0 0% 100%;
 
@@ -36,8 +85,6 @@
     --input: 240 6% 10%;
     --ring: 24 95% 46%;
 
-    --radius: 0.75rem;
-
     --current-day: 24 95% 46%;
     --weekend: 240 5% 8%;
 
@@ -47,6 +94,11 @@
     --chip-red: 350 80% 60%;
     --chip-purple: 270 50% 60%;
     --chip-orange: 30 100% 55%;
+
+    /* Overlay Colors (Dark Mode) */
+    --overlay-bg: 0 0% 100%;
+    --glass-border: 0 0% 100%;
+    --glass-bg: 0 0% 100%;
   }
 }
 
@@ -57,11 +109,17 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    /* Light Mode: Subtle Warm Gradient */
+    background-image: 
+      radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  .dark body {
     /* Cinematic Background Noise */
     background-image: 
       radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.03) 0%, transparent 50%),
       url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-    background-attachment: fixed;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -81,11 +139,11 @@
 
   /* Glassmorphism 2.0 Utilities */
   .glass-panel {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)];
+    @apply bg-white/40 dark:bg-white/5 backdrop-blur-md border border-black/5 dark:border-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)];
   }
   
   .glass-panel-hover {
-    @apply hover:bg-white/10 hover:border-white/20 transition-all duration-300;
+    @apply hover:bg-black/5 dark:hover:bg-white/10 hover:border-black/10 dark:hover:border-white/20 transition-all duration-300;
   }
 
   /* Custom Scrollbar */
@@ -99,7 +157,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+    @apply bg-foreground/10 rounded-full hover:bg-foreground/20 transition-colors;
   }
   
   /* Text Shadow for overlay text */

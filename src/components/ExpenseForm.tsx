@@ -131,37 +131,37 @@ export function ExpenseForm({ trip, initialData, onSubmit, onCancel, currentUser
                     placeholder="Expense description" 
                     value={description}
                     onChange={e => setDescription(e.target.value)}
-                    className="font-bold bg-transparent border-none p-0 focus:outline-none focus:ring-0 placeholder:text-muted-foreground/50 h-auto w-full text-2xl leading-tight text-white"
+                    className="font-bold bg-transparent border-none p-0 focus:outline-none focus:ring-0 placeholder:text-muted-foreground/50 h-auto w-full text-2xl leading-tight text-foreground"
                 />
             </div>
 
             {/* Properties Grid 1: Amount & Currency */}
-            <div className="grid grid-cols-2 gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+            <div className="grid grid-cols-2 gap-3 bg-muted/20 p-3 rounded-xl border border-border">
                 <div className="space-y-1">
                     <Label className="text-xs font-medium text-muted-foreground ml-1">Amount</Label>
-                    <div className="flex items-center bg-[#1a1a1a] rounded-lg border border-white/10 px-3 h-10 gap-2">
+                    <div className="flex items-center bg-card rounded-lg border border-border px-3 h-10 gap-2">
                         <DollarSign className="w-4 h-4 text-muted-foreground shrink-0" />
-                        <div className="w-px h-4 bg-white/10" />
+                        <div className="w-px h-4 bg-border" />
                         <input 
                             type="number" 
                             placeholder="0.00" 
                             value={amount}
                             onChange={e => setAmount(e.target.value)}
-                            className="h-full w-full bg-transparent border-none p-0 text-sm focus:outline-none placeholder:text-muted-foreground/30 text-white"
+                            className="h-full w-full bg-transparent border-none p-0 text-sm focus:outline-none placeholder:text-muted-foreground/30 text-foreground"
                         />
                     </div>
                 </div>
                 <div className="space-y-1">
                     <Label className="text-xs font-medium text-muted-foreground ml-1">Currency</Label>
-                    <div className="bg-[#1a1a1a] rounded-lg border border-white/10">
+                    <div className="bg-card rounded-lg border border-border">
                         <Select value={currency} onValueChange={setCurrency}>
-                            <SelectTrigger className="bg-transparent border-none h-10 text-sm font-medium focus:ring-0">
+                            <SelectTrigger className="bg-transparent border-none h-10 text-sm font-medium focus:ring-0 text-foreground">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-[#2a2a2a] border-white/10">
-                                <SelectItem value="BRL" className="text-white focus:bg-white/10 focus:text-white">BRL (R$)</SelectItem>
-                                <SelectItem value="USD" className="text-white focus:bg-white/10 focus:text-white">USD ($)</SelectItem>
-                                <SelectItem value="EUR" className="text-white focus:bg-white/10 focus:text-white">EUR (€)</SelectItem>
+                            <SelectContent className="bg-popover border-border text-popover-foreground">
+                                <SelectItem value="BRL" className="text-foreground focus:bg-accent focus:text-accent-foreground">BRL (R$)</SelectItem>
+                                <SelectItem value="USD" className="text-foreground focus:bg-accent focus:text-accent-foreground">USD ($)</SelectItem>
+                                <SelectItem value="EUR" className="text-foreground focus:bg-accent focus:text-accent-foreground">EUR (€)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -169,31 +169,31 @@ export function ExpenseForm({ trip, initialData, onSubmit, onCancel, currentUser
             </div>
 
             {/* Properties Grid 2: Installments & Start Date */}
-            <div className="grid grid-cols-2 gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+            <div className="grid grid-cols-2 gap-3 bg-muted/20 p-3 rounded-xl border border-border">
                 <div className="space-y-1">
                     <Label className="text-xs font-medium text-muted-foreground ml-1">Installments</Label>
-                    <div className="flex items-center bg-[#1a1a1a] rounded-lg border border-white/10 px-3 h-10 gap-2">
+                    <div className="flex items-center bg-card rounded-lg border border-border px-3 h-10 gap-2">
                         <CreditCard className="w-4 h-4 text-muted-foreground shrink-0" />
-                        <div className="w-px h-4 bg-white/10" />
+                        <div className="w-px h-4 bg-border" />
                         <input 
                             type="number" 
                             min={1} 
                             value={installments}
                             onChange={e => setInstallments(e.target.value)}
-                            className="h-full w-full bg-transparent border-none p-0 text-sm focus:outline-none placeholder:text-muted-foreground/30 text-white"
+                            className="h-full w-full bg-transparent border-none p-0 text-sm focus:outline-none placeholder:text-muted-foreground/30 text-foreground"
                         />
                     </div>
                 </div>
                 <div className="space-y-1">
                     <Label className="text-xs font-medium text-muted-foreground ml-1">Start Date</Label>
-                    <div className="flex items-center bg-[#1a1a1a] rounded-lg border border-white/10 px-3 h-10 gap-2">
+                    <div className="flex items-center bg-card rounded-lg border border-border px-3 h-10 gap-2">
                         <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
-                        <div className="w-px h-4 bg-white/10" />
+                        <div className="w-px h-4 bg-border" />
                         <input 
                             type="date"
                             value={startDate}
                             onChange={e => setStartDate(e.target.value)}
-                            className="h-full w-full bg-transparent border-none p-0 text-sm focus:outline-none text-white [color-scheme:dark]"
+                            className="h-full w-full bg-transparent border-none p-0 text-sm focus:outline-none text-foreground"
                         />
                     </div>
                 </div>
@@ -202,14 +202,14 @@ export function ExpenseForm({ trip, initialData, onSubmit, onCancel, currentUser
             {/* Paid By */}
             <div className="space-y-1">
                 <Label className="text-xs font-medium text-muted-foreground ml-1">Paid By</Label>
-                <div className="bg-[#1a1a1a] rounded-lg border border-white/10">
+                <div className="bg-card rounded-lg border border-border">
                     <Select value={payerId} onValueChange={setPayerId}>
-                        <SelectTrigger className="bg-transparent border-none h-10 text-sm font-medium focus:ring-0">
+                        <SelectTrigger className="bg-transparent border-none h-10 text-sm font-medium focus:ring-0 text-foreground">
                             <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#2a2a2a] border-white/10">
+                        <SelectContent className="bg-popover border-border text-popover-foreground">
                             {members.map(m => (
-                                <SelectItem key={m.id} value={m.id} className="text-white focus:bg-white/10 focus:text-white">
+                                <SelectItem key={m.id} value={m.id} className="text-foreground focus:bg-accent focus:text-accent-foreground">
                                     {m.name || m.email}
                                 </SelectItem>
                             ))}
@@ -231,36 +231,36 @@ export function ExpenseForm({ trip, initialData, onSubmit, onCancel, currentUser
                             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all text-sm ${
                                 involvedUserIds.includes(member.id) 
                                     ? 'bg-primary/20 border border-primary/50' 
-                                    : 'bg-white/5 border border-white/5 opacity-60 hover:opacity-100'
+                                    : 'bg-muted/20 border border-border opacity-60 hover:opacity-100'
                             }`}
                             onClick={() => toggleMember(member.id)}
                         >
                             <div className={`w-3 h-3 rounded-full border-2 flex items-center justify-center transition-colors ${
                                 involvedUserIds.includes(member.id) 
                                     ? 'bg-primary border-primary' 
-                                    : 'border-white/30'
+                                    : 'border-muted-foreground/30'
                             }`}>
                                 {involvedUserIds.includes(member.id) && (
                                     <div className="w-1 h-1 bg-white rounded-full" />
                                 )}
                             </div>
-                            <span className="font-medium">{member.name || member.email}</span>
+                            <span className="font-medium text-foreground">{member.name || member.email}</span>
                         </div>
                     ))}
                 </div>
             </div>
 
             {/* Split Strategy */}
-            <div className="space-y-3 bg-white/5 p-3 rounded-xl border border-white/5">
+            <div className="space-y-3 bg-muted/20 p-3 rounded-xl border border-border">
                 <div className="flex items-center justify-between">
                     <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Split Strategy</Label>
                     <div className="flex items-center gap-3">
-                        <span className={`text-sm transition-colors ${splitType === 'equal' ? 'font-bold text-white' : 'text-muted-foreground'}`}>Equal</span>
+                        <span className={`text-sm transition-colors ${splitType === 'equal' ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>Equal</span>
                         <Switch 
                             checked={splitType === 'percentage'}
                             onCheckedChange={(checked) => setSplitType(checked ? 'percentage' : 'equal')}
                         />
-                        <span className={`text-sm transition-colors ${splitType === 'percentage' ? 'font-bold text-white' : 'text-muted-foreground'}`}>Custom %</span>
+                        <span className={`text-sm transition-colors ${splitType === 'percentage' ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>Custom %</span>
                     </div>
                 </div>
 
@@ -272,8 +272,8 @@ export function ExpenseForm({ trip, initialData, onSubmit, onCancel, currentUser
                             return (
                                 <div key={userId} className="space-y-1">
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-white font-medium">{member?.name || userId}</span>
-                                        <span className="font-mono font-bold text-white">{ratio}%</span>
+                                        <span className="text-foreground font-medium">{member?.name || userId}</span>
+                                        <span className="font-mono font-bold text-foreground">{ratio}%</span>
                                     </div>
                                     <Slider 
                                         value={[ratio]} 
@@ -300,7 +300,7 @@ export function ExpenseForm({ trip, initialData, onSubmit, onCancel, currentUser
 
             {/* Footer Actions */}
             <div className="flex justify-end gap-3 pt-2">
-                <Button variant="ghost" onClick={onCancel} className="rounded-lg hover:bg-white/5">
+                <Button variant="ghost" onClick={onCancel} className="rounded-lg hover:bg-muted">
                     Cancel
                 </Button>
                 <Button onClick={handleSubmit} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg h-10 px-6 font-medium">

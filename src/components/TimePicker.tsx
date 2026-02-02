@@ -45,7 +45,7 @@ export function TimePicker({ time, onChange, className }: TimePickerProps) {
                 <Button
                     variant={"ghost"}
                     className={cn(
-                        "justify-start text-left font-medium p-2 text-base h-auto hover:bg-white/5 hover:text-white transition-all duration-200",
+                        "justify-start text-left font-medium p-2 text-base h-auto hover:bg-accent hover:text-foreground transition-all duration-200",
                         "hover:pl-4 hover:pr-4",
                         "focus:outline-none focus:ring-0 focus:border-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none",
                         !time && "text-muted-foreground",
@@ -61,16 +61,16 @@ export function TimePicker({ time, onChange, className }: TimePickerProps) {
                 </Button>
             </PopoverTrigger>
             <PopoverContent
-                className="w-auto p-0 bg-[#1a1a1a] border-white/10 shadow-2xl rounded-xl text-white overflow-hidden"
+                className="w-auto p-0 bg-popover border-border shadow-2xl rounded-xl text-popover-foreground overflow-hidden"
                 align="start"
                 onWheel={(e) => e.stopPropagation()}
             >
-                <div className="flex h-[300px] divide-x divide-white/10">
+                <div className="flex h-[300px] divide-x divide-border">
                     <div className="flex flex-col h-full">
-                        <div className="flex items-center justify-center h-10 text-xs text-muted-foreground font-medium border-b border-white/5 bg-[#252525] shrink-0">
+                        <div className="flex items-center justify-center h-10 text-xs text-muted-foreground font-medium border-b border-border bg-muted/50 shrink-0">
                             Hours
                         </div>
-                        <div className="h-[260px] w-[70px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                        <div className="h-[260px] w-[70px] overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
                             <div className="p-1">
                                 {hourOptions.map((hour) => (
                                     <Button
@@ -79,7 +79,7 @@ export function TimePicker({ time, onChange, className }: TimePickerProps) {
                                         size="sm"
                                         className={cn(
                                             "w-full justify-center font-normal h-8 mb-1 last:mb-0",
-                                            hours === hour ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium" : "text-muted-foreground hover:text-white hover:bg-white/10"
+                                            hours === hour ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium" : "text-muted-foreground hover:text-foreground hover:bg-accent"
                                         )}
                                         onClick={() => handleTimeChange('hour', hour)}
                                     >
@@ -90,10 +90,10 @@ export function TimePicker({ time, onChange, className }: TimePickerProps) {
                         </div>
                     </div>
                     <div className="flex flex-col h-full">
-                        <div className="flex items-center justify-center h-10 text-xs text-muted-foreground font-medium border-b border-white/5 bg-[#252525] shrink-0">
+                        <div className="flex items-center justify-center h-10 text-xs text-muted-foreground font-medium border-b border-border bg-muted/50 shrink-0">
                             Minutes
                         </div>
-                        <div className="h-[260px] w-[70px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                        <div className="h-[260px] w-[70px] overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
                             <div className="p-1">
                                 {minuteOptions.map((minute) => (
                                     <Button
@@ -102,7 +102,7 @@ export function TimePicker({ time, onChange, className }: TimePickerProps) {
                                         size="sm"
                                         className={cn(
                                             "w-full justify-center font-normal h-8 mb-1 last:mb-0",
-                                            minutes === minute ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium" : "text-muted-foreground hover:text-white hover:bg-white/10"
+                                            minutes === minute ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium" : "text-muted-foreground hover:text-foreground hover:bg-accent"
                                         )}
                                         onClick={() => handleTimeChange('minute', minute)}
                                     >
@@ -114,6 +114,7 @@ export function TimePicker({ time, onChange, className }: TimePickerProps) {
                     </div>
                 </div>
             </PopoverContent>
+
         </Popover>
     )
 }

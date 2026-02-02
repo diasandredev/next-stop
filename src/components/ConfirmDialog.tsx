@@ -30,7 +30,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogContent className="bg-[#1a1a1a] border-none text-white sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
+            <AlertDialogContent className="bg-background border-none text-foreground sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
                 <AlertDialogTitle className="sr-only">Confirmation</AlertDialogTitle>
                 <AlertDialogDescription className="sr-only">
                     Please confirm your action.
@@ -41,14 +41,14 @@ export function ConfirmDialog({
                         {title}
                         {variant === 'destructive' && <Trash2 className="w-4 h-4 text-muted-foreground" />}
                     </AlertDialogTitle>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => onOpenChange(false)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full" onClick={() => onOpenChange(false)}>
                         <span className="sr-only">Close</span>
                         <X className="w-4 h-4" />
                     </Button>
                 </div>
 
                 <div className="mb-6">
-                    <div className="bg-white/5 p-4 rounded-xl">
+                    <div className="bg-muted/30 p-4 rounded-xl">
                         <p className="text-muted-foreground">{description}</p>
                     </div>
                 </div>
@@ -58,7 +58,7 @@ export function ConfirmDialog({
                     <Button
                         variant="ghost"
                         onClick={() => onOpenChange(false)}
-                        className="text-muted-foreground hover:text-white hover:bg-white/10 rounded-full"
+                        className="text-muted-foreground hover:text-foreground hover:bg-accent rounded-full"
                     >
                         {cancelText}
                     </Button>
@@ -70,12 +70,13 @@ export function ConfirmDialog({
                         className={`${variant === 'destructive'
                             ? 'bg-red-600 hover:bg-red-500'
                             : 'bg-primary hover:bg-primary/90'
-                            } text-white rounded-full h-10 px-6 font-medium`}
+                            } text-primary-foreground rounded-full h-10 px-6 font-medium`}
                     >
                         {confirmText}
                     </Button>
                 </div>
             </AlertDialogContent>
         </AlertDialog>
+
     );
 }

@@ -79,14 +79,14 @@ export function Sidebar({
         <aside
             className={cn(
                 "h-screen flex flex-col transition-all duration-300 ease-in-out relative z-50",
-                "bg-secondary/40 backdrop-blur-xl border-r border-white/5", // Glassmorphism container
+                "bg-background/80 dark:bg-secondary/40 backdrop-blur-xl border-r border-border", // Glassmorphism container
                 isExpanded ? "w-72" : "w-20"
             )}
         >
             {/* Toggle Button - Floating outside */}
             <button
                 onClick={toggleSidebar}
-                className="absolute -right-3 top-8 bg-zinc-900 border border-white/10 rounded-full p-1.5 hover:bg-zinc-800 hover:text-white transition-all z-30 shadow-lg text-muted-foreground"
+                className="absolute -right-3 top-8 bg-card border border-border rounded-full p-1.5 hover:bg-accent hover:text-foreground transition-all z-30 shadow-lg text-muted-foreground"
             >
                 {isExpanded ? (
                     <ChevronLeft className="w-3 h-3" />
@@ -158,12 +158,13 @@ export function Sidebar({
                                      }}
                                          className={cn(
                                              "w-full flex items-center gap-3 p-2.5 rounded-xl transition-all duration-200 group relative select-none",
-                                             isTripActive 
-                                                 ? "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.2)]" 
-                                                 : "text-muted-foreground hover:text-white hover:bg-white/5",
-                                             !isExpanded && "justify-center"
-                                         )}
-                                 >
+                                                 isTripActive 
+                                                     ? "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.2)]" 
+                                                     : "text-muted-foreground hover:text-foreground hover:bg-accent",
+                                                 !isExpanded && "justify-center"
+                                             )}
+                                         >
+
                                      <Plane className={cn("w-5 h-5 flex-shrink-0 transition-transform duration-300", isTripActive && "text-primary", isTripExpanded && isExpanded && "rotate-45")} />
 
                                      {isExpanded && (
@@ -199,7 +200,7 @@ export function Sidebar({
                                                 "w-full flex items-center gap-3 p-2.5 rounded-xl transition-all duration-200 group relative select-none",
                                                 isTripActive 
                                                     ? "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_rgba(56,189,248,0.2)]" 
-                                                    : "text-muted-foreground hover:text-white hover:bg-white/5",
+                                                    : "text-muted-foreground hover:text-foreground hover:bg-accent",
                                                 !isExpanded && "justify-center"
                                             )}
                                         >
@@ -232,7 +233,7 @@ export function Sidebar({
 
                                 {/* Sub-menu with connecting line */}
                                 {isExpanded && isTripExpanded && (
-                                    <div className="ml-5 pl-4 border-l border-white/5 space-y-0.5 animate-accordion-down overflow-hidden">
+                                    <div className="ml-5 pl-4 border-l border-border space-y-0.5 animate-accordion-down overflow-hidden">
                                         <button
                                             onClick={() => {
                                                 setCurrentTripId(trip.id);
@@ -241,8 +242,8 @@ export function Sidebar({
                                             className={cn(
                                                 "w-full flex items-center gap-3 p-2 rounded-lg text-sm transition-all duration-200",
                                                 location.pathname === '/board' && isTripActive
-                                                    ? "text-white font-medium bg-white/5"
-                                                    : "text-muted-foreground hover:text-white hover:bg-white/5"
+                                                    ? "text-foreground font-medium bg-accent"
+                                                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
                                             )}
                                         >
                                             <LayoutDashboard className="w-4 h-4" />
@@ -254,7 +255,7 @@ export function Sidebar({
                                                 onClick={() => setIsMapExpanded(!isMapExpanded)}
                                                 className={cn(
                                                     "w-full flex items-center justify-between p-2 rounded-lg text-sm transition-all duration-200",
-                                                    "text-muted-foreground hover:text-white hover:bg-white/5 cursor-pointer group/map"
+                                                    "text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer group/map"
                                                 )}
                                             >
                                                 <div className="flex items-center gap-3">
@@ -266,7 +267,7 @@ export function Sidebar({
                                             
                                             {/* Dashboards List under Map */}
                                             {isMapExpanded && (
-                                                <div className="ml-3 pl-3 border-l border-white/5 mt-0.5 space-y-0.5">
+                                                <div className="ml-3 pl-3 border-l border-border mt-0.5 space-y-0.5">
                                                     {dashboards
                                                         .filter(d => d.tripId === trip.id)
                                                         .sort((a, b) => {
@@ -285,7 +286,7 @@ export function Sidebar({
                                                                 "w-full flex items-center gap-2 p-1.5 rounded-md text-xs transition-colors",
                                                                 location.pathname === '/map' && currentDashboardId === dashboard.id
                                                                     ? "text-primary font-medium bg-primary/10"
-                                                                    : "text-muted-foreground hover:text-white hover:bg-white/5"
+                                                                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
                                                             )}
                                                         >
                                                             <span className="w-1 h-1 rounded-full bg-current opacity-50" />
@@ -344,7 +345,7 @@ export function Sidebar({
             {/* User Section (Bottom) */}
             <div className="p-4 mt-auto">
                 <div className={cn(
-                    "rounded-2xl bg-white/5 border border-white/5 backdrop-blur-sm overflow-hidden transition-all duration-300",
+                    "rounded-2xl bg-muted/30 border border-border backdrop-blur-sm overflow-hidden transition-all duration-300",
                     isExpanded ? "p-3" : "p-1.5 bg-transparent border-none"
                 )}>
                     <DropdownMenu>
@@ -376,7 +377,7 @@ export function Sidebar({
                                 {isExpanded && (
                                     <>
                                         <div className="flex flex-col overflow-hidden flex-1 text-left">
-                                            <span className="text-sm font-medium truncate text-white group-hover:text-primary transition-colors">
+                                            <span className="text-sm font-medium truncate text-foreground group-hover:text-primary transition-colors">
                                                 {user?.displayName || 'Traveler'}
                                             </span>
                                             <span className="text-[10px] text-muted-foreground truncate">
@@ -392,12 +393,12 @@ export function Sidebar({
                             side={isExpanded ? "top" : "right"}
                             align={isExpanded ? "start" : "end"}
                             sideOffset={12}
-                            className="w-56 bg-[#121214] border-white/10 text-white p-2 rounded-xl shadow-2xl backdrop-blur-xl"
+                            className="w-56 bg-popover border-border text-popover-foreground p-2 rounded-xl shadow-2xl backdrop-blur-xl"
                         >
                             <div className="px-2 py-1.5 text-xs text-muted-foreground font-mono uppercase tracking-wider mb-1">
                                 Account
                             </div>
-                            <DropdownMenuItem onClick={onOpenAccountSettings} className="cursor-pointer gap-2.5 py-2.5 rounded-lg hover:bg-white/10 focus:bg-white/10 focus:text-white">
+                            <DropdownMenuItem onClick={onOpenAccountSettings} className="cursor-pointer gap-2.5 py-2.5 rounded-lg hover:bg-accent focus:bg-accent focus:text-accent-foreground">
                                 <Settings className="w-4 h-4" />
                                 Settings
                             </DropdownMenuItem>

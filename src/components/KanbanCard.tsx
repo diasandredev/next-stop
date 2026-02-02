@@ -10,6 +10,7 @@ import { OptionsCard } from './OptionsCard';
 import { getCurrencySymbol } from '@/utils/currency';
 import { Input } from './ui/input';
 import { cn } from '@/lib/utils';
+import { useTheme } from 'next-themes';
 
 interface KanbanCardProps {
   card: CardType;
@@ -23,6 +24,7 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(card.title);
   const { updateCard } = useKanban();
+  const { theme } = useTheme();
 
   const handleSaveTitle = () => {
       if (editTitle.trim() && editTitle !== card.title) {
@@ -71,9 +73,24 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
 
   // Card Color Logic
   const hasColor = card.color && card.color !== 'transparent';
-  const bgColor = hasColor ? chroma(card.color!).alpha(0.15).css() : 'rgba(255, 255, 255, 0.03)';
-  const borderColor = hasColor ? chroma(card.color!).alpha(0.3).css() : 'rgba(255, 255, 255, 0.08)';
-  const hoverBorderColor = hasColor ? chroma(card.color!).alpha(0.5).css() : 'rgba(255, 255, 255, 0.2)';
+  
+  // Dynamic default styles based on theme
+  const isDark = theme === 'dark' || theme === 'system'; // simplistic check, ideally check system pref
+  
+  const defaultBg = 'var(--card-muted, hsl(0 0% 98%))';
+  const defaultBorder = 'var(--border)';
+  
+  const bgColor = hasColor 
+    ? chroma(card.color!).alpha(0.15).css() 
+    : (theme === 'light' ? 'hsl(0 0% 100%)' : 'rgba(255, 255, 255, 0.03)');
+    
+  const borderColor = hasColor 
+    ? chroma(card.color!).alpha(0.3).css() 
+    : (theme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255, 255, 255, 0.08)');
+    
+  const hoverBorderColor = hasColor 
+    ? chroma(card.color!).alpha(0.5).css() 
+    : (theme === 'light' ? 'rgba(0,0,0,0.15)' : 'rgba(255, 255, 255, 0.2)');
 
   return (
     <>
@@ -116,8 +133,8 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
                     <button
                         onClick={handleToggleComplete}
                         className={cn(
-                            "mt-0.5 shrink-0 transition-colors duration-200 rounded-full hover:bg-white/10 p-0.5",
-                            card.completed ? "text-emerald-400" : "text-muted-foreground group-hover:text-white"
+                            "mt-0.5 shrink-0 transition-colors duration-200 rounded-full hover:bg-muted/50 p-0.5",
+                            card.completed ? "text-emerald-400" : "text-muted-foreground group-hover:text-foreground"
                         )}
                     >
                         {card.completed ? (

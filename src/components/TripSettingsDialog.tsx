@@ -77,15 +77,15 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
+            <DialogContent hideCloseButton className="bg-background border-none text-foreground sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
                 <DialogTitle className="sr-only">Trip Settings</DialogTitle>
                 <DialogDescription className="sr-only">Edit your trip details.</DialogDescription>
 
                 {/* Header / Actions Bar */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
                     <div className="flex items-center gap-3">
                         <Settings className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-lg font-semibold text-white">{trip.name}</span>
+                        <span className="text-lg font-semibold text-foreground">{trip.name}</span>
                     </div>
 
                     <div className="flex items-center gap-1">
@@ -104,19 +104,19 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
                         {/* More Menu */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white hover:bg-white/10 rounded-full h-8 w-8">
+                                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-accent rounded-full h-8 w-8">
                                     <MoreHorizontal className="w-4 h-4" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-[#2a2a2a] border-white/10 text-white">
-                                <DropdownMenuItem onClick={handleDiscard} className="text-red-400 focus:text-red-400 focus:bg-white/10 cursor-pointer">
+                            <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
+                                <DropdownMenuItem onClick={handleDiscard} className="text-red-400 focus:text-red-400 focus:bg-accent cursor-pointer">
                                     Discard changes
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
 
                         {/* Close */}
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => onOpenChange(false)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full" onClick={() => onOpenChange(false)}>
                             <X className="w-4 h-4" />
                         </Button>
                     </div>
@@ -125,13 +125,13 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
                 {/* Content */}
                 <div className="p-6 space-y-6 max-h-[85vh] overflow-y-auto">
                     {/* Properties Grid */}
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-4">
+                    <div className="bg-muted/20 p-4 rounded-xl border border-border space-y-4">
                         <div className="space-y-2">
                             <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                                 <Calendar className="w-3.5 h-3.5" />
                                 Dates
                             </Label>
-                            <div className="bg-[#1a1a1a] rounded-lg border border-white/10 overflow-hidden">
+                            <div className="bg-card rounded-lg border border-border overflow-hidden">
                                 <DateRangePicker
                                     date={dateRange}
                                     setDate={setDateRange}
@@ -142,11 +142,11 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 border-t border-white/5 bg-white/[0.02] flex justify-end gap-3">
+                <div className="px-6 py-4 border-t border-border bg-muted/20 flex justify-end gap-3">
                     <Button
                         variant="ghost"
                         onClick={() => onOpenChange(false)}
-                        className="rounded-lg hover:bg-white/5"
+                        className="rounded-lg hover:bg-muted"
                     >
                         Cancel
                     </Button>

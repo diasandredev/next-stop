@@ -59,14 +59,14 @@ const SortableCardItem = ({ card, isSelected, onToggle }: SortableCardItemProps)
         flex items-center gap-3 p-3 rounded-lg transition-all
         ${isSelected
                     ? 'bg-primary/20 border border-primary'
-                    : 'bg-white/5 hover:bg-white/10 border border-transparent'
+                    : 'bg-muted/30 hover:bg-muted/50 border border-transparent'
                 }
       `}
         >
             <div
                 {...attributes}
                 {...listeners}
-                className="cursor-grab active:cursor-grabbing shrink-0 text-muted-foreground hover:text-white"
+                className="cursor-grab active:cursor-grabbing shrink-0 text-muted-foreground hover:text-foreground"
             >
                 <GripVertical className="w-4 h-4" />
             </div>
@@ -75,7 +75,7 @@ const SortableCardItem = ({ card, isSelected, onToggle }: SortableCardItemProps)
                 {isSelected ? (
                     <CheckSquare className="w-5 h-5 text-primary" />
                 ) : (
-                    <Square className="w-5 h-5 text-white/30" />
+                    <Square className="w-5 h-5 text-muted-foreground/30" />
                 )}
             </div>
 
@@ -85,7 +85,7 @@ const SortableCardItem = ({ card, isSelected, onToggle }: SortableCardItemProps)
                         <span className="text-base">{card.icon}</span>
                     )}
                     {card.time && (
-                        <span className="text-xs text-white/60">{card.time}</span>
+                        <span className="text-xs text-muted-foreground/60">{card.time}</span>
                     )}
                     <span className="text-sm font-medium truncate">{card.title}</span>
                 </div>
@@ -186,7 +186,7 @@ export const CustomRouteDialog = ({ open, onOpenChange, cards, dayDate }: Custom
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-[#1a1a1a] border-none text-white sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
+            <DialogContent className="bg-background border-none text-foreground sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
                 <DialogHeader className="pb-4">
                     <DialogTitle className="text-xl font-bold">Create Custom Route</DialogTitle>
                     <DialogDescription className="text-muted-foreground">
@@ -206,7 +206,7 @@ export const CustomRouteDialog = ({ open, onOpenChange, cards, dayDate }: Custom
                                 size="sm"
                                 onClick={handleSelectAll}
                                 disabled={selectedCardIds.size === orderedCards.length}
-                                className="text-xs h-7"
+                                className="text-xs h-7 hover:bg-accent"
                             >
                                 Select All
                             </Button>
@@ -215,7 +215,7 @@ export const CustomRouteDialog = ({ open, onOpenChange, cards, dayDate }: Custom
                                 size="sm"
                                 onClick={handleDeselectAll}
                                 disabled={selectedCardIds.size === 0}
-                                className="text-xs h-7"
+                                className="text-xs h-7 hover:bg-accent"
                             >
                                 Clear
                             </Button>
@@ -246,11 +246,11 @@ export const CustomRouteDialog = ({ open, onOpenChange, cards, dayDate }: Custom
                     </DndContext>
 
                     {/* Create route button */}
-                    <div className="pt-4 border-t border-white/10">
+                    <div className="pt-4 border-t border-border">
                         <Button
                             onClick={handleCreateRoute}
                             disabled={selectedCardIds.size === 0}
-                            className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50"
+                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
                         >
                             Create Route ({selectedCardIds.size} location{selectedCardIds.size !== 1 ? 's' : ''})
                         </Button>
@@ -260,3 +260,4 @@ export const CustomRouteDialog = ({ open, onOpenChange, cards, dayDate }: Custom
         </Dialog>
     );
 };
+

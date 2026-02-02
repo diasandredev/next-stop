@@ -80,10 +80,11 @@ export const RightSidebar = ({
         <div
             ref={sidebarRef}
             className={cn(
-                "fixed top-0 right-0 h-screen bg-[#060606] border-l border-border z-40 transition-all duration-300 ease-in-out shadow-2xl",
+                "fixed top-0 right-0 h-screen bg-background border-l border-border z-40 transition-all duration-300 ease-in-out shadow-2xl",
                 isExpanded ? 'w-[400px]' : 'w-0'
             )}
         >
+
             {/* Sidebar Content */}
             <div className={cn(
                 "h-full flex flex-col transition-opacity duration-300",

@@ -294,7 +294,7 @@ const Board = () => {
             <div className="flex items-center justify-between">
             {/* Left Section - Trip Info */}
             <div className="flex items-center gap-4">
-                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {currentTrip ? currentTrip.name : 'Select a Trip'}
                 </h1>
                 {currentTrip?.startDate && (
@@ -345,10 +345,10 @@ const Board = () => {
                     <p>Export</p>
                     </TooltipContent>
                 </Tooltip>
-                <DropdownMenuContent align="end" className="w-48 bg-[#1a1a1a] text-white border-white/10">
+                <DropdownMenuContent align="end" className="w-48 bg-popover text-popover-foreground border-border">
                     <DropdownMenuItem 
                     onClick={handleExportPDF} 
-                    className="gap-2 cursor-pointer focus:bg-white/10 focus:text-white"
+                    className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
                     >
                     <FileText className="w-4 h-4" />
                     <span>Export as PDF</span>

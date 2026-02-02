@@ -157,7 +157,7 @@ export const EmojiPicker = ({ value, onChange, triggerClassName = '' }: EmojiPic
                 <Button
                     variant="ghost"
                     size="icon"
-                    className={`rounded-full hover:bg-white/10 ${triggerClassName}`}
+                    className={`rounded-full hover:bg-accent ${triggerClassName}`}
                     type="button"
                 >
                     {value ? (
@@ -169,17 +169,17 @@ export const EmojiPicker = ({ value, onChange, triggerClassName = '' }: EmojiPic
             </PopoverTrigger>
             <PopoverContent
                 align="start"
-                className="w-[320px] p-0 bg-[#1a1a1a] border-white/10"
+                className="w-[320px] p-0 bg-popover border-border"
                 onOpenAutoFocus={(e) => e.preventDefault()}
             >
                 {/* Header with clear button */}
                 {value && (
-                    <div className="px-2 py-1.5 border-b border-white/10">
+                    <div className="px-2 py-1.5 border-b border-border">
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={handleClear}
-                            className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-white/5 h-7"
+                            className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7"
                         >
                             <X className="w-3 h-3 mr-2" />
                             Remover ícone
@@ -188,15 +188,15 @@ export const EmojiPicker = ({ value, onChange, triggerClassName = '' }: EmojiPic
                 )}
 
                 {/* Tab Navigation */}
-                <div className="flex border-b border-white/10 px-1 py-1 gap-0.5 overflow-x-auto scrollbar-hide">
+                <div className="flex border-b border-border px-1 py-1 gap-0.5 overflow-x-auto scrollbar-hide">
                     <button
                         type="button"
                         onClick={() => setActiveTab('recentes')}
                         className={`
                         p-1.5 rounded-md transition-colors shrink-0
                         ${activeTab === 'recentes'
-                                ? 'bg-white/15 text-white'
-                                : 'text-muted-foreground hover:bg-white/5 hover:text-white'
+                                ? 'bg-accent text-accent-foreground'
+                                : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                             }
                         `}
                         title="Recentes"
@@ -212,8 +212,8 @@ export const EmojiPicker = ({ value, onChange, triggerClassName = '' }: EmojiPic
                             className={`
                 p-1.5 rounded-md transition-colors shrink-0
                 ${activeTab === key
-                                    ? 'bg-white/15 text-white'
-                                    : 'text-muted-foreground hover:bg-white/5 hover:text-white'
+                                    ? 'bg-accent text-accent-foreground'
+                                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                                 }
               `}
                             title={EMOJI_CATEGORIES[key].label}
@@ -235,7 +235,7 @@ export const EmojiPicker = ({ value, onChange, triggerClassName = '' }: EmojiPic
                                 type="button"
                                 onClick={() => handleSelect(emoji)}
                                 className={`
-                  p-1.5 rounded-md hover:bg-white/10 transition-colors text-xl leading-none
+                  p-1.5 rounded-md hover:bg-accent transition-colors text-xl leading-none
                   flex items-center justify-center
                   ${value === emoji ? 'bg-primary/30 ring-1 ring-primary' : ''}
                 `}
@@ -253,7 +253,7 @@ export const EmojiPicker = ({ value, onChange, triggerClassName = '' }: EmojiPic
                 </div>
 
                 {/* Footer - Category Label */}
-                <div className="px-3 py-1.5 border-t border-white/10 text-xs text-muted-foreground">
+                <div className="px-3 py-1.5 border-t border-border text-xs text-muted-foreground">
                     {activeTab === 'recentes' ? 'Recentes' : EMOJI_CATEGORIES[activeTab].label}
                 </div>
             </PopoverContent>

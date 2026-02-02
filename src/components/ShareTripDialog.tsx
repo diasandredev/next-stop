@@ -112,13 +112,13 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
+            <DialogContent hideCloseButton className="bg-background border-none text-foreground sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
                 <DialogTitle className="sr-only">Share Trip</DialogTitle>
                 <DialogDescription className="sr-only">Invite other people to collaborate on this trip.</DialogDescription>
                 
                 <TooltipProvider>
                     {/* Header / Actions Bar */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Users className="w-4 h-4" />
                             <span>Share "{trip.name}"</span>
@@ -128,15 +128,15 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                             {/* More Menu */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white hover:bg-white/10 rounded-full h-8 w-8">
+                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-accent rounded-full h-8 w-8">
                                         <MoreHorizontal className="w-4 h-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-[#2a2a2a] border-white/10 text-white">
+                                <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
                                     <DropdownMenuItem 
                                         onClick={handleClearAll} 
                                         disabled={shares.length === 0}
-                                        className="text-red-400 focus:text-red-400 focus:bg-white/10 cursor-pointer"
+                                        className="text-red-400 focus:text-red-400 focus:bg-accent cursor-pointer"
                                     >
                                         Remove all shares
                                     </DropdownMenuItem>
@@ -146,7 +146,7 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                             {/* Close */}
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => onOpenChange(false)}>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full" onClick={() => onOpenChange(false)}>
                                         <X className="w-4 h-4" />
                                     </Button>
                                 </TooltipTrigger>
@@ -162,20 +162,20 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                         </p>
                         
                         {/* Add new share - Properties Grid */}
-                        <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-4">
+                        <div className="bg-muted/20 p-4 rounded-xl border border-border space-y-4">
                             <Label className="text-xs font-medium text-muted-foreground">Add person</Label>
                             
                             <div className="grid grid-cols-[1fr_auto_auto] gap-2">
                                 {/* Email Input */}
-                                <div className="flex items-center bg-[#1a1a1a] rounded-lg border border-white/10 px-3 h-10 gap-2">
+                                <div className="flex items-center bg-card rounded-lg border border-border px-3 h-10 gap-2">
                                     <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
-                                    <div className="w-px h-4 bg-white/10" />
+                                    <div className="w-px h-4 bg-border" />
                                     <input
                                         type="email"
                                         placeholder="email@example.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="bg-transparent border-none text-white placeholder:text-muted-foreground/50 focus:outline-none flex-1 text-sm"
+                                        className="bg-transparent border-none text-foreground placeholder:text-muted-foreground/50 focus:outline-none flex-1 text-sm"
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
                                                 e.preventDefault();
@@ -187,17 +187,17 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
 
                                 {/* Permission Selector */}
                                 <Select value={permission} onValueChange={(v) => setPermission(v as 'view' | 'edit')}>
-                                    <SelectTrigger className="w-[120px] h-10 bg-[#1a1a1a] border-white/10 rounded-lg">
+                                    <SelectTrigger className="w-[120px] h-10 bg-card border-border rounded-lg text-foreground">
                                         <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-[#2a2a2a] border-white/10">
-                                        <SelectItem value="view" className="text-white focus:bg-white/10 focus:text-white">
+                                    <SelectContent className="bg-popover border-border text-popover-foreground">
+                                        <SelectItem value="view" className="text-foreground focus:bg-accent focus:text-accent-foreground">
                                             <div className="flex items-center gap-2">
                                                 <Eye className="w-4 h-4" />
                                                 <span>View</span>
                                             </div>
                                         </SelectItem>
-                                        <SelectItem value="edit" className="text-white focus:bg-white/10 focus:text-white">
+                                        <SelectItem value="edit" className="text-foreground focus:bg-accent focus:text-accent-foreground">
                                             <div className="flex items-center gap-2">
                                                 <Edit3 className="w-4 h-4" />
                                                 <span>Edit</span>
@@ -212,7 +212,7 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                                         <Button
                                             onClick={handleAddShare}
                                             disabled={isLoading || !email.trim()}
-                                            className="bg-primary hover:bg-primary/90 rounded-lg h-10 w-10 p-0"
+                                            className="bg-primary hover:bg-primary/90 rounded-lg h-10 w-10 p-0 text-primary-foreground"
                                         >
                                             <UserPlus className="w-4 h-4" />
                                         </Button>
@@ -222,7 +222,7 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                             </div>
                         </div>
 
-                        <div className="w-full h-px bg-white/5" />
+                        <div className="w-full h-px bg-border" />
 
                         {/* Current shares list */}
                         {shares.length > 0 && (
@@ -232,14 +232,14 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                                     {shares.map((share) => (
                                         <div
                                             key={share.email}
-                                            className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 group hover:bg-white/10 transition-colors"
+                                            className="flex items-center justify-between p-3 bg-muted/20 rounded-xl border border-border group hover:bg-muted/40 transition-colors"
                                         >
                                             <div className="flex items-center gap-3 min-w-0">
                                                 <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-sm font-medium text-primary">
                                                     {share.email.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-sm font-medium truncate text-white">{share.email}</p>
+                                                    <p className="text-sm font-medium truncate text-foreground">{share.email}</p>
                                                     <p className="text-xs text-muted-foreground">
                                                         Added by {share.addedBy.split('@')[0]}
                                                     </p>
@@ -250,14 +250,14 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                                                     value={share.permission}
                                                     onValueChange={(v) => handleUpdatePermission(share.email, v as 'view' | 'edit')}
                                                 >
-                                                    <SelectTrigger className="w-[100px] h-8 text-xs bg-transparent border-white/10 rounded-lg">
+                                                    <SelectTrigger className="w-[100px] h-8 text-xs bg-transparent border-border rounded-lg text-foreground">
                                                         <SelectValue />
                                                     </SelectTrigger>
-                                                    <SelectContent className="bg-[#2a2a2a] border-white/10">
-                                                        <SelectItem value="view" className="text-white text-xs focus:bg-white/10 focus:text-white">
+                                                    <SelectContent className="bg-popover border-border text-popover-foreground">
+                                                        <SelectItem value="view" className="text-foreground text-xs focus:bg-accent focus:text-accent-foreground">
                                                             View
                                                         </SelectItem>
-                                                        <SelectItem value="edit" className="text-white text-xs focus:bg-white/10 focus:text-white">
+                                                        <SelectItem value="edit" className="text-foreground text-xs focus:bg-accent focus:text-accent-foreground">
                                                             Edit
                                                         </SelectItem>
                                                     </SelectContent>
@@ -284,7 +284,7 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
 
                         {shares.length === 0 && (
                             <div className="text-center py-10 text-muted-foreground">
-                                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                                <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mx-auto mb-4">
                                     <UserPlus className="w-8 h-8 opacity-30" />
                                 </div>
                                 <p className="text-sm font-medium">No people added yet</p>

@@ -126,8 +126,8 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
             {/* Glassmorphic Dashboard Header */}
             <div 
                 className={cn(
-                    "rounded-2xl border border-white/5 backdrop-blur-xl p-5 relative overflow-hidden group/dash",
-                    hasCustomColor ? "" : "bg-secondary/40"
+                    "rounded-2xl border border-border backdrop-blur-xl p-5 relative overflow-hidden group/dash",
+                    hasCustomColor ? "" : "bg-card/40 dark:bg-secondary/40"
                 )}
                 style={hasCustomColor ? { backgroundColor: chroma(dashboard.backgroundColor!).alpha(0.15).css() } : undefined}
             >
@@ -138,7 +138,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                     {/* Title Section */}
                     <div className="flex items-start gap-4 flex-1 min-w-0">
                         <div 
-                            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg ring-1 ring-white/10"
+                            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg ring-1 ring-border"
                             style={{ 
                                 backgroundColor: chroma(dashboardColor).alpha(0.1).css(),
                                 color: dashboardColor
@@ -177,7 +177,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                             </div>
                             
                             <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground">
-                                <div className="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-md border border-white/5">
+                                <div className="flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded-md border border-border">
                                     <Calendar className="w-3.5 h-3.5" />
                                     <span>
                                         {format(dates[0], 'MMM d')} - {format(dates[dates.length - 1], 'MMM d')}
@@ -189,7 +189,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dashboard.accommodation.address)}&query_place_id=${dashboard.accommodation.placeId}`}
                                         target="_blank" 
                                         rel="noopener noreferrer"
-                                        className="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-md border border-white/5 hover:bg-white/10 hover:text-foreground transition-colors max-w-[200px]"
+                                        className="flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded-md border border-border hover:bg-muted hover:text-foreground transition-colors max-w-[200px]"
                                     >
                                         <Bed className="w-3.5 h-3.5 text-purple-400" />
                                         <span className="truncate">{dashboard.accommodation.name}</span>
@@ -261,14 +261,14 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                         <Settings className="h-4 w-4" />
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
+                                <DialogContent hideCloseButton className="bg-background border-none text-foreground sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
                                     <DialogTitle className="sr-only">{dashboard.name} Settings</DialogTitle>
                                     
                                     {/* Header Bar */}
-                                    <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+                                    <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
                                         <div className="flex items-center gap-3">
                                             <div 
-                                                className="w-10 h-10 rounded-xl flex items-center justify-center ring-1 ring-white/10"
+                                                className="w-10 h-10 rounded-xl flex items-center justify-center ring-1 ring-border"
                                                 style={{ 
                                                     backgroundColor: chroma(dashboardColor).alpha(0.15).css(),
                                                     color: dashboardColor
@@ -276,7 +276,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                             >
                                                 <MapPin className="w-5 h-5" />
                                             </div>
-                                            <span className="text-lg font-semibold text-white">{dashboard.name}</span>
+                                            <span className="text-lg font-semibold text-foreground">{dashboard.name}</span>
                                         </div>
                                         <div className="flex items-center gap-1">
                                             {trip.ownerId === user?.uid && (
@@ -289,7 +289,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                                     <Trash2 className="w-4 h-4" />
                                                 </Button>
                                             )}
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/10 rounded-full" onClick={() => setSettingsOpen(false)}>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full" onClick={() => setSettingsOpen(false)}>
                                                 <X className="w-4 h-4" />
                                             </Button>
                                         </div>
@@ -298,14 +298,14 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                     {/* Content */}
                                     <div className="p-6 space-y-6 max-h-[85vh] overflow-y-auto">
                                         {/* Properties */}
-                                        <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-4">
+                                        <div className="bg-muted/20 p-4 rounded-xl border border-border space-y-4">
                                             {/* Duration */}
                                             <div className="space-y-2">
                                                 <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                                                     <Calendar className="w-3.5 h-3.5" />
                                                     Duration
                                                 </Label>
-                                                <div className="bg-[#1a1a1a] rounded-lg border border-white/10 overflow-hidden">
+                                                <div className="bg-card rounded-lg border border-border overflow-hidden">
                                                     <DateRangePicker
                                                         date={{
                                                             from: editStartDate ? new Date(editStartDate) : undefined,
@@ -333,7 +333,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                             </div>
 
                                             {/* Divider */}
-                                            <div className="w-full h-px bg-white/5" />
+                                            <div className="w-full h-px bg-border" />
 
                                             {/* Accommodation */}
                                             <div className="space-y-2">
@@ -341,7 +341,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                                     <Bed className="w-3.5 h-3.5" />
                                                     Accommodation
                                                 </Label>
-                                                <div className="bg-[#1a1a1a] rounded-lg border border-white/10 overflow-hidden">
+                                                <div className="bg-card rounded-lg border border-border overflow-hidden">
                                                     <LocationSearch
                                                         defaultValue={dashboard.accommodation?.name || dashboard.accommodation?.address}
                                                         onLocationSelect={(location) => {
@@ -354,7 +354,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                     </div>
 
                                     {/* Footer */}
-                                    <div className="px-6 py-4 border-t border-white/5 bg-white/[0.02] flex justify-end">
+                                    <div className="px-6 py-4 border-t border-border bg-muted/20 flex justify-end">
                                         <Button
                                             onClick={handleSettingsSave}
                                             className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg h-10 px-6 text-sm font-medium"

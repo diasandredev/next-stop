@@ -152,13 +152,13 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent hideCloseButton className="bg-[#1a1a1a] border-none text-white sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
+      <DialogContent hideCloseButton className="bg-background border-none text-foreground sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
         <DialogTitle className="sr-only">Edit Card</DialogTitle>
         <DialogDescription className="sr-only">Edit the details of your card</DialogDescription>
         
         <TooltipProvider>
             {/* Header / Actions Bar - Clean and Minimal */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="w-4 h-4" />
                     <span>{dateString}</span>
@@ -170,7 +170,7 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <PopoverTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/10 h-8 w-8">
+                                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-accent h-8 w-8">
                                         <Circle
                                             className="w-4 h-4"
                                             style={{
@@ -183,7 +183,7 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                             </TooltipTrigger>
                             <TooltipContent><p>Color</p></TooltipContent>
                         </Tooltip>
-                        <PopoverContent align="end" className="w-auto p-3 bg-[#2a2a2a] border-white/10">
+                        <PopoverContent align="end" className="w-auto p-3 bg-popover border-border">
                             <ColorPicker color={color} onChange={handleColorChange} />
                         </PopoverContent>
                     </Popover>
@@ -201,12 +201,12 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                     {/* More Menu */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white hover:bg-white/10 rounded-full h-8 w-8">
+                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-accent rounded-full h-8 w-8">
                                 <MoreHorizontal className="w-4 h-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-[#2a2a2a] border-white/10 text-white">
-                            <DropdownMenuItem onClick={handleDiscardChanges} className="text-red-400 focus:text-red-400 focus:bg-white/10 cursor-pointer">
+                        <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
+                            <DropdownMenuItem onClick={handleDiscardChanges} className="text-red-400 focus:text-red-400 focus:bg-accent cursor-pointer">
                                 Discard changes
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -234,24 +234,24 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                             setTitle(e.target.value);
                             dirtyRef.current = true;
                         }}
-                        className="font-bold bg-transparent border-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none placeholder:text-muted-foreground/50 h-auto flex-1 text-3xl md:text-3xl leading-tight"
+                        className="font-bold bg-transparent border-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none placeholder:text-muted-foreground/50 h-auto flex-1 text-3xl md:text-3xl leading-tight text-foreground"
                         placeholder="Task title"
                     />
                 </div>
 
                 {/* 2. Properties Grid - Fixed Layout to prevent shifts */}
-                <div className="grid grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
+                <div className="grid grid-cols-2 gap-4 bg-muted/20 p-4 rounded-xl border border-border">
                     {/* Time Column */}
                     <div className="space-y-1.5">
                         <Label className="text-xs font-medium text-muted-foreground ml-1">Time</Label>
-                        <div className="flex items-center bg-[#1a1a1a] rounded-lg border border-white/10 px-2 h-10">
+                        <div className="flex items-center bg-card rounded-lg border border-border px-2 h-10">
                             <TimePicker
                                 time={time}
                                 onChange={(newTime) => {
                                     setTime(newTime);
                                     dirtyRef.current = true;
                                 }}
-                                className="w-full bg-transparent border-none p-0 h-full text-sm focus:ring-0 hover:bg-transparent hover:pl-0 hover:pr-0 text-white transition-none"
+                                className="w-full bg-transparent border-none p-0 h-full text-sm focus:ring-0 hover:bg-transparent hover:pl-0 hover:pr-0 text-foreground transition-none"
                             />
                         </div>
                     </div>
@@ -259,21 +259,21 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                     {/* Cost Column */}
                     <div className="space-y-1.5">
                         <Label className="text-xs font-medium text-muted-foreground ml-1">Cost</Label>
-                        <div className="flex items-center bg-[#1a1a1a] rounded-lg border border-white/10 px-3 h-10 gap-2 focus-within:ring-1 focus-within:ring-white/20 transition-all">
+                        <div className="flex items-center bg-card rounded-lg border border-border px-3 h-10 gap-2 focus-within:ring-1 focus-within:ring-ring transition-all">
                              <div className="shrink-0 text-muted-foreground">
                                 <Select value={currency} onValueChange={(v) => { setCurrency(v); dirtyRef.current = true; }}>
-                                    <SelectTrigger className="w-auto h-auto p-0 border-none bg-transparent text-xs font-medium gap-1 text-muted-foreground hover:text-white focus:ring-0">
+                                    <SelectTrigger className="w-auto h-auto p-0 border-none bg-transparent text-xs font-medium gap-1 text-muted-foreground hover:text-foreground focus:ring-0 shadow-none">
                                         <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-[#252525] border-white/10 text-white min-w-[80px]">
-                                        <SelectItem value="USD">USD</SelectItem>
-                                        <SelectItem value="EUR">EUR</SelectItem>
-                                        <SelectItem value="BRL">BRL</SelectItem>
-                                        <SelectItem value="GBP">GBP</SelectItem>
+                                    <SelectContent className="bg-popover border-border text-popover-foreground min-w-[80px]">
+                                        <SelectItem value="USD" className="text-foreground focus:bg-accent focus:text-accent-foreground">USD</SelectItem>
+                                        <SelectItem value="EUR" className="text-foreground focus:bg-accent focus:text-accent-foreground">EUR</SelectItem>
+                                        <SelectItem value="BRL" className="text-foreground focus:bg-accent focus:text-accent-foreground">BRL</SelectItem>
+                                        <SelectItem value="GBP" className="text-foreground focus:bg-accent focus:text-accent-foreground">GBP</SelectItem>
                                     </SelectContent>
                                 </Select>
                              </div>
-                             <div className="w-px h-4 bg-white/10" />
+                             <div className="w-px h-4 bg-border" />
                              <input
                                 type="number"
                                 step="0.01"
@@ -287,7 +287,7 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                                         }
                                     }
                                 }}
-                                className="h-full w-full bg-transparent border-none p-0 text-sm focus:outline-none placeholder:text-muted-foreground/30 text-white"
+                                className="h-full w-full bg-transparent border-none p-0 text-sm focus:outline-none placeholder:text-muted-foreground/30 text-foreground"
                                 placeholder="0.00"
                             />
                         </div>
@@ -298,12 +298,12 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                 <div className="space-y-2">
                      <Label className="text-xs font-medium text-muted-foreground ml-1">Location</Label>
                      {location ? (
-                        <div className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5 group hover:bg-white/10 transition-colors">
+                        <div className="flex items-center gap-3 bg-muted/20 p-3 rounded-xl border border-border group hover:bg-muted/40 transition-colors">
                             <div className="h-8 w-8 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
                                 <MapPin className="w-4 h-4 text-green-400" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate">{location.name}</p>
+                                <p className="text-sm font-medium text-foreground truncate">{location.name}</p>
                                 <p className="text-xs text-muted-foreground truncate">{location.address}</p>
                             </div>
                             <div className="flex items-center gap-1">
@@ -338,7 +338,7 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                     )}
                 </div>
 
-                <div className="w-full h-px bg-white/5" />
+                <div className="w-full h-px bg-border" />
 
                 {/* 4. Checklist Section */}
                 <div className="space-y-3">
@@ -357,11 +357,11 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                         <div key={item.id} className="flex items-center gap-3 group">
                            <button 
                              onClick={() => toggleChecklistItem(item.id)}
-                             className={`flex-shrink-0 w-4 h-4 rounded-[4px] border flex items-center justify-center transition-colors ${item.completed ? 'bg-primary border-primary text-primary-foreground' : 'border-white/20 hover:border-white/40'}`}
+                             className={`flex-shrink-0 w-4 h-4 rounded-[4px] border flex items-center justify-center transition-colors ${item.completed ? 'bg-primary border-primary text-primary-foreground' : 'border-border hover:border-primary/50'}`}
                            >
                               {item.completed && <CheckSquare className="w-3 h-3" />}
                            </button>
-                           <span className={`flex-1 text-sm transition-all ${item.completed ? 'text-muted-foreground line-through decoration-white/20' : 'text-white'}`}>
+                           <span className={`flex-1 text-sm transition-all ${item.completed ? 'text-muted-foreground line-through decoration-border' : 'text-foreground'}`}>
                               {item.text}
                            </span>
                            <Button
@@ -387,13 +387,13 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                               }
                            }}
                            placeholder="Add item"
-                           className="h-8 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 px-0 placeholder:text-muted-foreground/40 text-sm shadow-none"
+                           className="h-8 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 px-0 placeholder:text-muted-foreground/40 text-sm shadow-none text-foreground"
                         />
                      </div>
                   </div>
                 </div>
 
-                <div className="w-full h-px bg-white/5" />
+                <div className="w-full h-px bg-border" />
 
                 {/* 5. Notes Section */}
                 <div className="space-y-2">
@@ -404,7 +404,7 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                             setDescription(e.target.value);
                             dirtyRef.current = true;
                         }}
-                        className="bg-white/5 border-none resize-none focus-visible:ring-1 focus-visible:ring-white/20 focus-visible:ring-offset-0 p-4 min-h-[100px] text-sm text-muted-foreground focus:text-white transition-colors rounded-xl shadow-none"
+                        className="bg-muted/20 border-none resize-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 p-4 min-h-[100px] text-sm text-foreground focus:bg-muted/30 transition-colors rounded-xl shadow-none placeholder:text-muted-foreground/50"
                         placeholder="Add details, reservation numbers, or thoughts..."
                     />
                 </div>
@@ -414,12 +414,12 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                     <div className="pt-2 flex flex-col gap-1">
                         {card.createdBy && (
                             <p className="text-[10px] text-muted-foreground/40 uppercase tracking-wider font-medium">
-                                Created by <span className="text-white ml-1">{card.createdBy}</span>
+                                Created by <span className="text-foreground ml-1">{card.createdBy}</span>
                             </p>
                         )}
                          {card.lastEditedBy && card.lastEditedBy !== card.createdBy && (
                             <p className="text-[10px] text-muted-foreground/40 uppercase tracking-wider font-medium">
-                                Edited by <span className="text-white ml-1">{card.lastEditedBy}</span>
+                                Edited by <span className="text-foreground ml-1">{card.lastEditedBy}</span>
                             </p>
                         )}
                     </div>
