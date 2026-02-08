@@ -280,7 +280,7 @@ export const DayColumn = ({
                      <div 
                         onClick={() => setIsAdding(true)}
                         className={cn(
-                            "flex flex-col items-center justify-center h-24 text-muted-foreground/20 border-2 border-dashed rounded-xl transition-all cursor-pointer group/empty",
+                            "flex flex-col items-center justify-center h-[76px] text-muted-foreground/20 border-2 border-dashed rounded-xl transition-all cursor-pointer group/empty",
                             !isOver && "hover:border-border hover:bg-muted/50"
                         )}
                         style={{ borderColor: `${dashboardColor}30` }}
