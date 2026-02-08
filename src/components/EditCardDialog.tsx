@@ -334,7 +334,11 @@ export const EditCardDialog = ({ open, onOpenChange, card }: EditCardDialogProps
                             </div>
                         </div>
                     ) : (
-                        <LocationSearch onLocationSelect={handleLocationSelect} defaultValue={location?.name} />
+                        <LocationSearch 
+                            onLocationSelect={handleLocationSelect} 
+                            defaultValue={location?.name} 
+                            placeholder="Search location..."
+                        />
                     )}
                 </div>
 

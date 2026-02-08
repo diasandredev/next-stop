@@ -38,9 +38,10 @@ interface LocationSearchProps {
     }) => void;
     defaultValue?: string;
     className?: string;
+    placeholder?: string;
 }
 
-export const LocationSearch = ({ onLocationSelect, defaultValue, className }: LocationSearchProps) => {
+export const LocationSearch = ({ onLocationSelect, defaultValue, className, placeholder }: LocationSearchProps) => {
     const [open, setOpen] = useState(false);
     const [inputValue, setInputValue] = useState(defaultValue || "");
     const [isLoading, setIsLoading] = useState(false);
@@ -126,7 +127,7 @@ export const LocationSearch = ({ onLocationSelect, defaultValue, className }: Lo
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <input
                         className="flex h-10 w-full rounded-lg bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 pl-9 pr-10 text-foreground"
-                        placeholder="Search accommodation..."
+                        placeholder={placeholder || "Search accommodation..."}
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={handleKeyDown}
