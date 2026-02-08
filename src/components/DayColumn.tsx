@@ -4,11 +4,14 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { KanbanCard } from './KanbanCard';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { Plus } from 'lucide-react';
+import { Plus, Map, MapPinned } from 'lucide-react';
 import { useKanban } from '@/contexts/KanbanContext';
 import { useState } from 'react';
 import { Input } from './ui/input';
 import { EmojiPicker } from './EmojiPicker';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { createGoogleMapsRouteUrl } from '@/utils/googleMapsUtils';
+import { CustomRouteDialog } from './CustomRouteDialog';
 
 export interface DayColumnProps {
     dashboardId: string;
@@ -20,6 +23,12 @@ export interface DayColumnProps {
     isWeekend?: boolean;
     dashboardColor?: string;
     searchQuery?: string;
+    accommodation?: {
+        name: string;
+        lat: number;
+        lng: number;
+        placeId: string;
+    };
 }
 
 export const DayColumn = ({
@@ -31,7 +40,8 @@ export const DayColumn = ({
     minSlots,
     isWeekend = false,
     dashboardColor = '#3b82f6',
-    searchQuery = ''
+    searchQuery = '',
+    accommodation
 }: DayColumnProps) => {
     const dateStr = date.toISOString().split('T')[0];
     const { setNodeRef, isOver } = useDroppable({
@@ -47,6 +57,23 @@ export const DayColumn = ({
     const [isAdding, setIsAdding] = useState(false);
     const [newCardTitle, setNewCardTitle] = useState('');
     const [newCardIcon, setNewCardIcon] = useState<string | undefined>();
+    const [showCustomRouteDialog, setShowCustomRouteDialog] = useState(false);
+
+    const handleCreateRoute = () => {
+        const locationsInOrder = cards
+            .filter(c => !c.parentId && c.location)
+            .sort((a, b) => (a.order || 0) - (b.order || 0))
+            .map(c => ({
+                lat: c.location!.lat,
+                lng: c.location!.lng,
+                placeId: c.location!.placeId
+            }));
+
+        const routeUrl = createGoogleMapsRouteUrl(locationsInOrder);
+        if (routeUrl) {
+            window.open(routeUrl, '_blank');
+        }
+    };
 
     const handleAddCard = (keepOpen = false) => {
         if (newCardTitle.trim()) {
@@ -129,17 +156,59 @@ export const DayColumn = ({
                         </span>
                      </div>
                      
-                     <button
-                        onClick={() => setIsAdding(true)}
-                        className={cn(
-                            "w-7 h-7 flex items-center justify-center rounded-lg transition-all",
-                            isCurrentDay 
-                                ? "bg-white/20 hover:bg-white/30 text-white" 
-                                : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
-                        )}
-                    >
-                        <Plus className="w-4 h-4" />
-                    </button>
+                     <div className="flex items-center gap-1">
+                        <TooltipProvider delayDuration={0}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={handleCreateRoute}
+                                        disabled={!cards.some(c => !c.parentId && c.location)}
+                                        className={cn(
+                                            "w-7 h-7 flex items-center justify-center rounded-lg transition-all disabled:opacity-30",
+                                            isCurrentDay 
+                                                ? "bg-white/20 hover:bg-white/30 text-white" 
+                                                : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+                                        )}
+                                    >
+                                        <Map className="w-4 h-4" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent>Open Route in Google Maps</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider delayDuration={0}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={() => setShowCustomRouteDialog(true)}
+                                        disabled={!cards.some(c => !c.parentId && c.location) && !accommodation}
+                                        className={cn(
+                                            "w-7 h-7 flex items-center justify-center rounded-lg transition-all disabled:opacity-30",
+                                            isCurrentDay 
+                                                ? "bg-white/20 hover:bg-white/30 text-white" 
+                                                : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+                                        )}
+                                    >
+                                        <MapPinned className="w-4 h-4" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent>Create Custom Route in Google Maps</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+
+                        <button
+                            onClick={() => setIsAdding(true)}
+                            className={cn(
+                                "w-7 h-7 flex items-center justify-center rounded-lg transition-all",
+                                isCurrentDay 
+                                    ? "bg-white/20 hover:bg-white/30 text-white" 
+                                    : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+                            )}
+                        >
+                            <Plus className="w-4 h-4" />
+                        </button>
+                     </div>
                 </div>
                 
                 {/* Visual Accent Bar */}
@@ -220,6 +289,14 @@ export const DayColumn = ({
                      </div>
                 )}
             </div>
+
+            <CustomRouteDialog
+                open={showCustomRouteDialog}
+                onOpenChange={setShowCustomRouteDialog}
+                cards={cards}
+                dayDate={dateStr}
+                accommodation={accommodation}
+            />
         </div>
     );
 };

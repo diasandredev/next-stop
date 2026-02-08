@@ -400,6 +400,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                     isWeekend={date.getDay() === 0 || date.getDay() === 6} 
                                     dashboardColor={dashboardColor}
                                     searchQuery={searchQuery}
+                                    accommodation={dashboard.accommodation}
                                 />
                             </div>
                         );

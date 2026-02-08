@@ -9,7 +9,7 @@ interface SEOProps {
 
 export const SEO = ({
   title,
-  description = "Organize suas tarefas semanalmente com um board Kanban personalizável",
+  description = "Organize your trips with detailed itineraries, interactive maps, and real-time synchronization. Your ideal companion for planning your next adventure.",
   name = "Next Stop",
   type = "website"
 }: SEOProps) => {

@@ -27,6 +27,12 @@ interface CustomRouteDialogProps {
     onOpenChange: (open: boolean) => void;
     cards: Card[];
     dayDate: string;
+    accommodation?: {
+        name: string;
+        lat: number;
+        lng: number;
+        placeId: string;
+    };
 }
 
 interface SortableCardItemProps {
@@ -106,7 +112,7 @@ const SortableCardItem = ({ card, isSelected, onToggle }: SortableCardItemProps)
     );
 };
 
-export const CustomRouteDialog = ({ open, onOpenChange, cards, dayDate }: CustomRouteDialogProps) => {
+export const CustomRouteDialog = ({ open, onOpenChange, cards, dayDate, accommodation }: CustomRouteDialogProps) => {
     const [selectedCardIds, setSelectedCardIds] = useState<Set<string>>(new Set());
     const [orderedCards, setOrderedCards] = useState<Card[]>([]);
 
@@ -122,8 +128,22 @@ export const CustomRouteDialog = ({ open, onOpenChange, cards, dayDate }: Custom
         const cardsWithLocations = cards
             .filter(c => !c.parentId && c.location)
             .sort((a, b) => (a.order || 0) - (b.order || 0));
-        setOrderedCards(cardsWithLocations);
-    }, [cards, open]);
+            
+        if (accommodation) {
+            const accommodationCard = {
+                id: 'accommodation-start',
+                title: accommodation.name,
+                location: accommodation,
+                icon: '🛏️',
+                // Mock other required fields if any, but Card interface has mostly optionals
+            } as Card;
+            
+            // Add accommodation at the start
+            setOrderedCards([accommodationCard, ...cardsWithLocations]);
+        } else {
+            setOrderedCards(cardsWithLocations);
+        }
+    }, [cards, open, accommodation]);
 
     // Clear selections when dialog closes
     useEffect(() => {
