@@ -5,11 +5,12 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDroppable } from '@dnd-kit/core';
 import { KanbanCard } from './KanbanCard';
 import { Button } from './ui/button';
-import { Plus, Trash2, Split, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Split } from 'lucide-react';
 import { useState } from 'react';
 import { Input } from './ui/input';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EmojiPicker } from './EmojiPicker';
+import { cn } from '@/lib/utils';
 
 interface OptionsCardProps {
     card: Card;
@@ -27,9 +28,6 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
     // Group child cards by optionId
     const option1Cards = childCards.filter(c => c.optionId === '1').sort((a, b) => (a.order || 0) - (b.order || 0));
     const option2Cards = childCards.filter(c => c.optionId === '2').sort((a, b) => (a.order || 0) - (b.order || 0));
-
-    // Determine the maximum length to know when to hide the bottom border for the "last" item visually
-    const maxLen = Math.max(option1Cards.length, option2Cards.length);
 
     // Droppables for options
     const { setNodeRef: setRef1, isOver: isOver1 } = useDroppable({
@@ -79,126 +77,124 @@ export const OptionsCard = ({ card, childCards }: OptionsCardProps) => {
 
     return (
         <>
-            <div className="group/options border-b border-border/40 box-border bg-black/20 backdrop-blur-sm">
-
-                {/* Header - H-12 (48px) */}
-                <div className="h-12 flex flex-col border-b border-border/40 bg-white/5">
-                    {/* Top Row: Title + Actions */}
-                    <div className="h-6 flex items-center justify-between px-3 border-b border-border/10">
-                        <div className="flex items-center gap-2">
-                            <Split className="w-3 h-3 text-muted-foreground" />
-                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">ITINERARY OPTIONS</span>
-                        </div>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-4 w-4 opacity-0 group-hover/options:opacity-100 transition-opacity hover:text-red-400"
-                            onClick={handleDeleteClick}
-                        >
-                            <Trash2 className="w-3 h-3" />
-                        </Button>
+            <div className="group/options rounded-xl border border-border/40 overflow-hidden bg-muted/20 backdrop-blur-sm my-2">
+                
+                {/* Header - Compact */}
+                <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/20 bg-black/5 dark:bg-white/5">
+                    <div className="flex items-center gap-2">
+                        <Split className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Options</span>
                     </div>
-                    {/* Bottom Row: Path Labels + Add Buttons */}
-                    <div className="h-6 flex divide-x divide-border/10">
-                        <div className="flex-1 flex items-center justify-between px-2 bg-white/5 group/path-a">
-                            <span className="text-[9px] font-medium text-muted-foreground/70 uppercase tracking-widest">ITINERARY A</span>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 opacity-0 group-hover/options:opacity-100 transition-opacity hover:text-red-400 hover:bg-red-500/10"
+                        onClick={handleDeleteClick}
+                    >
+                        <Trash2 className="w-3 h-3" />
+                    </Button>
+                </div>
+
+                {/* Columns Container */}
+                <div className="flex divide-x divide-border/20">
+                    {/* Option 1 */}
+                    <div ref={setRef1} className={cn("flex-1 flex flex-col min-w-0 transition-colors", isOver1 && "bg-accent/5")}>
+                        
+                        {/* Column Header */}
+                        <div className="flex items-center justify-between px-2 py-1.5 border-b border-border/10 bg-white/5">
+                            <span className="text-[9px] font-medium text-muted-foreground/70 uppercase tracking-widest pl-1">Option A</span>
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-4 w-4 text-muted-foreground hover:text-foreground opacity-0 group-hover/path-a:opacity-100 transition-opacity"
+                                className="h-5 w-5 text-muted-foreground hover:text-foreground opacity-50 hover:opacity-100 transition-all"
                                 onClick={() => setIsAddingTo('1')}
                             >
                                 <Plus className="w-3 h-3" />
                             </Button>
                         </div>
-                        <div className="flex-1 flex items-center justify-between px-2 bg-white/5 group/path-b">
-                            <span className="text-[9px] font-medium text-muted-foreground/70 uppercase tracking-widest">ITINERARY B</span>
+
+                        {/* Content Area */}
+                        <div className="p-1.5 space-y-1.5 min-h-[3rem]">
+                            <SortableContext items={option1Cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
+                                {option1Cards.map(c => <KanbanCard key={c.id} card={c} isNested />)}
+                            </SortableContext>
+                            
+                            {/* Input - Only shown when adding */}
+                            {isAddingTo === '1' && (
+                                <div className="flex items-center gap-1.5 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                                    <EmojiPicker
+                                        value={newCardIcon}
+                                        onChange={setNewCardIcon}
+                                        triggerClassName="h-6 w-6 shrink-0"
+                                    />
+                                    <Input
+                                        value={newCardTitle}
+                                        onChange={e => setNewCardTitle(e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') handleAddCard('1');
+                                            if (e.key === 'Escape') {
+                                                setIsAddingTo(null);
+                                                setNewCardIcon(undefined);
+                                            }
+                                        }}
+                                        onBlur={() => handleAddCard('1')}
+                                        autoFocus
+                                        className="h-7 text-xs bg-background/50 flex-1 border-border/50 focus-visible:ring-1 focus-visible:ring-ring/20"
+                                        placeholder="Add to A..."
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Option 2 */}
+                    <div ref={setRef2} className={cn("flex-1 flex flex-col min-w-0 transition-colors", isOver2 && "bg-accent/5")}>
+                        
+                        {/* Column Header */}
+                        <div className="flex items-center justify-between px-2 py-1.5 border-b border-border/10 bg-white/5">
+                            <span className="text-[9px] font-medium text-muted-foreground/70 uppercase tracking-widest pl-1">Option B</span>
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-4 w-4 text-muted-foreground hover:text-foreground opacity-0 group-hover/path-b:opacity-100 transition-opacity"
+                                className="h-5 w-5 text-muted-foreground hover:text-foreground opacity-50 hover:opacity-100 transition-all"
                                 onClick={() => setIsAddingTo('2')}
                             >
                                 <Plus className="w-3 h-3" />
                             </Button>
                         </div>
-                    </div>
-                </div>
-
-                {/* Columns Container */}
-                <div className="flex divide-x divide-border/40">
-                    {/* Option 1 */}
-                    <div ref={setRef1} className={`flex-1 flex flex-col min-w-0 transition-colors ${isOver1 ? 'bg-accent/10' : ''}`}>
 
                         {/* Content Area */}
-                        <div className={`flex flex-col h-full p-0 space-y-0 text-sm min-h-0`}>
-                            <SortableContext items={option1Cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
-                                {option1Cards.map(c => <KanbanCard key={c.id} card={c} isNested />)}
-                            </SortableContext>
-                        </div>
-
-                        {/* Input - Only shown when adding */}
-                        {isAddingTo === '1' && (
-                            <div className="h-12 flex items-center gap-1 px-1 border-t border-border/40 shrink-0">
-                                <EmojiPicker
-                                    value={newCardIcon}
-                                    onChange={setNewCardIcon}
-                                    triggerClassName="h-6 w-6 shrink-0"
-                                />
-                                <Input
-                                    value={newCardTitle}
-                                    onChange={e => setNewCardTitle(e.target.value)}
-                                    onKeyDown={e => {
-                                        if (e.key === 'Enter') handleAddCard('1');
-                                        if (e.key === 'Escape') {
-                                            setIsAddingTo(null);
-                                            setNewCardIcon(undefined);
-                                        }
-                                    }}
-                                    onBlur={() => handleAddCard('1')}
-                                    autoFocus
-                                    className="h-8 text-xs bg-background/50 flex-1"
-                                    placeholder="Add to Itinerary A..."
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Option 2 */}
-                    <div ref={setRef2} className={`flex-1 flex flex-col min-w-0 transition-colors ${isOver2 ? 'bg-accent/10' : ''}`}>
-
-                        {/* Content Area */}
-                        <div className={`flex flex-col h-full p-0 space-y-0 text-sm min-h-0`}>
+                        <div className="p-1.5 space-y-1.5 min-h-[3rem]">
                             <SortableContext items={option2Cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
                                 {option2Cards.map(c => <KanbanCard key={c.id} card={c} isNested />)}
                             </SortableContext>
-                        </div>
 
-                        {/* Input - Only shown when adding */}
-                        {isAddingTo === '2' && (
-                            <div className="h-12 flex items-center gap-1 px-1 border-t border-border/40 shrink-0">
-                                <EmojiPicker
-                                    value={newCardIcon}
-                                    onChange={setNewCardIcon}
-                                    triggerClassName="h-6 w-6 shrink-0"
-                                />
-                                <Input
-                                    value={newCardTitle}
-                                    onChange={e => setNewCardTitle(e.target.value)}
-                                    onKeyDown={e => {
-                                        if (e.key === 'Enter') handleAddCard('2');
-                                        if (e.key === 'Escape') {
-                                            setIsAddingTo(null);
-                                            setNewCardIcon(undefined);
-                                        }
-                                    }}
-                                    onBlur={() => handleAddCard('2')}
-                                    autoFocus
-                                    className="h-8 text-xs bg-background/50 flex-1"
-                                    placeholder="Add to Itinerary B..."
-                                />
-                            </div>
-                        )}
+                             {/* Input - Only shown when adding */}
+                             {isAddingTo === '2' && (
+                                <div className="flex items-center gap-1.5 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                                    <EmojiPicker
+                                        value={newCardIcon}
+                                        onChange={setNewCardIcon}
+                                        triggerClassName="h-6 w-6 shrink-0"
+                                    />
+                                    <Input
+                                        value={newCardTitle}
+                                        onChange={e => setNewCardTitle(e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') handleAddCard('2');
+                                            if (e.key === 'Escape') {
+                                                setIsAddingTo(null);
+                                                setNewCardIcon(undefined);
+                                            }
+                                        }}
+                                        onBlur={() => handleAddCard('2')}
+                                        autoFocus
+                                        className="h-7 text-xs bg-background/50 flex-1 border-border/50 focus-visible:ring-1 focus-visible:ring-ring/20"
+                                        placeholder="Add to B..."
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

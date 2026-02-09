@@ -3,7 +3,8 @@ import { Card, Dashboard, Trip } from '@/types/kanban';
 import { DayColumn } from './DayColumn';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Trash2, X, Settings, Pencil, Calendar, Wallet, Maximize2, Minimize2, Bed, MapPin } from 'lucide-react';
+import { Trash2, X, Settings, Pencil, Calendar, Wallet, Maximize2, Minimize2, Bed, MapPin, FileUp } from 'lucide-react';
+import { ImportCardsDialog } from './ImportCardsDialog';
 import { useKanban } from '@/contexts/KanbanContext';
 import chroma from 'chroma-js';
 import { ColorPicker } from './ColorPicker';
@@ -101,7 +102,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
 
     // Calculate total trip cost across all cards in this dashboard
     const tripTotalCost = cards.reduce((acc, card) => {
-        if (card.dashboardId === dashboard.id && card.cost && !card.completed) {
+        if (card.dashboardId === dashboard.id && card.cost) {
             const currency = card.currency || 'USD';
             acc[currency] = (acc[currency] || 0) + card.cost;
         }
@@ -113,7 +114,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
     const containerClass = isFluid ? "flex gap-6 w-full h-full" : "flex gap-6 min-w-max h-full";
     const columnClass = isFluid
         ? `flex-1 min-w-0 h-full ${totalColumns === 1 ? 'max-w-[50%]' : ''}`
-        : "w-80 flex-shrink-0 h-full";
+        : "w-96 flex-shrink-0 h-full";
 
     const dashboardColor = dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' 
         ? dashboard.backgroundColor 
@@ -347,6 +348,30 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                                         onLocationSelect={(location) => {
                                                             updateDashboard(dashboard.id, { accommodation: location });
                                                         }}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Divider */}
+                                            <div className="w-full h-px bg-border" />
+
+                                            {/* Import Cards */}
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                                    <FileUp className="w-3.5 h-3.5" />
+                                                    Import Cards
+                                                </Label>
+                                                <div className="bg-card rounded-lg border border-border p-3">
+                                                    <ImportCardsDialog
+                                                        dashboardId={dashboard.id}
+                                                        startDate={editStartDate}
+                                                        days={editDays}
+                                                        trigger={
+                                                            <Button variant="outline" className="w-full justify-start gap-2 h-9">
+                                                                <FileUp className="w-4 h-4" />
+                                                                Import from JSON
+                                                            </Button>
+                                                        }
                                                     />
                                                 </div>
                                             </div>

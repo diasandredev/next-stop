@@ -4,7 +4,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { KanbanCard } from './KanbanCard';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { Plus, Map, MapPinned } from 'lucide-react';
+import { Plus, Map, MapPinned, Split } from 'lucide-react';
 import { useKanban } from '@/contexts/KanbanContext';
 import { useState } from 'react';
 import { Input } from './ui/input';
@@ -94,6 +94,17 @@ export const DayColumn = ({
             setIsAdding(false);
             setNewCardIcon(undefined);
         }
+    };
+
+    const handleAddOptionsGroup = () => {
+        addCard({
+            title: 'Options',
+            date: dateStr,
+            columnType: 'day',
+            type: 'options',
+            order: cards.length,
+            dashboardId
+        });
     };
 
     // Filter cards based on search query
@@ -194,6 +205,25 @@ export const DayColumn = ({
                                     </button>
                                 </TooltipTrigger>
                                 <TooltipContent>Create Custom Route in Google Maps</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider delayDuration={0}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={handleAddOptionsGroup}
+                                        className={cn(
+                                            "w-7 h-7 flex items-center justify-center rounded-lg transition-all",
+                                            isCurrentDay 
+                                                ? "bg-white/20 hover:bg-white/30 text-white" 
+                                                : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+                                        )}
+                                    >
+                                        <Split className="w-4 h-4" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent>Add Itinerary Options</TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
 

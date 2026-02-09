@@ -1,0 +1,41 @@
+{
+  "cards": [
+    {
+      "title": "Morning Coffee",
+      "date": "2025-06-15",
+      "order": 0,
+      "time": "08:30",
+      "icon": "☕",
+      "description": "Start the day with a nice coffee at a local cafe",
+      "notes": "Try the croissant!"
+    },
+    {
+      "title": "Museum Visit",
+      "date": "2025-06-15",
+      "order": 1,
+      "time": "10:00",
+      "icon": "🏛️",
+      "description": "Visit the National Museum",
+      "cost": 15,
+      "currency": "EUR",
+      "location": {
+        "name": "Louvre Museum",
+        "address": "Rue de Rivoli, 75001 Paris, France",
+        "lat": 48.8606,
+        "lng": 2.3376
+      },
+      "checklist": [
+        { "text": "Buy tickets online" },
+        { "text": "Bring camera" }
+      ]
+    },
+    {
+      "title": "Lunch Break",
+      "date": "2025-06-15",
+      "order": 2,
+      "time": "13:00",
+      "icon": "🍔",
+      "description": "Quick lunch near the museum"
+    }
+  ]
+}

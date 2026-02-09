@@ -1,6 +1,6 @@
 import { Card as CardType } from '@/types/kanban';
 import chroma from 'chroma-js';
-import { Check, Circle, MapPin, CheckSquare, GripVertical, Clock, DollarSign } from 'lucide-react';
+import { MapPin, CheckSquare, GripVertical, Clock, DollarSign } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
@@ -42,7 +42,6 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
     isDragging,
   } = useSortable({
     id: card.id,
-    disabled: card.completed,
     data: {
       type: card.type || 'card',
       card
@@ -52,15 +51,6 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
   const style = {
     transform: CSS.Transform.toString(transform),
     transition: transition || 'transform 250ms ease',
-  };
-
-  const handleToggleComplete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const newCompleted = !card.completed;
-    updateCard(card.id, {
-      completed: newCompleted,
-      completedAt: newCompleted ? new Date().toISOString() : undefined
-    });
   };
 
   if (card.type === 'options') {
@@ -110,7 +100,7 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
             className={cn(
                 "relative w-full rounded-xl border transition-all duration-200 ease-out overflow-hidden flex flex-col gap-1.5",
                 isNested ? "p-2 min-h-[3rem]" : "p-3 min-h-[4rem]",
-                card.completed ? "opacity-60 grayscale-[0.5]" : "hover:shadow-lg hover:-translate-y-0.5"
+                "hover:shadow-lg hover:-translate-y-0.5"
             )}
             style={{ 
                 backgroundColor: bgColor,
@@ -128,25 +118,6 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
 
               {/* Header: Title and Checkbox */}
               <div className="flex items-start gap-3">
-                  {/* Completion Circle */}
-                  {card.columnType !== 'extra' && (
-                    <button
-                        onClick={handleToggleComplete}
-                        className={cn(
-                            "mt-0.5 shrink-0 transition-colors duration-200 rounded-full hover:bg-muted/50 p-0.5",
-                            card.completed ? "text-emerald-400" : "text-muted-foreground group-hover:text-foreground"
-                        )}
-                    >
-                        {card.completed ? (
-                            <div className="w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center">
-                                <Check className="w-2.5 h-2.5" />
-                            </div>
-                        ) : (
-                            <Circle className="w-4 h-4 opacity-50 hover:opacity-100" />
-                        )}
-                    </button>
-                  )}
-
                   <div className="flex-1 min-w-0 flex flex-col gap-0.5">
                         <div className="flex items-center gap-2">
                              {card.icon && (
@@ -171,13 +142,12 @@ export const KanbanCard = ({ card, childrenCards = [], isNested = false, classNa
                                     onClick={(e) => e.stopPropagation()}
                                     onMouseDown={(e) => e.stopPropagation()}
                                     autoFocus
-                                    className="h-6 p-0 bg-transparent border-none text-foreground text-sm font-medium focus-visible:ring-0 px-1 -ml-1 w-full"
+                                    className="h-6 p-0 bg-transparent border-none text-foreground text-sm font-medium focus-visible:ring-0 focus-visible:ring-offset-0 px-1 -ml-1 w-full"
                                 />
                              ) : (
                                 <span 
                                     className={cn(
-                                        "font-medium text-sm text-foreground/90 truncate leading-snug cursor-text",
-                                        card.completed && "line-through text-muted-foreground"
+                                        "font-medium text-sm text-foreground/90 truncate leading-snug cursor-text"
                                     )}
                                     onClick={(e) => {
                                         e.stopPropagation();
