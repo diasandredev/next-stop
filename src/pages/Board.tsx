@@ -292,7 +292,7 @@ const Board = () => {
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       <SEO title="Dashboard" />
       {/* Header */}
-      <header className="px-4 pl-[3.25rem] md:px-6 md:pl-6 pt-[max(env(safe-area-inset-top),0.75rem)] pb-3 md:py-4 flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-md border-b border-border/30">
+      <header className="px-4 pl-[3.25rem] md:px-6 md:pl-6 pt-[calc(max(env(safe-area-inset-top),1rem)+0.75rem)] md:pt-[max(env(safe-area-inset-top),0.75rem)] pb-3 md:py-4 flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-md border-b border-border/30">
         <div className="flex items-center justify-between gap-2">
           {/* Left Section - Trip Info */}
           <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
