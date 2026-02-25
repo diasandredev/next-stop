@@ -279,6 +279,23 @@ export const EditCardDialog = ({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Close (saves automatically if dirty) */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full"
+                    onClick={() => handleClose(false)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Close</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
 

@@ -38,14 +38,14 @@ const DialogContent = React.forwardRef<
       className={cn(
         // Base styles
         "fixed z-50 gap-4 bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out",
-        
-        // Mobile: full screen with slide-up animation
-        "inset-0 w-full h-full rounded-none p-0",
+
+        // Mobile: full screen with slide-up animation + safe area for notch/home indicator
+        "inset-0 w-full h-full rounded-none p-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]",
         "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
-        
+
         // Desktop: modal centered
-        "md:inset-auto md:left-[50%] md:top-[50%] md:w-full md:max-w-lg md:translate-x-[-50%] md:translate-y-[-50%] md:rounded-xl md:shadow-xl md:border md:data-[state=closed]:slide-out-to-left-1/2 md:data-[state=closed]:slide-out-to-top-[48%] md:data-[state=open]:slide-in-from-left-1/2 md:data-[state=open]:slide-in-from-top-[48%]",
-        
+        "md:inset-auto md:left-[50%] md:top-[50%] md:w-full md:max-w-lg md:pt-0 md:pb-0 md:translate-x-[-50%] md:translate-y-[-50%] md:rounded-xl md:shadow-xl md:border md:data-[state=closed]:slide-out-to-left-1/2 md:data-[state=closed]:slide-out-to-top-[48%] md:data-[state=open]:slide-in-from-left-1/2 md:data-[state=open]:slide-in-from-top-[48%]",
+
         className,
       )}
       {...props}
