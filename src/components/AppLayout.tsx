@@ -69,14 +69,14 @@ export function AppLayout({ onOpenDashboardSelector }: AppLayoutProps) {
             <Button
                 variant="ghost"
                 size="icon"
-                className="fixed top-4 left-4 z-50 md:hidden bg-background/80 backdrop-blur-sm border border-border"
+                className="fixed top-[max(env(safe-area-inset-top,1rem),1rem)] left-4 z-50 md:hidden bg-background/80 backdrop-blur-sm border border-border"
                 onClick={toggleMobileMenu}
             >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
 
             {/* Mobile Overlay */}
-            <div 
+            <div
                 className={cn(
                     "fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden transition-opacity duration-300",
                     isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -118,8 +118,8 @@ export function AppLayout({ onOpenDashboardSelector }: AppLayoutProps) {
             </div>
 
             {/* Bottom Tabs - Only visible on mobile */}
-            <BottomTabs 
-                currentTripId={currentTripId} 
+            <BottomTabs
+                currentTripId={currentTripId}
                 onOpenTripSelector={() => setShowTripSelector(true)}
                 onOpenDashboardSelector={() => setShowDashboardSelector(true)}
             />

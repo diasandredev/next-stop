@@ -285,236 +285,236 @@ const Board = () => {
   };
 
   if (trips.length === 0) {
-      return <NoTripsView />;
+    return <NoTripsView />;
   }
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <SEO title="Dashboard" />
-        {/* Header */}
-        <header className="px-4 md:px-6 py-3 md:py-4 flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-md border-b border-border/30 safe-area-pt">
-            <div className="flex items-center justify-between gap-2">
-            {/* Left Section - Trip Info */}
-            <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
-                <h1 className="text-xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate">
-                {currentTrip ? currentTrip.name : 'Select a Trip'}
-                </h1>
-                {currentTrip?.startDate && (
-                <div className="hidden sm:flex items-center gap-2 bg-secondary/60 text-secondary-foreground h-8 px-3 rounded-lg border border-border/50">
-                    <Calendar className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-medium">
-                    {formatInTimeZone(new Date(currentTrip.startDate), timeZone, 'MMM d')}
-                    {currentTrip.endDate && ` - ${formatInTimeZone(new Date(currentTrip.endDate), timeZone, 'MMM d')}`}
-                    </span>
-                </div>
-                )}
+      <SEO title="Dashboard" />
+      {/* Header */}
+      <header className="px-4 pl-[3.25rem] md:px-6 md:pl-6 pt-[max(env(safe-area-inset-top),0.75rem)] pb-3 md:py-4 flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-md border-b border-border/30">
+        <div className="flex items-center justify-between gap-2">
+          {/* Left Section - Trip Info */}
+          <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
+            <h1 className="text-xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate">
+              {currentTrip ? currentTrip.name : 'Select a Trip'}
+            </h1>
+            {currentTrip?.startDate && (
+              <div className="hidden sm:flex items-center gap-2 bg-secondary/60 text-secondary-foreground h-8 px-3 rounded-lg border border-border/50">
+                <Calendar className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">
+                  {formatInTimeZone(new Date(currentTrip.startDate), timeZone, 'MMM d')}
+                  {currentTrip.endDate && ` - ${formatInTimeZone(new Date(currentTrip.endDate), timeZone, 'MMM d')}`}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Right Section - Actions */}
+          <div className="flex items-center gap-1 bg-secondary/40 rounded-xl p-1 border border-border/30">
+            {/* Search - Desktop only */}
+            <div className="relative hidden md:block">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              <Input
+                id="board-search"
+                placeholder="Search..."
+                className="h-9 w-48 focus:w-64 pl-8 pr-10 bg-transparent border-none focus:bg-background/50 transition-all duration-300 placeholder:text-muted-foreground/50 text-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none flex items-center gap-1">
+                <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-white/10 bg-white/5 px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                  <span className="text-xs">⌘</span>K
+                </kbd>
+              </div>
             </div>
+            <div className="w-px h-6 bg-white/10 mx-1 hidden md:block" />
 
-            {/* Right Section - Actions */}
-            <div className="flex items-center gap-1 bg-secondary/40 rounded-xl p-1 border border-border/30">
-                {/* Search - Desktop only */}
-                <div className="relative hidden md:block">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                    <Input 
-                        id="board-search"
-                        placeholder="Search..." 
-                        className="h-9 w-48 focus:w-64 pl-8 pr-10 bg-transparent border-none focus:bg-background/50 transition-all duration-300 placeholder:text-muted-foreground/50 text-sm"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none flex items-center gap-1">
-                        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-white/10 bg-white/5 px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                            <span className="text-xs">⌘</span>K
-                        </kbd>
-                    </div>
-                </div>
-                <div className="w-px h-6 bg-white/10 mx-1 hidden md:block" />
-
-                <DropdownMenu>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
-                        >
-                        <FileDown className="w-4 h-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">
-                    <p>Export</p>
-                    </TooltipContent>
-                </Tooltip>
-                <DropdownMenuContent align="end" className="w-48 bg-popover text-popover-foreground border-border">
-                    <DropdownMenuItem 
-                    onClick={handleExportPDF} 
-                    className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
-                    >
-                    <FileText className="w-4 h-4" />
-                    <span>Export as PDF</span>
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-                </DropdownMenu>
-
-                <Tooltip>
+            <DropdownMenu>
+              <Tooltip>
                 <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
                     <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
-                    onClick={() => {
-                        if (currentTrip) {
-                        setShowShareTripDialog(true);
-                        }
-                    }}
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
                     >
-                    <Users className="w-4 h-4" />
+                      <FileDown className="w-4 h-4" />
                     </Button>
+                  </DropdownMenuTrigger>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
-                    <p>Share Trip</p>
+                  <p>Export</p>
                 </TooltipContent>
-                </Tooltip>
+              </Tooltip>
+              <DropdownMenuContent align="end" className="w-48 bg-popover text-popover-foreground border-border">
+                <DropdownMenuItem
+                  onClick={handleExportPDF}
+                  className="gap-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Export as PDF</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-                <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button
-                    id="right-sidebar-toggle"
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
-                    onClick={() => {
-                        setIsRightSidebarExpanded(!isRightSidebarExpanded);
-                    }}
-                    >
-                    <PanelRight className="w-4 h-4" />
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                    <p>Groups</p>
-                </TooltipContent>
-                </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
+                  onClick={() => {
+                    if (currentTrip) {
+                      setShowShareTripDialog(true);
+                    }
+                  }}
+                >
+                  <Users className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>Share Trip</p>
+              </TooltipContent>
+            </Tooltip>
 
-                <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
-                    onClick={() => {
-                        if (currentTrip) {
-                        setShowTripSettingsDialog(true);
-                        }
-                    }}
-                    >
-                    <Settings className="w-4 h-4" />
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                    <p>Trip Settings</p>
-                </TooltipContent>
-                </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  id="right-sidebar-toggle"
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
+                  onClick={() => {
+                    setIsRightSidebarExpanded(!isRightSidebarExpanded);
+                  }}
+                >
+                  <PanelRight className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>Groups</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
+                  onClick={() => {
+                    if (currentTrip) {
+                      setShowTripSettingsDialog(true);
+                    }
+                  }}
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>Trip Settings</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+      </header>
+
+      {/* Board Content (Dashboards) */}
+      <main className="flex-1 overflow-y-auto bg-background/50 p-3 md:p-6">
+        <div className="max-w-[1920px] mx-auto flex flex-col gap-6 md:gap-8 pb-24 md:pb-20">
+          <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            {tripDashboards.map(dashboard => (
+              <DashboardView
+                key={dashboard.id}
+                dashboard={dashboard}
+                trip={currentTrip!}
+                cards={cards.filter(c => c.dashboardId === dashboard.id)}
+                today={today}
+                searchQuery={searchQuery}
+              />
+            ))}
+
+            {/* New Dashboard Button */}
+            {currentTrip && (
+              <div className="flex justify-center">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full max-w-md border-dashed border-2 h-16 text-muted-foreground hover:text-foreground hover:border-muted-foreground/50 hover:bg-muted/50"
+                  onClick={() => {
+                    addDashboard(currentTrip.id, `City ${tripDashboards.length + 1}`);
+                  }}
+                >
+                  <Plus className="mr-2 h-5 w-5" />
+                  Add City
+                </Button>
+              </div>
+            )}
+
+            {/* Right Sidebar - Inside DndContext - Desktop only */}
+            <div className="hidden md:block">
+              <RightSidebar
+                isExpanded={isRightSidebarExpanded}
+                onToggle={() => setIsRightSidebarExpanded(!isRightSidebarExpanded)}
+                groups={groups}
+                cards={cards}
+                dashboards={tripDashboards}
+                activeDashboardId={activeDashboardId}
+                onActiveDashboardChange={setActiveDashboardId}
+                onAddGroup={(dashboardId, name) => addGroup(dashboardId, name)}
+                onUpdateGroup={updateGroup}
+                onDeleteGroup={deleteGroup}
+              />
             </div>
-            </div>
-        </header>
 
-        {/* Board Content (Dashboards) */}
-        <main className="flex-1 overflow-y-auto bg-background/50 p-3 md:p-6">
-            <div className="max-w-[1920px] mx-auto flex flex-col gap-6 md:gap-8 pb-24 md:pb-20">
-            <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-                {tripDashboards.map(dashboard => (
-                <DashboardView
-                    key={dashboard.id}
-                    dashboard={dashboard}
-                    trip={currentTrip!}
-                    cards={cards.filter(c => c.dashboardId === dashboard.id)}
-                    today={today}
-                    searchQuery={searchQuery}
-                />
-                ))}
-
-                {/* New Dashboard Button */}
-                {currentTrip && (
-                <div className="flex justify-center">
-                    <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full max-w-md border-dashed border-2 h-16 text-muted-foreground hover:text-foreground hover:border-muted-foreground/50 hover:bg-muted/50"
-                    onClick={() => {
-                        addDashboard(currentTrip.id, `City ${tripDashboards.length + 1}`);
-                    }}
-                    >
-                    <Plus className="mr-2 h-5 w-5" />
-                    Add City
-                    </Button>
+            <DragOverlay dropAnimation={null}>
+              {activeCard ? (
+                <div className="bg-black/40 border border-white/10 rounded-lg px-4 py-2 shadow-lg cursor-grabbing inline-flex items-center gap-3 backdrop-blur-sm min-w-[200px] z-50">
+                  {activeCard.icon && <span className="text-lg shadow-sm">{activeCard.icon}</span>}
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-sm font-medium text-white whitespace-nowrap">{activeCard.title}</p>
+                    {activeCard.time && <p className="text-[10px] text-white/50">{activeCard.time}</p>}
+                  </div>
                 </div>
-                )}
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        </div>
+      </main>
 
-                {/* Right Sidebar - Inside DndContext - Desktop only */}
-                <div className="hidden md:block">
-                    <RightSidebar
-                    isExpanded={isRightSidebarExpanded}
-                    onToggle={() => setIsRightSidebarExpanded(!isRightSidebarExpanded)}
-                    groups={groups}
-                    cards={cards}
-                    dashboards={tripDashboards}
-                    activeDashboardId={activeDashboardId}
-                    onActiveDashboardChange={setActiveDashboardId}
-                    onAddGroup={(dashboardId, name) => addGroup(dashboardId, name)}
-                    onUpdateGroup={updateGroup}
-                    onDeleteGroup={deleteGroup}
-                    />
-                </div>
+      {currentTrip && (
+        <>
+          <TripSettingsDialog
+            open={showTripSettingsDialog}
+            onOpenChange={setShowTripSettingsDialog}
+            trip={currentTrip}
+          />
 
-                <DragOverlay dropAnimation={null}>
-                {activeCard ? (
-                    <div className="bg-black/40 border border-white/10 rounded-lg px-4 py-2 shadow-lg cursor-grabbing inline-flex items-center gap-3 backdrop-blur-sm min-w-[200px] z-50">
-                    {activeCard.icon && <span className="text-lg shadow-sm">{activeCard.icon}</span>}
-                    <div className="flex flex-col gap-0.5">
-                        <p className="text-sm font-medium text-white whitespace-nowrap">{activeCard.title}</p>
-                        {activeCard.time && <p className="text-[10px] text-white/50">{activeCard.time}</p>}
-                    </div>
-                    </div>
-                ) : null}
-                </DragOverlay>
-            </DndContext>
-            </div>
-        </main>
+          <ShareTripDialog
+            open={showShareTripDialog}
+            onOpenChange={setShowShareTripDialog}
+            trip={currentTrip}
+            onUpdateTrip={updateTrip}
+          />
+        </>
+      )}
 
-        {currentTrip && (
-            <>
-            <TripSettingsDialog
-                open={showTripSettingsDialog}
-                onOpenChange={setShowTripSettingsDialog}
-                trip={currentTrip}
-            />
+      {/* Mobile FAB */}
+      {currentTrip && (
+        <Button
+          onClick={() => setShowMobileAdd(true)}
+          className="fixed bottom-24 right-4 z-40 md:hidden w-14 h-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 touch-manipulation"
+          size="icon"
+        >
+          <Plus className="w-6 h-6" />
+        </Button>
+      )}
 
-            <ShareTripDialog
-                open={showShareTripDialog}
-                onOpenChange={setShowShareTripDialog}
-                trip={currentTrip}
-                onUpdateTrip={updateTrip}
-            />
-            </>
-        )}
-
-        {/* Mobile FAB */}
-        {currentTrip && (
-            <Button
-                onClick={() => setShowMobileAdd(true)}
-                className="fixed bottom-24 right-4 z-40 md:hidden w-14 h-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 touch-manipulation"
-                size="icon"
-            >
-                <Plus className="w-6 h-6" />
-            </Button>
-        )}
-
-        <MobileQuickAdd
-            open={showMobileAdd}
-            onOpenChange={setShowMobileAdd}
-        />
+      <MobileQuickAdd
+        open={showMobileAdd}
+        onOpenChange={setShowMobileAdd}
+      />
     </div>
   );
 };
