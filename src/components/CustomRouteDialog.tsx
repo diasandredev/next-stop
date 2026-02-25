@@ -61,7 +61,7 @@ const SortableCardItem = ({ card, isSelected, onToggle }: SortableCardItemProps)
         <div
             ref={setNodeRef}
             style={style}
-        className={`
+            className={`
         flex items-center gap-3 p-3 rounded-lg transition-all
         ${isSelected
                     ? 'bg-primary/20 border border-primary'
@@ -128,7 +128,7 @@ export const CustomRouteDialog = ({ open, onOpenChange, cards, dayDate, accommod
         const cardsWithLocations = cards
             .filter(c => !c.parentId && c.location)
             .sort((a, b) => (a.order || 0) - (b.order || 0));
-            
+
         if (accommodation) {
             const accommodationCard = {
                 id: 'accommodation-start',
@@ -137,7 +137,7 @@ export const CustomRouteDialog = ({ open, onOpenChange, cards, dayDate, accommod
                 icon: '🛏️',
                 // Mock other required fields if any, but Card interface has mostly optionals
             } as Card;
-            
+
             // Add accommodation at the start
             setOrderedCards([accommodationCard, ...cardsWithLocations]);
         } else {
@@ -206,15 +206,15 @@ export const CustomRouteDialog = ({ open, onOpenChange, cards, dayDate, accommod
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-background border-none text-foreground sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
-                <DialogHeader className="pb-4">
+            <DialogContent className="bg-background border-none text-foreground md:max-w-[500px] p-0 gap-0 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full md:h-auto">
+                <DialogHeader className="px-4 md:px-6 pt-4 md:pt-6 pb-4">
                     <DialogTitle className="text-xl font-bold">Create Custom Route</DialogTitle>
                     <DialogDescription className="text-muted-foreground">
                         Select and reorder locations for your route on {formattedDate}
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4">
+                <div className="px-4 md:px-6 pb-4 md:pb-6 space-y-4 flex-1 overflow-y-auto">
                     {/* Action buttons */}
                     <div className="flex items-center justify-between">
                         <div className="text-sm text-muted-foreground">

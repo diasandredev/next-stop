@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useKanban } from '@/contexts/KanbanContext';
 import { Button } from '@/components/ui/button';
 import { RightSidebar } from '@/components/RightSidebar';
+import { MobileQuickAdd } from '@/components/MobileQuickAdd';
 import { Calendar, Plus, Settings, Users, PanelRight, FileDown, FileText, Search } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
@@ -47,6 +48,7 @@ const Board = () => {
 
   const [showTripSettingsDialog, setShowTripSettingsDialog] = useState(false);
   const [showShareTripDialog, setShowShareTripDialog] = useState(false);
+  const [showMobileAdd, setShowMobileAdd] = useState(false);
 
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [isRightSidebarExpanded, setIsRightSidebarExpanded] = useState(false);
@@ -290,15 +292,15 @@ const Board = () => {
     <div className="flex-1 flex flex-col h-full overflow-hidden">
         <SEO title="Dashboard" />
         {/* Header */}
-        <header className="px-6 py-4 flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-md border-b border-border/30 relative">
-            <div className="flex items-center justify-between">
+        <header className="px-4 md:px-6 py-3 md:py-4 flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-md border-b border-border/30 safe-area-pt">
+            <div className="flex items-center justify-between gap-2">
             {/* Left Section - Trip Info */}
-            <div className="flex items-center gap-4">
-                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
+                <h1 className="text-xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate">
                 {currentTrip ? currentTrip.name : 'Select a Trip'}
                 </h1>
                 {currentTrip?.startDate && (
-                <div className="flex items-center gap-2 bg-secondary/60 text-secondary-foreground h-8 px-3 rounded-lg border border-border/50">
+                <div className="hidden sm:flex items-center gap-2 bg-secondary/60 text-secondary-foreground h-8 px-3 rounded-lg border border-border/50">
                     <Calendar className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium">
                     {formatInTimeZone(new Date(currentTrip.startDate), timeZone, 'MMM d')}
@@ -310,7 +312,7 @@ const Board = () => {
 
             {/* Right Section - Actions */}
             <div className="flex items-center gap-1 bg-secondary/40 rounded-xl p-1 border border-border/30">
-                {/* Search */}
+                {/* Search - Desktop only */}
                 <div className="relative hidden md:block">
                     <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                     <Input 
@@ -419,8 +421,8 @@ const Board = () => {
         </header>
 
         {/* Board Content (Dashboards) */}
-        <main className="flex-1 overflow-y-auto bg-background/50 p-6">
-            <div className="max-w-[1920px] mx-auto flex flex-col gap-8 pb-20">
+        <main className="flex-1 overflow-y-auto bg-background/50 p-3 md:p-6">
+            <div className="max-w-[1920px] mx-auto flex flex-col gap-6 md:gap-8 pb-24 md:pb-20">
             <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                 {tripDashboards.map(dashboard => (
                 <DashboardView
@@ -450,19 +452,21 @@ const Board = () => {
                 </div>
                 )}
 
-                {/* Right Sidebar - Inside DndContext */}
-                <RightSidebar
-                isExpanded={isRightSidebarExpanded}
-                onToggle={() => setIsRightSidebarExpanded(!isRightSidebarExpanded)}
-                groups={groups}
-                cards={cards}
-                dashboards={tripDashboards}
-                activeDashboardId={activeDashboardId}
-                onActiveDashboardChange={setActiveDashboardId}
-                onAddGroup={(dashboardId, name) => addGroup(dashboardId, name)}
-                onUpdateGroup={updateGroup}
-                onDeleteGroup={deleteGroup}
-                />
+                {/* Right Sidebar - Inside DndContext - Desktop only */}
+                <div className="hidden md:block">
+                    <RightSidebar
+                    isExpanded={isRightSidebarExpanded}
+                    onToggle={() => setIsRightSidebarExpanded(!isRightSidebarExpanded)}
+                    groups={groups}
+                    cards={cards}
+                    dashboards={tripDashboards}
+                    activeDashboardId={activeDashboardId}
+                    onActiveDashboardChange={setActiveDashboardId}
+                    onAddGroup={(dashboardId, name) => addGroup(dashboardId, name)}
+                    onUpdateGroup={updateGroup}
+                    onDeleteGroup={deleteGroup}
+                    />
+                </div>
 
                 <DragOverlay dropAnimation={null}>
                 {activeCard ? (
@@ -495,6 +499,22 @@ const Board = () => {
             />
             </>
         )}
+
+        {/* Mobile FAB */}
+        {currentTrip && (
+            <Button
+                onClick={() => setShowMobileAdd(true)}
+                className="fixed bottom-24 right-4 z-40 md:hidden w-14 h-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 touch-manipulation"
+                size="icon"
+            >
+                <Plus className="w-6 h-6" />
+            </Button>
+        )}
+
+        <MobileQuickAdd
+            open={showMobileAdd}
+            onOpenChange={setShowMobileAdd}
+        />
     </div>
   );
 };

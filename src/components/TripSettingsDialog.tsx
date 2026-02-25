@@ -77,12 +77,12 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent hideCloseButton className="bg-background border-none text-foreground sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
+            <DialogContent hideCloseButton className="bg-background border-none text-foreground md:max-w-[600px] p-0 gap-0 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full md:h-auto">
                 <DialogTitle className="sr-only">Trip Settings</DialogTitle>
                 <DialogDescription className="sr-only">Edit your trip details.</DialogDescription>
 
                 {/* Header / Actions Bar */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
+                <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-border bg-muted/20">
                     <div className="flex items-center gap-3">
                         <Settings className="w-4 h-4 text-muted-foreground" />
                         <span className="text-lg font-semibold text-foreground">{trip.name}</span>
@@ -91,10 +91,10 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
                     <div className="flex items-center gap-1">
                         {/* Delete */}
                         {user?.uid === trip.ownerId && (
-                            <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-full h-8 w-8" 
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-full h-8 w-8"
                                 onClick={() => setShowDeleteConfirm(true)}
                             >
                                 <Trash2 className="w-4 h-4" />
@@ -123,7 +123,7 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
                 </div>
 
                 {/* Content */}
-                <div className="p-6 space-y-6 max-h-[85vh] overflow-y-auto">
+                <div className="p-4 md:p-6 space-y-6 flex-1 overflow-y-auto md:max-h-[85vh]">
                     {/* Properties Grid */}
                     <div className="bg-muted/20 p-4 rounded-xl border border-border space-y-4">
                         <div className="space-y-2">
@@ -142,7 +142,7 @@ export function TripSettingsDialog({ open, onOpenChange, trip }: TripSettingsDia
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 border-t border-border bg-muted/20 flex justify-end gap-3">
+                <div className="px-4 md:px-6 py-4 border-t border-border bg-muted/20 flex justify-end gap-3">
                     <Button
                         variant="ghost"
                         onClick={() => onOpenChange(false)}

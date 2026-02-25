@@ -112,13 +112,13 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent hideCloseButton className="bg-background border-none text-foreground sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
+            <DialogContent hideCloseButton className="bg-background border-none text-foreground md:max-w-[600px] p-0 gap-0 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full md:h-auto">
                 <DialogTitle className="sr-only">Share Trip</DialogTitle>
                 <DialogDescription className="sr-only">Invite other people to collaborate on this trip.</DialogDescription>
-                
+
                 <TooltipProvider>
                     {/* Header / Actions Bar */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
+                    <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-border bg-muted/20">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Users className="w-4 h-4" />
                             <span>Share "{trip.name}"</span>
@@ -133,8 +133,8 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
-                                    <DropdownMenuItem 
-                                        onClick={handleClearAll} 
+                                    <DropdownMenuItem
+                                        onClick={handleClearAll}
                                         disabled={shares.length === 0}
                                         className="text-red-400 focus:text-red-400 focus:bg-accent cursor-pointer"
                                     >
@@ -156,16 +156,16 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                     </div>
 
                     {/* Content */}
-                    <div className="p-6 space-y-6 max-h-[85vh] overflow-y-auto">
+                    <div className="p-4 md:p-6 space-y-6 flex-1 overflow-y-auto md:max-h-[85vh]">
                         <p className="text-sm text-muted-foreground -mt-2">
                             Invite other people to collaborate on this trip by entering their email address.
                         </p>
-                        
+
                         {/* Add new share - Properties Grid */}
                         <div className="bg-muted/20 p-4 rounded-xl border border-border space-y-4">
                             <Label className="text-xs font-medium text-muted-foreground">Add person</Label>
-                            
-                            <div className="grid grid-cols-[1fr_auto_auto] gap-2">
+
+                            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-2">
                                 {/* Email Input */}
                                 <div className="flex items-center bg-card rounded-lg border border-border px-3 h-10 gap-2">
                                     <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -186,39 +186,41 @@ export const ShareTripDialog = ({ open, onOpenChange, trip, onUpdateTrip }: Shar
                                 </div>
 
                                 {/* Permission Selector */}
-                                <Select value={permission} onValueChange={(v) => setPermission(v as 'view' | 'edit')}>
-                                    <SelectTrigger className="w-[120px] h-10 bg-card border-border rounded-lg text-foreground">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-popover border-border text-popover-foreground">
-                                        <SelectItem value="view" className="text-foreground focus:bg-accent focus:text-accent-foreground">
-                                            <div className="flex items-center gap-2">
-                                                <Eye className="w-4 h-4" />
-                                                <span>View</span>
-                                            </div>
-                                        </SelectItem>
-                                        <SelectItem value="edit" className="text-foreground focus:bg-accent focus:text-accent-foreground">
-                                            <div className="flex items-center gap-2">
-                                                <Edit3 className="w-4 h-4" />
-                                                <span>Edit</span>
-                                            </div>
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <div className="flex items-center gap-2">
+                                    <Select value={permission} onValueChange={(v) => setPermission(v as 'view' | 'edit')}>
+                                        <SelectTrigger className="w-full md:w-[120px] h-10 bg-card border-border rounded-lg text-foreground">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-popover border-border text-popover-foreground">
+                                            <SelectItem value="view" className="text-foreground focus:bg-accent focus:text-accent-foreground">
+                                                <div className="flex items-center gap-2">
+                                                    <Eye className="w-4 h-4" />
+                                                    <span>View</span>
+                                                </div>
+                                            </SelectItem>
+                                            <SelectItem value="edit" className="text-foreground focus:bg-accent focus:text-accent-foreground">
+                                                <div className="flex items-center gap-2">
+                                                    <Edit3 className="w-4 h-4" />
+                                                    <span>Edit</span>
+                                                </div>
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
 
-                                {/* Add Button */}
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button
-                                            onClick={handleAddShare}
-                                            disabled={isLoading || !email.trim()}
-                                            className="bg-primary hover:bg-primary/90 rounded-lg h-10 w-10 p-0 text-primary-foreground"
-                                        >
-                                            <UserPlus className="w-4 h-4" />
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>Add person</p></TooltipContent>
-                                </Tooltip>
+                                    {/* Add Button */}
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                onClick={handleAddShare}
+                                                disabled={isLoading || !email.trim()}
+                                                className="bg-primary hover:bg-primary/90 rounded-lg h-10 w-10 md:w-10 p-0 text-primary-foreground"
+                                            >
+                                                <UserPlus className="w-4 h-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>Add person</p></TooltipContent>
+                                    </Tooltip>
+                                </div>
                             </div>
                         </div>
 

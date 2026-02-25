@@ -16,25 +16,30 @@ export default defineConfig(() => ({
       workbox: {
         maximumFileSizeToCacheInBytes: 5000000,
       },
-      includeAssets: ["favicon.png", "favicon1.png", "robots.txt", "placeholder.svg"],
+      includeAssets: ["favicon.png", "logo.png", "logo-192.png", "logo-500.png", "robots.txt"],
       manifest: {
-        name: "NextStop",
-        short_name: "NextStop",
-        description: "Travel planner",
-        theme_color: "#ffffff",
+        name: "Next Stop - Travel Planner",
+        short_name: "Next Stop",
+        description: "Plan your perfect trip with Kanban boards, interactive maps, and real-time sync.",
+        theme_color: "#09090b",
+        background_color: "#09090b",
+        display: "standalone",
+        orientation: "portrait-primary",
+        scope: "/",
+        start_url: "/",
         icons: [
           {
-            src: "favicon-192-192.png",
+            src: "logo-192.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "favicon-512-512.png",
+            src: "logo-500.png",
             sizes: "512x512",
             type: "image/png",
           },
           {
-            src: "favicon-512-512.png",
+            src: "logo-500.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",

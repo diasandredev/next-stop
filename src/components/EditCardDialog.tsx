@@ -175,21 +175,21 @@ export const EditCardDialog = ({
 
   const dateString = card.date
     ? new Date(card.date)
-        .toLocaleDateString("en-US", {
-          weekday: "long",
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-          timeZone: "UTC",
-        })
-        .replace(/,/g, "")
+      .toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC",
+      })
+      .replace(/,/g, "")
     : "No date";
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
         hideCloseButton
-        className="bg-background border-none text-foreground sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden"
+        className="bg-background border-none text-foreground md:max-w-[600px] p-0 gap-0 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full md:h-auto"
       >
         <DialogTitle className="sr-only">Edit Card</DialogTitle>
         <DialogDescription className="sr-only">
@@ -198,7 +198,7 @@ export const EditCardDialog = ({
 
         <TooltipProvider>
           {/* Header / Actions Bar - Clean and Minimal */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
+          <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-border bg-muted/20">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="w-4 h-4" />
               <span>{dateString}</span>
@@ -282,7 +282,7 @@ export const EditCardDialog = ({
             </div>
           </div>
 
-          <div className="p-6 space-y-6 max-h-[85vh] overflow-y-auto">
+          <div className="p-4 md:p-6 space-y-6 flex-1 overflow-y-auto md:max-h-[85vh]">
             {/* 1. Hero Section: Icon & Title */}
             <div className="flex items-center gap-5">
               <div>
@@ -308,7 +308,7 @@ export const EditCardDialog = ({
             </div>
 
             {/* 2. Properties Grid - Fixed Layout to prevent shifts */}
-            <div className="grid grid-cols-2 gap-4 bg-muted/20 p-4 rounded-xl border border-border">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/20 p-4 rounded-xl border border-border">
               {/* Time Column */}
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground ml-1">

@@ -3,7 +3,13 @@ import { Card, Dashboard, Trip } from '@/types/kanban';
 import { DayColumn } from './DayColumn';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Trash2, X, Settings, Pencil, Calendar, Wallet, Maximize2, Minimize2, Bed, MapPin, FileUp } from 'lucide-react';
+import { Trash2, X, Settings, Pencil, Calendar, Wallet, Maximize2, Minimize2, Bed, MapPin, FileUp, MoreHorizontal, Palette } from 'lucide-react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ImportCardsDialog } from './ImportCardsDialog';
 import { useKanban } from '@/contexts/KanbanContext';
 import chroma from 'chroma-js';
@@ -40,7 +46,8 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
 
     // Settings State
     const [settingsOpen, setSettingsOpen] = useState(false);
-    const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+    const [isMobileColorPickerOpen, setIsMobileColorPickerOpen] = useState(false);
+    const [isDesktopColorPickerOpen, setIsDesktopColorPickerOpen] = useState(false);
     const [editDays, setEditDays] = useState(dashboard.days);
     const [editStartDate, setEditStartDate] = useState(dashboard.startDate || trip.startDate || new Date().toISOString());
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -110,45 +117,61 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
     }, {} as Record<string, number>);
 
     // Width logic: if <= 5 columns, fill space (fluid). If > 5, fixed width (scroll).
+    // On mobile, stack vertically (flex-col), on desktop horizontal (flex-row)
     const isFluid = isFluidOverride !== null ? isFluidOverride : totalColumns <= 5;
-    const containerClass = isFluid ? "flex gap-6 w-full h-full" : "flex gap-6 min-w-max h-full";
+    const containerClass = isFluid
+        ? "flex flex-col md:flex-row gap-4 md:gap-6 w-full h-full overflow-y-auto md:overflow-x-auto md:overflow-y-hidden"
+        : "flex flex-col md:flex-row gap-4 md:gap-6 w-full h-full overflow-y-auto md:overflow-x-auto md:overflow-y-hidden";
     const columnClass = isFluid
-        ? `flex-1 min-w-0 h-full ${totalColumns === 1 ? 'max-w-[50%]' : ''}`
-        : "w-96 flex-shrink-0 h-full";
+        ? `w-full md:flex-1 md:min-w-0 h-auto md:h-full ${totalColumns === 1 ? 'md:max-w-[50%]' : ''}`
+        : "w-full md:w-96 flex-shrink-0 h-auto md:h-full";
 
-    const dashboardColor = dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' 
-        ? dashboard.backgroundColor 
+    const dashboardColor = dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent'
+        ? dashboard.backgroundColor
         : '#A1A1AA'; // Light Gray fallback for "No Color"
 
     const hasCustomColor = dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent';
 
     return (
-        <div className="flex flex-col gap-6 p-1">
+        <div className="flex flex-col gap-4 md:gap-6 p-1">
             {/* Glassmorphic Dashboard Header */}
-            <div 
+            <div
                 className={cn(
-                    "rounded-2xl border border-border backdrop-blur-xl p-5 relative overflow-hidden group/dash",
+                    "rounded-xl md:rounded-2xl border border-border backdrop-blur-xl p-3 md:p-5 relative overflow-hidden group/dash",
                     hasCustomColor ? "" : "bg-card/40 dark:bg-secondary/40"
                 )}
                 style={hasCustomColor ? { backgroundColor: chroma(dashboard.backgroundColor!).alpha(0.15).css() } : undefined}
             >
                 {/* Decorative background glow - Removed */}
 
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-                    
+                <div className="flex items-center justify-between gap-3 md:gap-6 relative z-10">
+
                     {/* Title Section */}
-                    <div className="flex items-start gap-4 flex-1 min-w-0">
-                        <div 
-                            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg ring-1 ring-border"
-                            style={{ 
+                    <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                        {/* Mobile: colored dot, Desktop: full icon */}
+                        <div
+                            className="hidden md:flex w-12 h-12 rounded-xl items-center justify-center shrink-0 shadow-lg ring-1 ring-border"
+                            style={{
                                 backgroundColor: chroma(dashboardColor).alpha(0.1).css(),
                                 color: dashboardColor
                             }}
                         >
                             <MapPin className="w-6 h-6" />
                         </div>
-                        
-                        <div className="flex flex-col gap-1 flex-1 min-w-0">
+                        <ColorPicker
+                            open={isMobileColorPickerOpen}
+                            onOpenChange={setIsMobileColorPickerOpen}
+                            color={dashboard.backgroundColor || 'transparent'}
+                            onChange={(color) => updateDashboard(dashboard.id, { backgroundColor: color })}
+                            trigger={
+                                <button
+                                    className="md:hidden w-3 h-3 rounded-full shrink-0 ring-2 ring-background shadow-sm cursor-pointer hover:scale-125 transition-transform"
+                                    style={{ backgroundColor: dashboardColor }}
+                                />
+                            }
+                        />
+
+                        <div className="flex flex-col gap-0.5 md:gap-1 flex-1 min-w-0">
                             <div className="flex items-center gap-2 group/title">
                                 {isEditingName ? (
                                     <input
@@ -158,41 +181,41 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                         onKeyDown={(e) => e.key === 'Enter' && handleNameSave()}
                                         autoFocus
                                         className="bg-transparent border-none outline-none text-foreground w-full"
-                                        style={{ 
+                                        style={{
                                             fontFamily: "'Space Grotesk', sans-serif",
-                                            fontSize: '1.5rem',
+                                            fontSize: '1.25rem',
                                             fontWeight: 700,
                                             letterSpacing: '-0.025em',
                                             lineHeight: 1.2
                                         }}
                                     />
                                 ) : (
-                                    <h2 
+                                    <h2
                                         onClick={() => setIsEditingName(true)}
-                                        className="text-2xl font-display font-bold tracking-tight text-foreground truncate cursor-pointer hover:opacity-80 transition-opacity"
+                                        className="text-base md:text-2xl font-display font-bold tracking-tight text-foreground truncate cursor-pointer hover:opacity-80 transition-opacity"
                                     >
                                         {dashboard.name}
                                     </h2>
                                 )}
                                 {!isEditingName && <Pencil onClick={() => setIsEditingName(true)} className="w-3.5 h-3.5 text-muted-foreground/50 opacity-0 group-hover/title:opacity-100 transition-opacity cursor-pointer" />}
                             </div>
-                            
-                            <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground">
-                                <div className="flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded-md border border-border">
-                                    <Calendar className="w-3.5 h-3.5" />
+
+                            <div className="flex items-center gap-1.5 md:gap-4 text-[11px] md:text-xs font-medium text-muted-foreground">
+                                <div className="flex items-center gap-1 md:gap-1.5 bg-muted/50 px-1.5 md:px-2 py-0.5 md:py-1 rounded-md border border-border">
+                                    <Calendar className="w-3 h-3 md:w-3.5 md:h-3.5" />
                                     <span>
                                         {format(dates[0], 'MMM d')} - {format(dates[dates.length - 1], 'MMM d')}
                                     </span>
                                 </div>
 
                                 {dashboard.accommodation && (
-                                     <a 
+                                    <a
                                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dashboard.accommodation.address)}&query_place_id=${dashboard.accommodation.placeId}`}
-                                        target="_blank" 
+                                        target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded-md border border-border hover:bg-muted hover:text-foreground transition-colors max-w-[200px]"
+                                        className="flex items-center gap-1 md:gap-1.5 bg-muted/50 px-1.5 md:px-2 py-0.5 md:py-1 rounded-md border border-border hover:bg-muted hover:text-foreground transition-colors max-w-[180px] md:max-w-[200px]"
                                     >
-                                        <Bed className="w-3.5 h-3.5 text-purple-400" />
+                                        <Bed className="w-3 h-3 md:w-3.5 md:h-3.5 text-purple-400 shrink-0" />
                                         <span className="truncate">{dashboard.accommodation.name}</span>
                                     </a>
                                 )}
@@ -201,9 +224,9 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                     </div>
 
                     {/* Actions & Stats */}
-                    <div className="flex items-center gap-3">
-                         {/* Stats Pill */}
-                         {Object.keys(tripTotalCost).length > 0 && (
+                    <div className="flex items-center gap-2 md:gap-3 shrink-0">
+                        {/* Stats Pill - Desktop only */}
+                        {Object.keys(tripTotalCost).length > 0 && (
                             <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/5 backdrop-blur-sm mr-2">
                                 <Wallet className="w-4 h-4 text-muted-foreground" />
                                 <div className="flex items-center gap-3">
@@ -219,13 +242,14 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                             </div>
                         )}
 
-                        <div className="flex items-center gap-1 bg-white/5 p-1 rounded-lg border border-white/5 backdrop-blur-sm">
+                        {/* Desktop: Full actions bar */}
+                        <div className="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-lg border border-white/5 backdrop-blur-sm">
                             <TooltipProvider delayDuration={0}>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="icon" 
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
                                             className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-md"
                                             onClick={() => setIsFluidOverride(prev => {
                                                 const current = prev !== null ? prev : totalColumns <= 5;
@@ -242,35 +266,35 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                             <div className="w-px h-4 bg-white/10 mx-1" />
 
                             <ColorPicker
-                                open={isColorPickerOpen}
-                                onOpenChange={setIsColorPickerOpen}
+                                open={isDesktopColorPickerOpen}
+                                onOpenChange={setIsDesktopColorPickerOpen}
                                 color={dashboard.backgroundColor || 'transparent'}
                                 onChange={(color) => updateDashboard(dashboard.id, { backgroundColor: color })}
                                 trigger={
                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-md group/color">
-                                        <div 
-                                            className="w-3.5 h-3.5 rounded-full ring-2 ring-white/10 group-hover/color:scale-110 transition-transform" 
+                                        <div
+                                            className="w-3.5 h-3.5 rounded-full ring-2 ring-white/10 group-hover/color:scale-110 transition-transform"
                                             style={{ backgroundColor: dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent' ? dashboard.backgroundColor : 'transparent' }}
                                         />
                                     </Button>
                                 }
                             />
-                            
+
                             <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
                                 <DialogTrigger asChild>
                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-md">
                                         <Settings className="h-4 w-4" />
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent hideCloseButton className="bg-background border-none text-foreground sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
+                                <DialogContent hideCloseButton className="bg-background border-none text-foreground md:max-w-[600px] p-0 gap-0 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full md:h-auto">
                                     <DialogTitle className="sr-only">{dashboard.name} Settings</DialogTitle>
-                                    
+
                                     {/* Header Bar */}
-                                    <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
+                                    <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-border bg-muted/20">
                                         <div className="flex items-center gap-3">
-                                            <div 
+                                            <div
                                                 className="w-10 h-10 rounded-xl flex items-center justify-center ring-1 ring-border"
-                                                style={{ 
+                                                style={{
                                                     backgroundColor: chroma(dashboardColor).alpha(0.15).css(),
                                                     color: dashboardColor
                                                 }}
@@ -281,9 +305,9 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                         </div>
                                         <div className="flex items-center gap-1">
                                             {trip.ownerId === user?.uid && (
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
                                                     className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-full"
                                                     onClick={() => setShowDeleteConfirm(true)}
                                                 >
@@ -297,7 +321,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                     </div>
 
                                     {/* Content */}
-                                    <div className="p-6 space-y-6 max-h-[85vh] overflow-y-auto">
+                                    <div className="p-4 md:p-6 space-y-6 flex-1 overflow-y-auto md:max-h-[85vh]">
                                         {/* Properties */}
                                         <div className="bg-muted/20 p-4 rounded-xl border border-border space-y-4">
                                             {/* Duration */}
@@ -379,7 +403,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                     </div>
 
                                     {/* Footer */}
-                                    <div className="px-6 py-4 border-t border-border bg-muted/20 flex justify-end">
+                                    <div className="px-4 md:px-6 py-4 border-t border-border bg-muted/20 flex justify-end">
                                         <Button
                                             onClick={handleSettingsSave}
                                             className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg h-10 px-6 text-sm font-medium"
@@ -390,10 +414,33 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                                 </DialogContent>
                             </Dialog>
                         </div>
+
+                        {/* Mobile: Overflow menu with all actions */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="md:hidden h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-lg"
+                                >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
+
+                                <DropdownMenuItem
+                                    onClick={() => setSettingsOpen(true)}
+                                    className="focus:bg-accent focus:text-accent-foreground cursor-pointer gap-2"
+                                >
+                                    <Settings className="w-4 h-4" />
+                                    Settings
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
             </div>
-            
+
             <ConfirmDialog
                 open={showDeleteConfirm}
                 onOpenChange={setShowDeleteConfirm}
@@ -401,28 +448,28 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
                 description="Delete this city? Cards will be hidden/lost properly unless moved."
                 onConfirm={() => {
                     deleteDashboard(dashboard.id);
-                    setSettingsOpen(false); 
+                    setSettingsOpen(false);
                 }}
                 confirmText="Delete"
                 variant="destructive"
             />
 
-            {/* Content: Horizontal Scroll */}
-            <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4 pt-1 -mx-1 px-1 custom-scrollbar">
+            {/* Content: Vertical scroll on mobile, horizontal on desktop */}
+            <div className="flex-1 overflow-y-auto md:overflow-x-auto md:overflow-y-hidden pb-20 md:pb-4 pt-1 -mx-1 px-1 custom-scrollbar">
                 <div className={containerClass}>
                     {/* Day Columns */}
                     {dates.map((date, index) => {
                         const dateStr = date.toISOString().split('T')[0];
                         return (
                             <div key={dateStr} className={columnClass}>
-                                    <DayColumn
+                                <DayColumn
                                     dashboardId={dashboard.id}
                                     date={date}
                                     dayIndex={index + 1}
                                     cards={cards.filter(c => c.date === dateStr)}
                                     isCurrentDay={dateStr === today}
                                     minSlots={unifiedMinSlots}
-                                    isWeekend={date.getDay() === 0 || date.getDay() === 6} 
+                                    isWeekend={date.getDay() === 0 || date.getDay() === 6}
                                     dashboardColor={dashboardColor}
                                     searchQuery={searchQuery}
                                     accommodation={dashboard.accommodation}

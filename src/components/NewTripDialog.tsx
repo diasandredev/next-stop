@@ -27,7 +27,7 @@ interface NewTripDialogProps {
 export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
     const { addTrip, addDashboard, setCurrentTripId } = useKanban();
     const [name, setName] = useState('');
-    
+
     // Smart Defaults: Next Friday to Sunday
     const getSmartDates = () => {
         const today = new Date();
@@ -67,13 +67,13 @@ export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent hideCloseButton className="bg-background border-none text-foreground sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
+            <DialogContent hideCloseButton className="bg-background border-none text-foreground md:max-w-[600px] p-0 gap-0 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full md:h-auto">
                 <DialogTitle className="sr-only">Create New Trip</DialogTitle>
                 <DialogDescription className="sr-only">Create a new trip with name and dates.</DialogDescription>
-                
+
                 <TooltipProvider>
                     {/* Header / Actions Bar */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
+                    <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-border bg-muted/20">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Plus className="w-4 h-4" />
                             <span>New Trip</span>
@@ -107,7 +107,7 @@ export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
                     </div>
 
                     {/* Content */}
-                    <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[85vh] overflow-y-auto">
+                    <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-6 flex-1 overflow-y-auto md:max-h-[85vh]">
                         {/* Hero Section: Trip Name */}
                         <div className="space-y-4">
                             <input
@@ -126,8 +126,8 @@ export function NewTripDialog({ open, onOpenChange }: NewTripDialogProps) {
                                 <div className="flex items-center bg-card rounded-lg border border-border px-3 h-12 gap-2">
                                     <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
                                     <div className="w-px h-5 bg-border" />
-                                    <DateRangePicker 
-                                        date={dateRange} 
+                                    <DateRangePicker
+                                        date={dateRange}
                                         setDate={setDateRange}
                                     />
                                 </div>

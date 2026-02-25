@@ -109,23 +109,23 @@ export const DayColumn = ({
 
     // Filter cards based on search query
     const filteredCards = searchQuery
-        ? cards.filter(card => 
+        ? cards.filter(card =>
             card.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             card.location?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             card.notes?.toLowerCase().includes(searchQuery.toLowerCase())
-          )
+        )
         : cards;
 
     const rootCards = filteredCards.filter(c => !c.parentId);
     const sortedRootCards = rootCards.sort((a, b) => (a.order || 0) - (b.order || 0));
-    
+
     // We need all cards for passing children to parents
     const allCards = cards;
 
     // Header Color Logic
     const borderClass = isCurrentDay ? 'border-primary shadow-[0_0_15px_-3px_rgba(59,130,246,0.5)]' : 'border-border';
-    const bgClass = isCurrentDay 
-        ? 'bg-primary/5' 
+    const bgClass = isCurrentDay
+        ? 'bg-primary/5'
         : (isWeekend ? 'bg-muted/50 dark:bg-black/20' : 'bg-card/30 dark:bg-[#09090b]/20');
 
     return (
@@ -137,22 +137,22 @@ export const DayColumn = ({
                 "border backdrop-blur-sm",
                 bgClass
             )}
-            style={isOver ? { 
+            style={isOver ? {
                 boxShadow: `0 0 0 2px ${dashboardColor}`,
                 backgroundColor: 'rgba(255,255,255,0.02)'
             } : undefined}
         >
-             {/* "Passport" Header */}
-            <div 
+            {/* "Passport" Header */}
+            <div
                 className={cn(
                     "relative p-3 border-b border-border flex flex-col gap-1 transition-colors",
                     isCurrentDay && "bg-primary text-primary-foreground"
                 )}
             >
-                 {/* Day Number Watermark - Removed */}
+                {/* Day Number Watermark - Removed */}
 
-                <div className="flex items-baseline justify-between relative z-10">
-                     <div className="flex flex-col">
+                <div className="flex items-center justify-between relative z-10">
+                    <div className="flex flex-col">
                         <span className={cn(
                             "text-xs font-mono uppercase tracking-widest opacity-70",
                             isCurrentDay ? "text-primary-foreground" : "text-muted-foreground"
@@ -165,9 +165,9 @@ export const DayColumn = ({
                         )}>
                             {format(date, 'MMM d')}
                         </span>
-                     </div>
-                     
-                     <div className="flex items-center gap-1">
+                    </div>
+
+                    <div className="flex items-center gap-1 md:gap-1">
                         <TooltipProvider delayDuration={0}>
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -175,9 +175,9 @@ export const DayColumn = ({
                                         onClick={handleCreateRoute}
                                         disabled={!cards.some(c => !c.parentId && c.location)}
                                         className={cn(
-                                            "w-7 h-7 flex items-center justify-center rounded-lg transition-all disabled:opacity-30",
-                                            isCurrentDay 
-                                                ? "bg-white/20 hover:bg-white/30 text-white" 
+                                            "w-8 h-8 md:w-7 md:h-7 flex items-center justify-center rounded-lg transition-all disabled:opacity-30 touch-manipulation",
+                                            isCurrentDay
+                                                ? "bg-white/20 hover:bg-white/30 text-white"
                                                 : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
                                         )}
                                     >
@@ -195,9 +195,9 @@ export const DayColumn = ({
                                         onClick={() => setShowCustomRouteDialog(true)}
                                         disabled={!cards.some(c => !c.parentId && c.location) && !accommodation}
                                         className={cn(
-                                            "w-7 h-7 flex items-center justify-center rounded-lg transition-all disabled:opacity-30",
-                                            isCurrentDay 
-                                                ? "bg-white/20 hover:bg-white/30 text-white" 
+                                            "w-8 h-8 md:w-7 md:h-7 flex items-center justify-center rounded-lg transition-all disabled:opacity-30 touch-manipulation",
+                                            isCurrentDay
+                                                ? "bg-white/20 hover:bg-white/30 text-white"
                                                 : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
                                         )}
                                     >
@@ -214,9 +214,9 @@ export const DayColumn = ({
                                     <button
                                         onClick={handleAddOptionsGroup}
                                         className={cn(
-                                            "w-7 h-7 flex items-center justify-center rounded-lg transition-all",
-                                            isCurrentDay 
-                                                ? "bg-white/20 hover:bg-white/30 text-white" 
+                                            "w-8 h-8 md:w-7 md:h-7 flex items-center justify-center rounded-lg transition-all touch-manipulation",
+                                            isCurrentDay
+                                                ? "bg-white/20 hover:bg-white/30 text-white"
                                                 : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
                                         )}
                                     >
@@ -230,20 +230,20 @@ export const DayColumn = ({
                         <button
                             onClick={() => setIsAdding(true)}
                             className={cn(
-                                "w-7 h-7 flex items-center justify-center rounded-lg transition-all",
-                                isCurrentDay 
-                                    ? "bg-white/20 hover:bg-white/30 text-white" 
+                                "w-8 h-8 md:w-7 md:h-7 flex items-center justify-center rounded-lg transition-all touch-manipulation",
+                                isCurrentDay
+                                    ? "bg-white/20 hover:bg-white/30 text-white"
                                     : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground"
                             )}
                         >
                             <Plus className="w-4 h-4" />
                         </button>
-                     </div>
+                    </div>
                 </div>
-                
+
                 {/* Visual Accent Bar */}
                 {!isCurrentDay && (
-                    <div 
+                    <div
                         className="absolute bottom-0 left-0 w-full h-[2px] opacity-0 group-hover/column:opacity-100 transition-opacity duration-500"
                         style={{ background: `linear-gradient(90deg, transparent, ${dashboardColor}, transparent)` }}
                     />
@@ -252,26 +252,26 @@ export const DayColumn = ({
 
             {/* Content Area - Scrollable */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 custom-scrollbar space-y-2">
-                <SortableContext 
-                    items={sortedRootCards.map(c => c.id)} 
+                <SortableContext
+                    items={sortedRootCards.map(c => c.id)}
                     strategy={verticalListSortingStrategy}
                 >
                     {sortedRootCards.map((card) => {
                         // Pass children if any (for Options type)
-                        const children = card.type === 'options' 
+                        const children = card.type === 'options'
                             ? allCards.filter(c => c.parentId === card.id)
                             : undefined;
 
                         return (
-                            <KanbanCard 
-                                key={card.id} 
-                                card={card} 
+                            <KanbanCard
+                                key={card.id}
+                                card={card}
                                 childrenCards={children}
                             />
                         );
                     })}
                 </SortableContext>
-                
+
                 {/* Inline Add Card Input */}
                 {isAdding && (
                     <div className="bg-muted rounded-xl p-2 animate-fade-in">
@@ -307,7 +307,7 @@ export const DayColumn = ({
 
                 {/* Empty State / Drop Target Area - Only when NO cards exist */}
                 {sortedRootCards.length === 0 && !isAdding && (
-                     <div 
+                    <div
                         onClick={() => setIsAdding(true)}
                         className={cn(
                             "flex flex-col items-center justify-center h-[76px] text-muted-foreground/20 border-2 border-dashed rounded-xl transition-all cursor-pointer group/empty",
@@ -315,8 +315,8 @@ export const DayColumn = ({
                         )}
                         style={{ borderColor: `${dashboardColor}30` }}
                     >
-                         <span className="text-xs font-medium uppercase tracking-widest group-hover/empty:text-muted-foreground/50 transition-colors">Plan this day</span>
-                     </div>
+                        <span className="text-xs font-medium uppercase tracking-widest group-hover/empty:text-muted-foreground/50 transition-colors">Plan this day</span>
+                    </div>
                 )}
             </div>
 

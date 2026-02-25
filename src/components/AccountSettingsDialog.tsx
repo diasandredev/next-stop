@@ -61,9 +61,9 @@ export function AccountSettingsDialog({ open, onOpenChange }: AccountSettingsDia
     return (
         <>
             <Dialog open={open} onOpenChange={onOpenChange}>
-                <DialogContent 
-                    hideCloseButton 
-                    className="bg-background border-none text-foreground sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden"
+                <DialogContent
+                    hideCloseButton
+                    className="bg-background border-none text-foreground md:max-w-[600px] p-0 gap-0 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full md:h-auto"
                     onOpenAutoFocus={(e) => e.preventDefault()}
                 >
                     <DialogTitle className="sr-only">Account Settings</DialogTitle>
@@ -71,7 +71,7 @@ export function AccountSettingsDialog({ open, onOpenChange }: AccountSettingsDia
 
                     <TooltipProvider>
                         {/* Header / Actions Bar */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
+                        <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-border bg-muted/20">
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Settings className="w-4 h-4" />
                                 <span>Account Settings</span>
@@ -81,10 +81,10 @@ export function AccountSettingsDialog({ open, onOpenChange }: AccountSettingsDia
                                 {/* Delete Cards */}
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            className="text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-full h-8 w-8" 
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-full h-8 w-8"
                                             onClick={() => setShowDeleteAlert(true)}
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -101,8 +101,8 @@ export function AccountSettingsDialog({ open, onOpenChange }: AccountSettingsDia
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
-                                        <DropdownMenuItem 
-                                            onClick={() => setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)} 
+                                        <DropdownMenuItem
+                                            onClick={() => setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)}
                                             className="focus:bg-muted focus:text-foreground cursor-pointer"
                                         >
                                             Reset to system timezone
@@ -123,18 +123,18 @@ export function AccountSettingsDialog({ open, onOpenChange }: AccountSettingsDia
                         </div>
 
                         {/* Content */}
-                        <div className="p-6 space-y-6 max-h-[85vh] overflow-y-auto">
+                        <div className="p-4 md:p-6 space-y-6 flex-1 overflow-y-auto md:max-h-[85vh]">
                             {/* User Info Card */}
                             <div className="bg-muted/30 p-4 rounded-xl border border-border space-y-4">
                                 <Label className="text-xs font-medium text-muted-foreground">Account Information</Label>
-                                
+
                                 <div className="grid grid-cols-1 gap-3">
                                     <div className="flex items-center gap-3 bg-card rounded-lg border border-border px-4 h-12">
                                         <User className="w-4 h-4 text-muted-foreground shrink-0" />
                                         <div className="w-px h-5 bg-border" />
                                         <span className="text-sm font-medium text-foreground">{user?.displayName || 'User'}</span>
                                     </div>
-                                    
+
                                     <div className="flex items-center gap-3 bg-card rounded-lg border border-border px-4 h-12">
                                         <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
                                         <div className="w-px h-5 bg-border" />

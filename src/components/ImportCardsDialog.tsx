@@ -76,13 +76,13 @@ export const ImportCardsDialog = ({
     const handleFileSelect = async (selectedFile: File) => {
         setFile(selectedFile);
         setIsLoading(true);
-        
+
         try {
             const text = await selectedFile.text();
-            
+
             const json = JSON.parse(text);
             const count = Array.isArray(json.cards) ? json.cards.length : 0;
-            
+
             setPreview({
                 count,
                 warnings: [],
@@ -119,8 +119,8 @@ export const ImportCardsDialog = ({
             }
 
             if (result.warnings.length > 0) {
-                 // Warn about skipped cards
-                 toast.warning(`${result.warnings.length} cards skipped due to date range issues`);
+                // Warn about skipped cards
+                toast.warning(`${result.warnings.length} cards skipped due to date range issues`);
             }
         } catch (e) {
             toast.error("An error occurred during import");
@@ -147,15 +147,15 @@ export const ImportCardsDialog = ({
     return (
         <Dialog open={open ?? isOpen} onOpenChange={onOpenChange ?? setIsOpen}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader>
+            <DialogContent className="md:max-w-md p-0 md:p-6 flex flex-col h-full md:h-auto">
+                <DialogHeader className="px-4 md:px-0 pt-4 md:pt-0">
                     <DialogTitle>Import Cards</DialogTitle>
                     <DialogDescription>
                         Upload a JSON file to import cards into this dashboard.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 py-4">
+                <div className="space-y-4 py-4 px-4 md:px-0 flex-1 overflow-y-auto">
                     <div className="flex justify-end">
                         <Button variant="outline" size="sm" onClick={downloadTemplate} className="gap-2 text-xs h-8">
                             <Download className="w-3.5 h-3.5" />
@@ -226,10 +226,10 @@ export const ImportCardsDialog = ({
                     )}
                 </div>
 
-                <DialogFooter>
+                <DialogFooter className="px-4 md:px-0 pb-4 md:pb-0">
                     <Button variant="outline" onClick={() => (onOpenChange ?? setIsOpen)(false)}>Cancel</Button>
-                    <Button 
-                        onClick={handleImport} 
+                    <Button
+                        onClick={handleImport}
                         disabled={!file || isLoading || (preview?.errors.length ?? 0) > 0}
                     >
                         {isLoading ? "Importing..." : "Import Cards"}

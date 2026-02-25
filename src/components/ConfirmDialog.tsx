@@ -30,13 +30,13 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogContent className="bg-background border-none text-foreground sm:max-w-[500px] p-6 rounded-2xl shadow-2xl">
+            <AlertDialogContent className="bg-background border-none text-foreground md:max-w-[500px] p-0 md:p-6 md:rounded-2xl shadow-2xl flex flex-col h-full md:h-auto">
                 <AlertDialogTitle className="sr-only">Confirmation</AlertDialogTitle>
                 <AlertDialogDescription className="sr-only">
                     Please confirm your action.
                 </AlertDialogDescription>
 
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 px-4 md:px-0 pt-4 md:pt-0">
                     <AlertDialogTitle className="text-xl font-bold flex items-center gap-2">
                         {title}
                         {variant === 'destructive' && <Trash2 className="w-4 h-4 text-muted-foreground" />}
@@ -47,14 +47,14 @@ export function ConfirmDialog({
                     </Button>
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-6 px-4 md:px-0">
                     <div className="bg-muted/30 p-4 rounded-xl">
                         <p className="text-muted-foreground">{description}</p>
                     </div>
                 </div>
 
                 {/* Footer Actions */}
-                <div className="flex items-center justify-end gap-3">
+                <div className="flex items-center justify-end gap-3 px-4 md:px-0 pb-4 md:pb-0 mt-auto">
                     <Button
                         variant="ghost"
                         onClick={() => onOpenChange(false)}

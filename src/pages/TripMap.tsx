@@ -6,9 +6,17 @@ import maplibregl from 'maplibre-gl';
 import { Card } from "@/types/kanban";
 import { format } from "date-fns";
 import { Bed, MapPin, Calendar, Navigation, Layers } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useOutletContext } from "react-router-dom";
 import { TripSettingsDialog } from '@/components/TripSettingsDialog';
+import { TripMapHeader } from '@/components/TripMapHeader';
+import { DashboardSelector } from '@/components/DashboardSelector';
 import { cn } from "@/lib/utils";
+
+interface OutletContext {
+  setIsSidebarExpanded?: (expanded: boolean) => void;
+  setShowTripSelector?: (open: boolean) => void;
+  setShowDashboardSelector?: (open: boolean) => void;
+}
 
 // Define a color palette for days
 const DAY_COLORS = [
@@ -25,8 +33,18 @@ const DAY_COLORS = [
 export default function TripMap() {
     const { cards, trips, currentTripId, dashboards } = useKanban();
     const location = useLocation();
+    const context = useOutletContext<OutletContext>();
     const [popupInfo, setPopupInfo] = useState<Card | null>(null);
     const [activeRouteId, setActiveRouteId] = useState<string | null>(null);
+    const [showDashboardSelector, setShowDashboardSelectorLocal] = useState(false);
+
+    const openDashboardSelector = () => {
+        if (context?.setShowDashboardSelector) {
+            context.setShowDashboardSelector(true);
+        } else {
+            setShowDashboardSelectorLocal(true);
+        }
+    };
 
     // Dialog states
     const [showTripSettingsDialog, setShowTripSettingsDialog] = useState(false);
@@ -149,14 +167,23 @@ export default function TripMap() {
     return (
         <div className="flex-1 h-screen w-full relative bg-background flex flex-col overflow-hidden">
             
+            {/* Mobile/Desktop Header */}
+            <TripMapHeader onOpenDashboardSelector={openDashboardSelector} />
+
+            {/* Dashboard Selector */}
+            <DashboardSelector 
+                open={false} 
+                onOpenChange={() => {}} 
+            />
+            
             {/* Map HUD / Overlay */}
-            <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between p-6">
+            <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between md:p-6 pb-24 md:pb-6 pt-16 md:pt-6">
                 
                 {/* Top Section */}
                 <div className="flex items-start justify-between pointer-events-auto">
-                    {/* Itinerary Panel */}
+                    {/* Itinerary Panel - Desktop only */}
                     {routes.length > 0 && (
-                        <div className="glass-panel rounded-2xl p-4 w-72 animate-slide-in">
+                        <div className="hidden md:block glass-panel rounded-2xl p-4 w-72 animate-slide-in">
                             <div className="flex items-center gap-2 mb-4 text-foreground/80">
                                 <Layers className="w-4 h-4" />
                                 <h3 className="text-sm font-bold uppercase tracking-wider">Itinerary</h3>

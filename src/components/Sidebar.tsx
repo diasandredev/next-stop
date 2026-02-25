@@ -42,6 +42,7 @@ interface SidebarProps {
     logout: () => void;
     onOpenAccountSettings: () => void;
     onOpenNewTrip: () => void;
+    onClose?: () => void;
 }
 
 export function Sidebar({
@@ -55,6 +56,7 @@ export function Sidebar({
     logout,
     onOpenAccountSettings,
     onOpenNewTrip,
+    onClose,
 }: SidebarProps) {
     const navigate = useNavigate();
     const location = useLocation();
@@ -73,26 +75,35 @@ export function Sidebar({
 
     const handleDashboardClick = (dashboardId: string) => {
         navigate(`/map?dashboardId=${dashboardId}`);
+        onClose?.();
     };
 
     return (
         <aside
             className={cn(
                 "h-screen flex flex-col transition-all duration-300 ease-in-out relative z-50",
-                "bg-background/80 dark:bg-secondary/40 backdrop-blur-xl border-r border-border", // Glassmorphism container
-                isExpanded ? "w-72" : "w-20"
+                "bg-background/80 dark:bg-secondary/40 backdrop-blur-xl border-r border-border",
+                "w-[280px] max-w-[85vw] md:w-72"
             )}
         >
-            {/* Toggle Button - Floating outside */}
+            {/* Toggle Button - Floating outside - Hidden on mobile */}
             <button
                 onClick={toggleSidebar}
-                className="absolute -right-3 top-8 bg-card border border-border rounded-full p-1.5 hover:bg-accent hover:text-foreground transition-all z-30 shadow-lg text-muted-foreground"
+                className="absolute -right-3 top-8 bg-card border border-border rounded-full p-1.5 hover:bg-accent hover:text-foreground transition-all z-30 shadow-lg text-muted-foreground hidden md:flex items-center justify-center"
             >
                 {isExpanded ? (
                     <ChevronLeft className="w-3 h-3" />
                 ) : (
                     <ChevronRight className="w-3 h-3" />
                 )}
+            </button>
+
+            {/* Mobile Close Button */}
+            <button
+                onClick={onClose}
+                className="absolute top-4 right-4 md:hidden p-1 text-muted-foreground hover:text-foreground"
+            >
+                <ChevronLeft className="w-5 h-5" />
             </button>
 
             {/* Header / Logo */}
@@ -147,23 +158,24 @@ export function Sidebar({
                             <div key={trip.id} className="flex flex-col gap-1">
                                 {isExpanded ? (
                                      <button
-                                     onClick={() => {
-                                         if (isExpanded) {
-                                             setExpandedTripId(isTripExpanded ? null : trip.id);
-                                             if (!isTripActive) setCurrentTripId(trip.id);
-                                         } else {
-                                             setCurrentTripId(trip.id);
-                                             navigate('/board');
-                                         }
-                                     }}
-                                         className={cn(
-                                             "w-full flex items-center gap-3 p-2.5 rounded-xl transition-all duration-200 group relative select-none",
-                                                 isTripActive 
-                                                     ? "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.2)]" 
-                                                     : "text-muted-foreground hover:text-foreground hover:bg-accent",
-                                                 !isExpanded && "justify-center"
-                                             )}
-                                         >
+                                       onClick={() => {
+                                           if (isExpanded) {
+                                               setExpandedTripId(isTripExpanded ? null : trip.id);
+                                               if (!isTripActive) setCurrentTripId(trip.id);
+                                           } else {
+                                               setCurrentTripId(trip.id);
+                                               navigate('/board');
+                                               onClose?.();
+                                           }
+                                       }}
+                                          className={cn(
+                                              "w-full flex items-center gap-3 p-2.5 rounded-xl transition-all duration-200 group relative select-none touch-manipulation min-h-[48px] md:min-h-[auto]",
+                                                  isTripActive 
+                                                      ? "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.2)]" 
+                                                      : "text-muted-foreground hover:text-foreground hover:bg-accent",
+                                                  !isExpanded && "justify-center"
+                                              )}
+                                          >
 
                                      <Plane className={cn("w-5 h-5 flex-shrink-0 transition-transform duration-300", isTripActive && "text-primary", isTripExpanded && isExpanded && "rotate-45")} />
 
@@ -194,6 +206,7 @@ export function Sidebar({
                                                 } else {
                                                     setCurrentTripId(trip.id);
                                                     navigate('/board');
+                                                    onClose?.();
                                                 }
                                             }}
                                             className={cn(
@@ -238,6 +251,7 @@ export function Sidebar({
                                             onClick={() => {
                                                 setCurrentTripId(trip.id);
                                                 navigate('/board');
+                                                onClose?.();
                                             }}
                                             className={cn(
                                                 "w-full flex items-center gap-3 p-2 rounded-lg text-sm transition-all duration-200",
@@ -351,7 +365,7 @@ export function Sidebar({
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className={cn(
-                                "w-full flex items-center gap-3 transition-all duration-200 group cursor-pointer outline-none",
+                                "w-full flex items-center gap-3 transition-all duration-200 group cursor-pointer outline-none touch-manipulation min-h-[48px] md:min-h-[auto]",
                                 !isExpanded && "justify-center"
                             )}>
                                 {/* Avatar */}
