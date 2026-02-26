@@ -109,11 +109,15 @@ export const DayColumn = ({
 
     // Filter cards based on search query
     const filteredCards = searchQuery
-        ? cards.filter(card =>
-            card.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            card.location?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            card.notes?.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+        ? cards.filter(card => {
+            const q = searchQuery.toLowerCase();
+            return (
+                card.title.toLowerCase().includes(q) ||
+                card.location?.name?.toLowerCase().includes(q) ||
+                card.notes?.toLowerCase().includes(q) ||
+                card.checklist?.some(item => item.text.toLowerCase().includes(q))
+            );
+        })
         : cards;
 
     const rootCards = filteredCards.filter(c => !c.parentId);
