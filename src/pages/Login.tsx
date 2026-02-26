@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -25,13 +25,140 @@ const AirplaneSvg = ({ size, opacity }: { size: number; opacity: number }) => (
   </svg>
 );
 
+// 🎅 Santa Sleigh SVG for Christmas Easter egg
+const SantaSleighSvg = ({ size, opacity }: { size: number; opacity: number }) => (
+  <svg
+    width={size * 3}
+    height={size * 1.5}
+    viewBox="0 0 120 50"
+    fill="none"
+    style={{ opacity: opacity * 1.5 }}
+  >
+    {/* Reindeer antlers */}
+    <path d="M8 18 L5 10 L3 14 M8 18 L11 10 L13 14" stroke="rgba(160,120,60,0.9)" strokeWidth="1" fill="none" />
+    {/* Reindeer body */}
+    <ellipse cx="10" cy="22" rx="6" ry="4" fill="rgba(160,120,60,0.8)" />
+    {/* Reindeer legs */}
+    <line x1="6" y1="26" x2="5" y2="31" stroke="rgba(160,120,60,0.7)" strokeWidth="1" />
+    <line x1="14" y1="26" x2="15" y2="31" stroke="rgba(160,120,60,0.7)" strokeWidth="1" />
+    {/* Rudolph's red nose */}
+    <circle cx="4" cy="20" r="1.5" fill="rgba(255,50,50,0.9)" />
+    {/* Nose glow */}
+    <circle cx="4" cy="20" r="3" fill="rgba(255,50,50,0.2)" />
+    {/* Reins */}
+    <path d="M16 22 Q30 18 40 25" stroke="rgba(200,180,100,0.5)" strokeWidth="0.8" fill="none" />
+    {/* Second reindeer (behind) */}
+    <ellipse cx="22" cy="20" rx="5" ry="3.5" fill="rgba(140,100,50,0.6)" />
+    <path d="M20 14 L17 8 L15 11 M20 14 L23 8 L25 11" stroke="rgba(140,100,50,0.7)" strokeWidth="0.8" fill="none" />
+    {/* Sleigh body */}
+    <path d="M38 22 Q36 22 36 28 L38 32 Q40 34 75 34 L78 32 Q80 28 78 25 Z" fill="rgba(180,30,30,0.85)" />
+    {/* Sleigh runner */}
+    <path d="M36 34 Q34 36 36 37 L80 37 Q82 36 80 34" fill="rgba(200,170,50,0.7)" stroke="rgba(220,190,70,0.8)" strokeWidth="0.5" />
+    {/* Gift boxes */}
+    <rect x="60" y="22" width="6" height="6" rx="0.5" fill="rgba(220,50,50,0.8)" />
+    <line x1="63" y1="22" x2="63" y2="28" stroke="rgba(255,215,0,0.8)" strokeWidth="0.8" />
+    <line x1="60" y1="25" x2="66" y2="25" stroke="rgba(255,215,0,0.8)" strokeWidth="0.8" />
+    <rect x="67" y="24" width="5" height="5" rx="0.5" fill="rgba(50,180,50,0.8)" />
+    <line x1="69.5" y1="24" x2="69.5" y2="29" stroke="rgba(255,215,0,0.7)" strokeWidth="0.7" />
+    {/* Santa body */}
+    <ellipse cx="50" cy="22" rx="6" ry="8" fill="rgba(200,30,30,0.9)" />
+    {/* Belt */}
+    <rect x="44" y="24" width="12" height="2" fill="rgba(30,30,30,0.8)" />
+    <rect x="49" y="23.5" width="3" height="3" rx="0.5" fill="rgba(255,215,0,0.8)" />
+    {/* Santa head */}
+    <circle cx="50" cy="13" r="4" fill="rgba(255,210,170,0.9)" />
+    {/* Santa hat */}
+    <path d="M46 13 Q46 8 50 6 Q54 8 54 13" fill="rgba(200,30,30,0.9)" />
+    <path d="M50 6 Q52 4 55 5" stroke="rgba(200,30,30,0.9)" strokeWidth="2" fill="none" />
+    <circle cx="55" cy="5" r="1.5" fill="rgba(255,255,255,0.9)" />
+    {/* Hat brim */}
+    <rect x="45" y="12" width="10" height="2" rx="1" fill="rgba(255,255,255,0.85)" />
+    {/* Santa beard */}
+    <path d="M47 15 Q50 20 53 15" fill="rgba(255,255,255,0.85)" />
+  </svg>
+);
+
+// 🎈 Hot Air Balloon SVG
+const HotAirBalloonSvg = ({ size, opacity }: { size: number; opacity: number }) => (
+  <svg
+    width={size}
+    height={size * 1.4}
+    viewBox="0 0 60 84"
+    fill="none"
+    style={{ opacity }}
+  >
+    {/* Balloon envelope */}
+    <path
+      d="M30 2 C12 2 2 18 2 32 C2 44 12 52 22 56 L24 58 L36 58 L38 56 C48 52 58 44 58 32 C58 18 48 2 30 2Z"
+      fill="url(#balloonGrad)"
+    />
+    {/* Balloon stripes */}
+    <path d="M20 4 Q16 16 16 32 Q16 44 22 54" stroke="rgba(255,255,255,0.2)" strokeWidth="1" fill="none" />
+    <path d="M30 2 Q30 16 30 32 Q30 44 30 56" stroke="rgba(255,255,255,0.15)" strokeWidth="1" fill="none" />
+    <path d="M40 4 Q44 16 44 32 Q44 44 38 54" stroke="rgba(255,255,255,0.2)" strokeWidth="1" fill="none" />
+    {/* Ropes */}
+    <line x1="24" y1="58" x2="22" y2="70" stroke="rgba(200,180,120,0.6)" strokeWidth="0.8" />
+    <line x1="36" y1="58" x2="38" y2="70" stroke="rgba(200,180,120,0.6)" strokeWidth="0.8" />
+    <line x1="28" y1="57" x2="26" y2="70" stroke="rgba(200,180,120,0.5)" strokeWidth="0.6" />
+    <line x1="32" y1="57" x2="34" y2="70" stroke="rgba(200,180,120,0.5)" strokeWidth="0.6" />
+    {/* Basket */}
+    <rect x="21" y="70" width="18" height="10" rx="2" fill="rgba(160,120,60,0.8)" stroke="rgba(130,95,45,0.9)" strokeWidth="0.8" />
+    {/* Basket weave pattern */}
+    <line x1="25" y1="70" x2="25" y2="80" stroke="rgba(130,95,45,0.5)" strokeWidth="0.5" />
+    <line x1="30" y1="70" x2="30" y2="80" stroke="rgba(130,95,45,0.5)" strokeWidth="0.5" />
+    <line x1="35" y1="70" x2="35" y2="80" stroke="rgba(130,95,45,0.5)" strokeWidth="0.5" />
+    <line x1="21" y1="75" x2="39" y2="75" stroke="rgba(130,95,45,0.5)" strokeWidth="0.5" />
+    {/* Flame */}
+    <ellipse cx="30" cy="60" rx="2" ry="3" fill="rgba(255,160,30,0.7)" />
+    <ellipse cx="30" cy="59" rx="1" ry="2" fill="rgba(255,220,80,0.8)" />
+    {/* Gradient definition */}
+    <defs>
+      <linearGradient id="balloonGrad" x1="0" y1="0" x2="60" y2="60">
+        <stop offset="0%" stopColor="rgba(220,60,60,0.85)" />
+        <stop offset="33%" stopColor="rgba(255,165,0,0.85)" />
+        <stop offset="66%" stopColor="rgba(255,215,0,0.85)" />
+        <stop offset="100%" stopColor="rgba(220,60,60,0.85)" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+// Animated balloon component - floating upward
+const AnimatedBalloon = ({ left, delay, duration, size, opacity }: {
+  left: number;
+  delay: number;
+  duration: number;
+  size: number;
+  opacity: number;
+}) => (
+  <div
+    className="animated-balloon"
+    style={{
+      position: 'absolute',
+      left: `${left}%`,
+      bottom: '-120px',
+      animationDelay: `${delay}s`,
+      animationDuration: `${duration}s`,
+    }}
+  >
+    <HotAirBalloonSvg size={size} opacity={opacity} />
+  </div>
+);
+
+// Check if today is Christmas
+const isChristmas = () => {
+  const today = new Date();
+  return today.getMonth() === 11 && today.getDate() === 25;
+};
+
 // Animated airplane component - flying left to right
-const AnimatedPlane = ({ delay, top, duration, size, opacity }: {
+const AnimatedPlane = ({ delay, top, duration, size, opacity, christmas }: {
   delay: number;
   top: number;
   duration: number;
   size: number;
   opacity: number;
+  christmas: boolean;
 }) => (
   <div
     className="animated-plane"
@@ -43,8 +170,12 @@ const AnimatedPlane = ({ delay, top, duration, size, opacity }: {
       animationDuration: `${duration}s`,
     }}
   >
-    <div style={{ transform: 'rotate(90deg)' }}>
-      <AirplaneSvg size={size} opacity={opacity} />
+    <div style={{ transform: christmas ? 'scaleX(-1)' : 'rotate(90deg)' }}>
+      {christmas ? (
+        <SantaSleighSvg size={size} opacity={opacity} />
+      ) : (
+        <AirplaneSvg size={size} opacity={opacity} />
+      )}
     </div>
   </div>
 );
@@ -147,6 +278,18 @@ const generateStars = () => {
   return stars;
 };
 
+// Generate balloon data (only if lucky — ~5% chance)
+const generateBalloon = () => {
+  if (Math.random() > 0.05) return null;
+  return {
+    left: 15 + Math.random() * 70,
+    delay: 5 + Math.random() * 15,
+    duration: 40 + Math.random() * 20,
+    size: 30 + Math.random() * 20,
+    opacity: 0.15 + Math.random() * 0.15,
+  };
+};
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -155,6 +298,8 @@ const Login = () => {
   const [planes] = useState(generatePlanes);
   const [clouds] = useState(generateClouds);
   const [stars] = useState(generateStars);
+  const christmas = useMemo(() => isChristmas(), []);
+  const [balloon] = useState(generateBalloon);
   const { login, signup, loginWithGoogle, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -227,12 +372,19 @@ const Login = () => {
         ))}
       </div>
 
-      {/* Animated planes */}
+      {/* Animated planes (or Santa on Christmas!) */}
       <div className="planes-container">
         {planes.map((plane) => (
-          <AnimatedPlane key={plane.id} {...plane} />
+          <AnimatedPlane key={plane.id} {...plane} christmas={christmas} />
         ))}
       </div>
+
+      {/* 🎈 Easter egg: rare hot air balloon */}
+      {balloon && (
+        <div className="balloon-container">
+          <AnimatedBalloon {...balloon} />
+        </div>
+      )}
 
       {/* Subtle grid pattern overlay */}
       <div className="grid-overlay" />
@@ -246,9 +398,9 @@ const Login = () => {
         {/* Logo / Branding */}
 
         <div className="login-header">
-          <img 
-            src="/logo.png" 
-            alt="Next Stop" 
+          <img
+            src="/logo.png"
+            alt="Next Stop"
             className="login-logo"
           />
           <h1 className="brand-name">Next Stop</h1>
@@ -422,6 +574,37 @@ const Login = () => {
         .animated-cloud {
           position: absolute;
           animation: driftAcross linear infinite;
+        }
+
+        /* Hot air balloon floating up */
+        .balloon-container {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          pointer-events: none;
+        }
+
+        .animated-balloon {
+          position: absolute;
+          animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+          0% {
+            transform: translateY(0) translateX(0);
+          }
+          25% {
+            transform: translateY(-25vh) translateX(15px);
+          }
+          50% {
+            transform: translateY(-50vh) translateX(-10px);
+          }
+          75% {
+            transform: translateY(-75vh) translateX(12px);
+          }
+          100% {
+            transform: translateY(calc(-100vh - 150px)) translateX(-5px);
+          }
         }
 
         @keyframes driftAcross {
