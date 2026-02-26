@@ -72,6 +72,14 @@ const Board = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    const handleToggleGroups = () => {
+      setIsRightSidebarExpanded(prev => !prev);
+    };
+    window.addEventListener('toggle-groups-panel', handleToggleGroups);
+    return () => window.removeEventListener('toggle-groups-panel', handleToggleGroups);
+  }, []);
+
   // Derived state
   const currentTrip = trips.find(t => t.id === currentTripId);
   const tripDashboards = dashboards
@@ -292,11 +300,11 @@ const Board = () => {
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       <SEO title="Dashboard" />
       {/* Header */}
-      <header className="px-4 pl-[3.25rem] md:px-6 md:pl-6 pt-[calc(max(env(safe-area-inset-top),1rem)+0.75rem)] md:pt-[max(env(safe-area-inset-top),0.75rem)] pb-3 md:py-4 flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-md border-b border-border/30">
-        <div className="flex items-center justify-between gap-2">
-          {/* Left Section - Trip Info */}
-          <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
-            <h1 className="text-xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate">
+      <header className="px-4 md:px-6 md:pl-6 pt-[calc(max(env(safe-area-inset-top),1rem)+0.75rem)] md:pt-[max(env(safe-area-inset-top),0.75rem)] pb-3 md:py-4 flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-md border-b border-border/30">
+        <div className="flex flex-col items-center gap-1.5 md:flex-row md:items-center md:justify-between md:gap-2">
+          {/* First Row (mobile) / Left Section (desktop) - Trip Info */}
+          <div className="flex items-center gap-2 md:gap-4 min-w-0 md:flex-1 justify-center md:justify-start">
+            <h1 className="text-xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate text-center md:text-left">
               {currentTrip ? currentTrip.name : 'Select a Trip'}
             </h1>
             {currentTrip?.startDate && (
@@ -310,8 +318,8 @@ const Board = () => {
             )}
           </div>
 
-          {/* Right Section - Actions */}
-          <div className="flex items-center gap-1 bg-secondary/40 rounded-xl p-1 border border-border/30">
+          {/* Second Row (mobile) / Right Section (desktop) - Actions */}
+          <div className="flex items-center gap-1 bg-secondary/40 rounded-xl p-1 border border-border/30 md:self-auto">
             {/* Search - Desktop only */}
             <div className="relative hidden md:block">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -378,13 +386,14 @@ const Board = () => {
               </TooltipContent>
             </Tooltip>
 
+            {/* Groups toggle - Desktop only (mobile uses BottomTabs) */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   id="right-sidebar-toggle"
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
+                  className="hidden md:inline-flex h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
                   onClick={() => {
                     setIsRightSidebarExpanded(!isRightSidebarExpanded);
                   }}
@@ -452,21 +461,19 @@ const Board = () => {
               </div>
             )}
 
-            {/* Right Sidebar - Inside DndContext - Desktop only */}
-            <div className="hidden md:block">
-              <RightSidebar
-                isExpanded={isRightSidebarExpanded}
-                onToggle={() => setIsRightSidebarExpanded(!isRightSidebarExpanded)}
-                groups={groups}
-                cards={cards}
-                dashboards={tripDashboards}
-                activeDashboardId={activeDashboardId}
-                onActiveDashboardChange={setActiveDashboardId}
-                onAddGroup={(dashboardId, name) => addGroup(dashboardId, name)}
-                onUpdateGroup={updateGroup}
-                onDeleteGroup={deleteGroup}
-              />
-            </div>
+            {/* Right Sidebar - Inside DndContext */}
+            <RightSidebar
+              isExpanded={isRightSidebarExpanded}
+              onToggle={() => setIsRightSidebarExpanded(!isRightSidebarExpanded)}
+              groups={groups}
+              cards={cards}
+              dashboards={tripDashboards}
+              activeDashboardId={activeDashboardId}
+              onActiveDashboardChange={setActiveDashboardId}
+              onAddGroup={(dashboardId, name) => addGroup(dashboardId, name)}
+              onUpdateGroup={updateGroup}
+              onDeleteGroup={deleteGroup}
+            />
 
             <DragOverlay dropAnimation={null}>
               {activeCard ? (

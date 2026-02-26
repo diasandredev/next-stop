@@ -122,6 +122,7 @@ export function AppLayout({ onOpenDashboardSelector }: AppLayoutProps) {
                 currentTripId={currentTripId}
                 onOpenTripSelector={() => setShowTripSelector(true)}
                 onOpenDashboardSelector={() => setShowDashboardSelector(true)}
+                onOpenGroups={() => window.dispatchEvent(new Event('toggle-groups-panel'))}
             />
 
             <NewTripDialog

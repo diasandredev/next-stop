@@ -1,14 +1,15 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Map, Wallet, Plane, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Map, Wallet, PanelRight, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BottomTabsProps {
   currentTripId: string | null;
   onOpenTripSelector?: () => void;
   onOpenDashboardSelector?: () => void;
+  onOpenGroups?: () => void;
 }
 
-export function BottomTabs({ currentTripId, onOpenTripSelector, onOpenDashboardSelector }: BottomTabsProps) {
+export function BottomTabs({ currentTripId, onOpenTripSelector, onOpenDashboardSelector, onOpenGroups }: BottomTabsProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -85,6 +86,21 @@ export function BottomTabs({ currentTripId, onOpenTripSelector, onOpenDashboardS
           {isOnMap && (
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />
           )}
+        </button>
+
+        {/* Groups Tab */}
+        <button
+          onClick={onOpenGroups}
+          disabled={!currentTripId}
+          className={cn(
+            'flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors relative',
+            !currentTripId
+              ? 'text-muted-foreground/30 cursor-not-allowed'
+              : 'text-muted-foreground'
+          )}
+        >
+          <PanelRight className="w-5 h-5" />
+          <span className="text-[10px] font-medium">Groups</span>
         </button>
 
         {/* Expenses Tab - Disabled */}
