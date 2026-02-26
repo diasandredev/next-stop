@@ -3,8 +3,8 @@ import { useKanban } from '@/contexts/KanbanContext';
 import { Button } from '@/components/ui/button';
 import { RightSidebar } from '@/components/RightSidebar';
 import { MobileQuickAdd } from '@/components/MobileQuickAdd';
-import { Calendar, Plus, Settings, Users, PanelRight, FileDown, FileText, Search } from 'lucide-react';
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { Calendar, Plus, Settings, Users, PanelRight, FileDown, FileText, Search, EllipsisVertical } from 'lucide-react';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Card } from '@/types/kanban';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -13,6 +13,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TripSettingsDialog } from '@/components/TripSettingsDialog';
@@ -42,6 +43,12 @@ const Board = () => {
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
       },
     })
   );
@@ -301,14 +308,64 @@ const Board = () => {
       <SEO title="Dashboard" />
       {/* Header */}
       <header className="px-4 md:px-6 md:pl-6 pt-[calc(max(env(safe-area-inset-top),1rem)+0.75rem)] md:pt-[max(env(safe-area-inset-top),0.75rem)] pb-3 md:py-4 flex-shrink-0 sticky top-0 z-10 bg-gradient-to-r from-background via-background to-background/95 backdrop-blur-md border-b border-border/30">
-        <div className="flex flex-col items-center gap-1.5 md:flex-row md:items-center md:justify-between md:gap-2">
-          {/* First Row (mobile) / Left Section (desktop) - Trip Info */}
-          <div className="flex items-center gap-2 md:gap-4 min-w-0 md:flex-1 justify-center md:justify-start">
-            <h1 className="text-xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate text-center md:text-left">
+
+        {/* ===== MOBILE HEADER — single compact row ===== */}
+        <div className="flex md:hidden items-center justify-between gap-2">
+          {/* Spacer to balance the hamburger on the left */}
+          <div className="w-10" />
+
+          {/* Centered Trip Name */}
+          <h1 className="text-lg font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate text-center flex-1 min-w-0">
+            {currentTrip ? currentTrip.name : 'Select a Trip'}
+          </h1>
+
+          {/* Overflow Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-lg hover:bg-primary/20 transition-all duration-200 flex-shrink-0"
+              >
+                <EllipsisVertical className="w-5 h-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52 bg-popover text-popover-foreground border-border p-1.5 rounded-xl">
+              <DropdownMenuItem
+                onClick={handleExportPDF}
+                className="gap-3 cursor-pointer py-2.5 rounded-lg focus:bg-accent focus:text-accent-foreground"
+              >
+                <FileDown className="w-4 h-4" />
+                <span>Export as PDF</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => currentTrip && setShowShareTripDialog(true)}
+                className="gap-3 cursor-pointer py-2.5 rounded-lg focus:bg-accent focus:text-accent-foreground"
+              >
+                <Users className="w-4 h-4" />
+                <span>Share Trip</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="my-1 bg-border/50" />
+              <DropdownMenuItem
+                onClick={() => currentTrip && setShowTripSettingsDialog(true)}
+                className="gap-3 cursor-pointer py-2.5 rounded-lg focus:bg-accent focus:text-accent-foreground"
+              >
+                <Settings className="w-4 h-4" />
+                <span>Trip Settings</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* ===== DESKTOP HEADER — full toolbar ===== */}
+        <div className="hidden md:flex items-center justify-between gap-2">
+          {/* Left Section - Trip Info */}
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate">
               {currentTrip ? currentTrip.name : 'Select a Trip'}
             </h1>
             {currentTrip?.startDate && (
-              <div className="hidden sm:flex items-center gap-2 bg-secondary/60 text-secondary-foreground h-8 px-3 rounded-lg border border-border/50">
+              <div className="flex items-center gap-2 bg-secondary/60 text-secondary-foreground h-8 px-3 rounded-lg border border-border/50">
                 <Calendar className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium">
                   {formatInTimeZone(new Date(currentTrip.startDate), timeZone, 'MMM d')}
@@ -318,10 +375,10 @@ const Board = () => {
             )}
           </div>
 
-          {/* Second Row (mobile) / Right Section (desktop) - Actions */}
-          <div className="flex items-center gap-1 bg-secondary/40 rounded-xl p-1 border border-border/30 md:self-auto">
-            {/* Search - Desktop only */}
-            <div className="relative hidden md:block">
+          {/* Right Section - Actions */}
+          <div className="flex items-center gap-1 bg-secondary/40 rounded-xl p-1 border border-border/30">
+            {/* Search */}
+            <div className="relative">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               <Input
                 id="board-search"
@@ -336,7 +393,7 @@ const Board = () => {
                 </kbd>
               </div>
             </div>
-            <div className="w-px h-6 bg-white/10 mx-1 hidden md:block" />
+            <div className="w-px h-6 bg-white/10 mx-1" />
 
             <DropdownMenu>
               <Tooltip>
@@ -386,14 +443,14 @@ const Board = () => {
               </TooltipContent>
             </Tooltip>
 
-            {/* Groups toggle - Desktop only (mobile uses BottomTabs) */}
+            {/* Groups toggle */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   id="right-sidebar-toggle"
                   variant="ghost"
                   size="icon"
-                  className="hidden md:inline-flex h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
+                  className="h-9 w-9 rounded-lg hover:bg-primary/20 transition-all duration-200"
                   onClick={() => {
                     setIsRightSidebarExpanded(!isRightSidebarExpanded);
                   }}
@@ -431,7 +488,7 @@ const Board = () => {
 
       {/* Board Content (Dashboards) */}
       <main className="flex-1 overflow-y-auto bg-background/50 p-3 md:p-6">
-        <div className="max-w-[1920px] mx-auto flex flex-col gap-6 md:gap-8 pb-24 md:pb-20">
+        <div className="max-w-[1920px] mx-auto flex flex-col gap-3 md:gap-8 pb-24 md:pb-20">
           <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             {tripDashboards.map(dashboard => (
               <DashboardView

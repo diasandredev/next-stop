@@ -133,7 +133,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
     const hasCustomColor = dashboard.backgroundColor && dashboard.backgroundColor !== 'transparent';
 
     return (
-        <div className="flex flex-col gap-4 md:gap-6 p-1">
+        <div className="flex flex-col gap-2 md:gap-6 p-1">
             {/* Glassmorphic Dashboard Header */}
             <div
                 className={cn(
@@ -455,7 +455,7 @@ export const DashboardView = ({ dashboard, trip, cards, today, searchQuery = '' 
             />
 
             {/* Content: Vertical scroll on mobile, horizontal on desktop */}
-            <div className="flex-1 overflow-y-auto md:overflow-x-auto md:overflow-y-hidden pb-20 md:pb-4 pt-1 -mx-1 px-1 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto md:overflow-x-auto md:overflow-y-hidden pb-4 md:pb-4 pt-1 -mx-1 px-1 custom-scrollbar">
                 <div className={containerClass}>
                     {/* Day Columns */}
                     {dates.map((date, index) => {

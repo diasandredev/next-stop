@@ -69,7 +69,7 @@ export function AppLayout({ onOpenDashboardSelector }: AppLayoutProps) {
             <Button
                 variant="ghost"
                 size="icon"
-                className="fixed top-[max(env(safe-area-inset-top,1rem),1rem)] left-4 z-50 md:hidden bg-background/80 backdrop-blur-sm border border-border"
+                className="fixed top-[calc(max(env(safe-area-inset-top,1rem),1rem)+0.75rem)] left-4 z-50 md:hidden bg-background/80 backdrop-blur-sm border border-border"
                 onClick={toggleMobileMenu}
             >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
