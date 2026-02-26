@@ -13,9 +13,9 @@ import { DashboardSelector } from '@/components/DashboardSelector';
 import { cn } from "@/lib/utils";
 
 interface OutletContext {
-  setIsSidebarExpanded?: (expanded: boolean) => void;
-  setShowTripSelector?: (open: boolean) => void;
-  setShowDashboardSelector?: (open: boolean) => void;
+    setIsSidebarExpanded?: (expanded: boolean) => void;
+    setShowTripSelector?: (open: boolean) => void;
+    setShowDashboardSelector?: (open: boolean) => void;
 }
 
 // Define a color palette for days
@@ -54,7 +54,7 @@ export default function TripMap() {
     const dashboardId = searchParams.get('dashboardId');
 
     const currentTrip = trips.find(t => t.id === currentTripId);
-    
+
     // Filter dashboards for current trip
     const tripDashboards = useMemo(() => {
         return dashboards
@@ -69,12 +69,12 @@ export default function TripMap() {
     // Filter cards that have location data AND match dashboardId if present
     const cardsWithLocation = useMemo(() => {
         let filteredCards = cards.filter(card => card.location && card.location.lat && card.location.lng);
-        
+
         if (dashboardId) {
             filteredCards = filteredCards.filter(card => card.dashboardId === dashboardId);
         } else if (currentTripId) {
-             const tripDashboardIds = tripDashboards.map(d => d.id);
-             filteredCards = filteredCards.filter(card => tripDashboardIds.includes(card.dashboardId));
+            const tripDashboardIds = tripDashboards.map(d => d.id);
+            filteredCards = filteredCards.filter(card => tripDashboardIds.includes(card.dashboardId));
         }
 
         return filteredCards;
@@ -136,7 +136,7 @@ export default function TripMap() {
         }).filter(Boolean);
     }, [routeCards]);
 
-    // Calculate initial view state (bounds)
+    // Calculate initial view state with bounds to fit all points
     const initialViewState = useMemo(() => {
         const allCards = [...routeCards, ...standaloneCards];
         const allPoints = [
@@ -152,43 +152,55 @@ export default function TripMap() {
             };
         }
 
+        // Single point — center on it with a comfortable zoom
+        if (allPoints.length === 1) {
+            return {
+                longitude: allPoints[0].lng,
+                latitude: allPoints[0].lat,
+                zoom: 14
+            };
+        }
+
+        // Multiple points — compute bounding box and let the map fit them
         const lngs = allPoints.map(p => p.lng);
         const lats = allPoints.map(p => p.lat);
-        const centerLng = lngs.reduce((a, b) => a + b, 0) / lngs.length;
-        const centerLat = lats.reduce((a, b) => a + b, 0) / lats.length;
+
+        const bounds: [[number, number], [number, number]] = [
+            [Math.min(...lngs), Math.min(...lats)], // southwest
+            [Math.max(...lngs), Math.max(...lats)]  // northeast
+        ];
 
         return {
-            longitude: centerLng,
-            latitude: centerLat,
-            zoom: 13
+            bounds,
+            fitBoundsOptions: { padding: 80, maxZoom: 15 }
         };
     }, [routeCards, standaloneCards, accommodations]);
 
     return (
         <div className="flex-1 h-screen w-full relative bg-background flex flex-col overflow-hidden">
-            
+
             {/* Mobile/Desktop Header */}
             <TripMapHeader onOpenDashboardSelector={openDashboardSelector} />
 
             {/* Dashboard Selector */}
-            <DashboardSelector 
-                open={false} 
-                onOpenChange={() => {}} 
+            <DashboardSelector
+                open={false}
+                onOpenChange={() => { }}
             />
-            
+
             {/* Map HUD / Overlay */}
             <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between md:p-6 pb-24 md:pb-6 pt-16 md:pt-6">
-                
+
                 {/* Top Section */}
-                <div className="flex items-start justify-between pointer-events-auto">
+                <div className="flex items-start justify-between">
                     {/* Itinerary Panel - Desktop only */}
                     {routes.length > 0 && (
-                        <div className="hidden md:block glass-panel rounded-2xl p-4 w-72 animate-slide-in">
+                        <div className="hidden md:block glass-panel rounded-2xl p-4 w-72 animate-slide-in pointer-events-auto">
                             <div className="flex items-center gap-2 mb-4 text-foreground/80">
                                 <Layers className="w-4 h-4" />
                                 <h3 className="text-sm font-bold uppercase tracking-wider">Itinerary</h3>
                             </div>
-                            
+
                             <div className="space-y-1 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
                                 {routes.map(route => route && (
                                     <button
@@ -196,12 +208,12 @@ export default function TripMap() {
                                         onClick={() => setActiveRouteId(activeRouteId === route.id ? null : route.id)}
                                         className={cn(
                                             "w-full flex items-center gap-3 p-2 rounded-xl transition-all duration-200 border border-transparent group",
-                                            activeRouteId === route.id 
-                                                ? "bg-muted border-border" 
+                                            activeRouteId === route.id
+                                                ? "bg-muted border-border"
                                                 : "hover:bg-muted/50"
                                         )}
                                     >
-                                        <div 
+                                        <div
                                             className={cn(
                                                 "w-2 h-8 rounded-full transition-all duration-300",
                                                 activeRouteId === route.id ? "scale-y-100" : "scale-y-50 group-hover:scale-y-75"
@@ -370,12 +382,12 @@ export default function TripMap() {
                                             )}
                                         </div>
                                     </div>
-                                    <button 
+                                    <button
                                         onClick={() => setPopupInfo(null)}
                                         className="text-muted-foreground/50 hover:text-foreground transition-colors"
                                     >
                                         <span className="sr-only">Close</span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                                     </button>
                                 </div>
 
