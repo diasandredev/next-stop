@@ -159,6 +159,15 @@ export const EditCardDialog = ({
     dirtyRef.current = true;
   };
 
+  const editChecklistItemText = (itemId: string, newText: string) => {
+    setChecklist(
+      checklist.map((item) =>
+        item.id === itemId ? { ...item, text: newText } : item,
+      ),
+    );
+    dirtyRef.current = true;
+  };
+
   const handleDiscardChanges = () => {
     dirtyRef.current = false;
     setTimeout(() => {
@@ -492,11 +501,11 @@ export const EditCardDialog = ({
                     >
                       {item.completed && <CheckSquare className="w-3 h-3" />}
                     </button>
-                    <span
-                      className={`flex-1 text-sm transition-all ${item.completed ? "text-muted-foreground line-through decoration-border" : "text-foreground"}`}
-                    >
-                      {item.text}
-                    </span>
+                    <Input
+                      value={item.text}
+                      onChange={(e) => editChecklistItemText(item.id, e.target.value)}
+                      className={`flex-1 h-auto py-0 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 px-0 shadow-none text-sm transition-all ${item.completed ? "text-muted-foreground line-through decoration-border" : "text-foreground"}`}
+                    />
                     <Button
                       variant="ghost"
                       size="icon"

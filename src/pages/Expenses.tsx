@@ -6,7 +6,7 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { calculateMonthlyBalances } from '@/services/financeService';
 import { Expense } from '@/types/finance';
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Plus, Receipt, MoreVertical, Pencil, Trash2, Wallet, DollarSign, PieChart, TrendingUp, X, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Receipt, MoreVertical, Pencil, Trash2, Wallet, DollarSign, PieChart, TrendingUp, X, Calendar, ArrowRightLeft, ArrowRight } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
     Tooltip,
@@ -38,20 +38,20 @@ import { cn } from '@/lib/utils';
 
 export default function Expenses() {
     const { user } = useAuth();
-    const { 
-        trips, 
-        currentTripId, 
-        expenses, 
-        saveExpense, 
-        deleteExpense 
+    const {
+        trips,
+        currentTripId,
+        expenses,
+        saveExpense,
+        deleteExpense
     } = useKanban();
-    
+
     const currentTrip = trips.find(t => t.id === currentTripId);
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     // Dialog States
     const [showTripSettingsDialog, setShowTripSettingsDialog] = useState(false);
-    
+
     // State for Month Selection
     const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
     const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
@@ -59,6 +59,10 @@ export default function Expenses() {
     const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
 
     // Derived Data
+    const currentUserMemberId = currentTrip?.ownerId === user?.uid
+        ? (currentTrip.ownerId || '')
+        : (user?.email || '');
+
     const tripExpenses = useMemo(() => {
         return expenses.filter(e => e.tripId === currentTripId);
     }, [expenses, currentTripId]);
@@ -71,6 +75,14 @@ export default function Expenses() {
     // Helpers
     const formatCurrency = (amount: number, currency: string) => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+    };
+
+    const getMemberName = (id: string) => {
+        if (!currentTrip) return id;
+        if (id === currentTrip.ownerId) {
+            return (user?.uid === currentTrip.ownerId && user?.email) ? user.email.split('@')[0] : 'Owner';
+        }
+        return id.split('@')[0];
     };
 
     const handlePrevMonth = () => setSelectedMonth(m => format(subMonths(parseISO(m + '-01'), 1), 'yyyy-MM'));
@@ -93,7 +105,7 @@ export default function Expenses() {
 
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-background relative">
-             
+
             {!currentTrip ? (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-4 relative z-10">
                     <Wallet className="w-16 h-16 opacity-10" />
@@ -130,7 +142,7 @@ export default function Expenses() {
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <Button 
+                                            <Button
                                                 onClick={() => {
                                                     setEditingExpense(null);
                                                     setIsAddExpenseOpen(true);
@@ -154,7 +166,7 @@ export default function Expenses() {
                     {/* Content Scrollable Area */}
                     <div className="flex-1 overflow-auto p-8 custom-scrollbar relative z-10">
                         <div className="max-w-7xl mx-auto space-y-12 pb-20">
-                            
+
                             {/* Monthly Overview Section */}
                             <div className="space-y-6">
                                 <div className="flex items-center justify-between">
@@ -162,7 +174,7 @@ export default function Expenses() {
                                         <PieChart className="w-4 h-4" />
                                         Monthly Overview
                                     </h2>
-                                    
+
                                     {/* Month Switcher */}
                                     <div className="flex items-center gap-2 bg-muted/20 p-1 rounded-xl border border-border">
                                         <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted/50 hover:text-foreground rounded-lg" onClick={handlePrevMonth}>
@@ -188,48 +200,61 @@ export default function Expenses() {
                                         </div>
                                     ) : (
                                         balances.debts.map((debt, idx) => (
-                                            <div key={idx} className="group relative overflow-hidden rounded-2xl bg-card border border-border p-6 hover:border-primary/30 transition-all duration-300 shadow-xl">
-                                                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-transparent opacity-50" />
-                                                
-                                                <div className="flex items-center justify-between mb-6">
-                                                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Settlement</span>
-                                                    <Badge variant="outline" className="font-mono text-[10px] border-border bg-muted/20 text-muted-foreground">
+                                            <div key={idx} className="group relative overflow-hidden rounded-3xl bg-card border border-border/60 p-6 hover:shadow-2xl hover:border-primary/30 transition-all duration-500 flex flex-col justify-between gap-6">
+
+                                                {/* Header */}
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                                            <ArrowRightLeft className="w-4 h-4 text-primary" />
+                                                        </div>
+                                                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Settlement</span>
+                                                    </div>
+                                                    <Badge variant="outline" className="font-mono text-[10px] bg-muted/30 text-muted-foreground border-border px-2">
                                                         {debt.currency}
                                                     </Badge>
                                                 </div>
 
-                                                <div className="flex flex-col gap-4">
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 font-bold border border-red-500/20">
-                                                                {debt.debtorId.substring(0, 2).toUpperCase()}
-                                                            </div>
-                                                            <div className="flex flex-col">
-                                                                <span className="text-xs text-muted-foreground">From</span>
-                                                                <span className="font-medium text-foreground">{debt.debtorId.split('@')[0]}</span>
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <div className="h-px flex-1 bg-border mx-4 relative">
-                                                            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-border" />
-                                                        </div>
+                                                {/* Amount Centerpiece */}
+                                                <div className="flex flex-col items-center justify-center py-2">
+                                                    <span className="text-4xl font-black tracking-tighter text-foreground drop-shadow-sm">
+                                                        {formatCurrency(debt.amount, debt.currency)}
+                                                    </span>
+                                                    <span className="text-xs font-medium text-muted-foreground mt-1 uppercase tracking-wider">Amount Due</span>
+                                                </div>
 
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="flex flex-col items-end">
-                                                                <span className="text-xs text-muted-foreground">To</span>
-                                                                <span className="font-medium text-foreground">{debt.creditorId.split('@')[0]}</span>
-                                                            </div>
-                                                            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold border border-emerald-500/20">
-                                                                {debt.creditorId.substring(0, 2).toUpperCase()}
-                                                            </div>
+                                                {/* Directional Flow */}
+                                                <div className="bg-muted/20 rounded-2xl p-4 flex items-center justify-between border border-border/40 relative">
+
+                                                    {/* Debtor */}
+                                                    <div className="flex flex-col items-center gap-2 z-10 w-1/3">
+                                                        <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 font-bold border-2 border-background ring-2 ring-red-500/20 shadow-sm transition-transform duration-300 group-hover:scale-105 group-hover:ring-red-500/40">
+                                                            {getMemberName(debt.debtorId).substring(0, 2).toUpperCase()}
+                                                        </div>
+                                                        <span className="text-xs font-semibold text-foreground truncate w-full text-center">{getMemberName(debt.debtorId)}</span>
+                                                    </div>
+
+                                                    {/* Arrow Path */}
+                                                    <div className="flex-1 flex items-center justify-center relative z-0 px-2 mt-[-1rem]">
+                                                        {/* Animated Track */}
+                                                        <div className="h-1 w-full rounded-full overflow-hidden bg-muted/50 border border-border/50">
+                                                            <div className="h-full w-full opacity-70 animate-flow-progress"
+                                                                style={{
+                                                                    backgroundImage: 'linear-gradient(90deg, transparent 0%, transparent 40%, rgba(16, 185, 129, 0.4) 50%, rgba(16, 185, 129, 0.8) 55%, transparent 60%, transparent 100%)'
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div className="absolute bg-card border border-border shadow-sm rounded-full p-1.5 transform group-hover:scale-110 transition-transform duration-500">
+                                                            <ArrowRight className="w-3 h-3 text-muted-foreground" />
                                                         </div>
                                                     </div>
 
-                                                    <div className="mt-2 pt-4 border-t border-border flex items-center justify-between">
-                                                        <span className="text-sm text-muted-foreground">Amount Due</span>
-                                                        <span className="text-2xl font-bold font-mono text-foreground tracking-tight">
-                                                            {formatCurrency(debt.amount, debt.currency)}
-                                                        </span>
+                                                    {/* Creditor */}
+                                                    <div className="flex flex-col items-center gap-2 z-10 w-1/3">
+                                                        <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold border-2 border-background ring-2 ring-emerald-500/20 shadow-sm transition-transform duration-300 group-hover:scale-105 group-hover:ring-emerald-500/40">
+                                                            {getMemberName(debt.creditorId).substring(0, 2).toUpperCase()}
+                                                        </div>
+                                                        <span className="text-xs font-semibold text-foreground truncate w-full text-center">{getMemberName(debt.creditorId)}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -246,7 +271,7 @@ export default function Expenses() {
                                         Transactions
                                     </h2>
                                 </div>
-                                
+
                                 <div className="grid gap-3">
                                     {tripExpenses.filter(e => {
                                         const start = parseISO(e.startDate);
@@ -254,23 +279,23 @@ export default function Expenses() {
                                         const diff = differenceInMonths(current, startOfMonth(start));
                                         return diff >= 0 && diff < e.installments;
                                     }).map(expense => (
-                                        <div 
-                                            key={expense.id} 
+                                        <div
+                                            key={expense.id}
                                             className="group flex items-center justify-between p-4 rounded-xl bg-card border border-border hover:bg-muted/30 transition-all duration-200"
                                         >
                                             <div className="flex items-center gap-5">
                                                 <div className="h-12 w-12 rounded-xl bg-muted/30 flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:bg-primary/20 transition-colors">
                                                     <DollarSign className="w-5 h-5" />
                                                 </div>
-                                                
+
                                                 <div>
                                                     <div className="font-bold text-lg text-foreground leading-tight mb-1">{expense.description}</div>
                                                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                                         <span className="flex items-center gap-1.5">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-primary/50" />
-                                                            {expense.payerId.split('@')[0]}
+                                                            {getMemberName(expense.payerId)}
                                                         </span>
-                                                        
+
                                                         {expense.installments > 1 && (
                                                             <span className="bg-muted/30 px-2 py-0.5 rounded text-muted-foreground">
                                                                 {expense.installments}x installments
@@ -279,7 +304,7 @@ export default function Expenses() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="flex items-center gap-8">
                                                 <div className="text-right">
                                                     <div className="font-bold font-mono text-lg text-foreground tracking-tight">
@@ -290,7 +315,7 @@ export default function Expenses() {
                                                         Total: {formatCurrency(expense.amount, expense.currency)}
                                                     </div>
                                                 </div>
-                                                
+
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
@@ -305,7 +330,7 @@ export default function Expenses() {
                                                             <Pencil className="w-4 h-4 mr-2" />
                                                             Edit
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem 
+                                                        <DropdownMenuItem
                                                             className="text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer"
                                                             onClick={() => setDeletingExpenseId(expense.id)}
                                                         >
@@ -317,21 +342,21 @@ export default function Expenses() {
                                             </div>
                                         </div>
                                     ))}
-                                    
-                                     {tripExpenses.filter(e => {
+
+                                    {tripExpenses.filter(e => {
                                         const start = parseISO(e.startDate);
                                         const current = parseISO(selectedMonth + '-01');
                                         const diff = differenceInMonths(current, startOfMonth(start));
                                         return diff >= 0 && diff < e.installments;
                                     }).length === 0 && (
-                                        <div className="flex flex-col items-center justify-center py-16 border border-dashed border-border rounded-2xl bg-muted/5">
-                                            <TrendingUp className="w-10 h-10 text-muted-foreground/20 mb-3" />
-                                            <p className="text-muted-foreground">No active expenses for {format(parseISO(selectedMonth + '-01'), 'MMMM')}.</p>
-                                            <Button variant="link" onClick={() => setIsAddExpenseOpen(true)} className="mt-2 text-primary">
-                                                Add the first one
-                                            </Button>
-                                        </div>
-                                    )}
+                                            <div className="flex flex-col items-center justify-center py-16 border border-dashed border-border rounded-2xl bg-muted/5">
+                                                <TrendingUp className="w-10 h-10 text-muted-foreground/20 mb-3" />
+                                                <p className="text-muted-foreground">No active expenses for {format(parseISO(selectedMonth + '-01'), 'MMMM')}.</p>
+                                                <Button variant="link" onClick={() => setIsAddExpenseOpen(true)} className="mt-2 text-primary">
+                                                    Add the first one
+                                                </Button>
+                                            </div>
+                                        )}
                                 </div>
                             </div>
                         </div>
@@ -341,7 +366,7 @@ export default function Expenses() {
                     <Dialog open={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen}>
                         <DialogContent hideCloseButton className="bg-background border-none text-foreground sm:max-w-[600px] p-0 gap-0 rounded-2xl shadow-2xl overflow-hidden">
                             <DialogTitle className="sr-only">{editingExpense ? 'Edit Expense' : 'Add New Expense'}</DialogTitle>
-                            
+
                             <TooltipProvider>
                                 {/* Header Bar */}
                                 <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/20">
@@ -358,13 +383,14 @@ export default function Expenses() {
                                         <TooltipContent><p>Close</p></TooltipContent>
                                     </Tooltip>
                                 </div>
-                                
+
                                 {/* Content */}
                                 <div className="p-6 max-h-[85vh] overflow-y-auto">
-                                    <ExpenseForm 
+                                    <ExpenseForm
                                         trip={currentTrip}
                                         initialData={editingExpense || undefined}
-                                        currentUserId={user?.email || ''} // Use email as ID for consistency in this MVP
+                                        currentUserId={currentUserMemberId}
+                                        currentUserEmail={user?.email || ''}
                                         onSubmit={handleSaveExpense}
                                         onCancel={() => setIsAddExpenseOpen(false)}
                                     />
@@ -405,19 +431,19 @@ export default function Expenses() {
 
 function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
-      <svg
-        {...props}
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M20 6 9 17l-5-5" />
-      </svg>
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M20 6 9 17l-5-5" />
+        </svg>
     )
-  }
+}

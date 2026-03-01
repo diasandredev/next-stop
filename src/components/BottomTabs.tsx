@@ -103,13 +103,34 @@ export function BottomTabs({ currentTripId, onOpenTripSelector, onOpenDashboardS
           <span className="text-[10px] font-medium">Groups</span>
         </button>
 
-        {/* Expenses Tab - Disabled */}
+        {/* Expenses Tab */}
         <button
-          disabled
-          className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-muted-foreground/30 cursor-not-allowed"
+          onClick={() => {
+            if (!currentTripId && onOpenTripSelector) {
+              onOpenTripSelector();
+            } else {
+              navigate('/expenses');
+            }
+          }}
+          className={cn(
+            'flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors relative',
+            isOnExpenses
+              ? 'text-primary'
+              : !currentTripId
+                ? 'text-amber-500'
+                : 'text-muted-foreground'
+          )}
         >
-          <Wallet className="w-5 h-5" />
+          <div className="relative">
+            <Wallet className="w-5 h-5" />
+            {!currentTripId && (
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full" />
+            )}
+          </div>
           <span className="text-[10px] font-medium">Expenses</span>
+          {isOnExpenses && (
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />
+          )}
         </button>
 
 

@@ -199,4 +199,19 @@
   .text-shadow-sm {
     text-shadow: 0 1px 2px rgba(0,0,0,0.5);
   }
+
+  /* Animated Money Flow Line */
+  .animate-flow-progress {
+    background-size: 200% 100%;
+    animation: flow-path 2s linear infinite;
+  }
+
+  @keyframes flow-path {
+    0% {
+      background-position: 100% 0;
+    }
+    100% {
+      background-position: -100% 0;
+    }
+  }
 }
