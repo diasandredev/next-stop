@@ -659,27 +659,31 @@ const Login = () => {
           backdrop-filter: blur(20px);
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 24px;
-          padding: 40px;
+          padding: clamp(24px, 5vh, 40px);
           position: relative;
           z-index: 10;
           box-shadow: 
             0 0 0 1px rgba(255, 255, 255, 0.05),
             0 20px 50px -20px rgba(0, 0, 0, 0.5);
+          max-height: 95vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
         }
 
         /* Header */
         .login-header {
           text-align: center;
-          margin-bottom: 32px;
+          margin-bottom: clamp(16px, 3vh, 32px);
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 16px;
+          gap: clamp(8px, 1.5vh, 16px);
         }
 
         .login-logo {
-          width: 140px;
-          height: 140px;
+          width: clamp(80px, 15vh, 140px);
+          height: clamp(80px, 15vh, 140px);
           border-radius: 28px;
           object-fit: cover;
           animation: float 6s ease-in-out infinite;
@@ -692,7 +696,7 @@ const Login = () => {
 
         .brand-name {
           font-family: 'Pacifico', cursive;
-          font-size: 42px;
+          font-size: clamp(32px, 5vh, 42px);
           background: linear-gradient(135deg, #FFBA08 0%, #E85D04 50%, #DC2F02 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
@@ -753,7 +757,7 @@ const Login = () => {
         .login-form {
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: clamp(12px, 2.5vh, 20px);
         }
 
         .input-group {

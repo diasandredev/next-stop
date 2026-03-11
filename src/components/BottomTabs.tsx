@@ -18,7 +18,6 @@ export function BottomTabs({ currentTripId, onOpenTripSelector, onOpenDashboardS
   const isOnExpenses = location.pathname === '/expenses';
   const isOnReminders = location.pathname === '/reminders';
 
-
   const handleBoardClick = () => {
     if (!currentTripId && onOpenTripSelector) {
       onOpenTripSelector();
@@ -134,6 +133,35 @@ export function BottomTabs({ currentTripId, onOpenTripSelector, onOpenDashboardS
           )}
         </button>
 
+        {/* Expenses Tab */}
+        <button
+          onClick={() => {
+            if (!currentTripId && onOpenTripSelector) {
+              onOpenTripSelector();
+            } else {
+              navigate('/expenses');
+            }
+          }}
+          className={cn(
+            'flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors relative',
+            isOnExpenses && currentTripId
+              ? 'text-primary'
+              : !currentTripId
+                ? 'text-amber-500'
+                : 'text-muted-foreground'
+          )}
+        >
+          <div className="relative">
+            <Wallet className="w-5 h-5" />
+            {!currentTripId && (
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full" />
+            )}
+          </div>
+          <span className="text-[10px] font-medium">Expenses</span>
+          {isOnExpenses && (
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />
+          )}
+        </button>
 
       </div>
     </nav>
