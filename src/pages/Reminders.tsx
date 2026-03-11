@@ -249,8 +249,6 @@ const Reminders = () => {
                         {items.map((item, index) => (
                             <div
                                 key={item.id}
-                                draggable
-                                onDragStart={() => handleDragStart(index)}
                                 onDragOver={(e) => handleDragOver(e, index)}
                                 onDragEnd={handleDragEnd}
                                 onDragLeave={handleDragLeave}
@@ -267,7 +265,11 @@ const Reminders = () => {
                                 )}
                             >
                                 {/* Drag handle */}
-                                <div className="pt-2 opacity-0 group-hover:opacity-40 transition-opacity cursor-grab active:cursor-grabbing select-none">
+                                <div
+                                    draggable
+                                    onDragStart={() => handleDragStart(index)}
+                                    className="pt-2 opacity-0 group-hover:opacity-40 transition-opacity cursor-grab active:cursor-grabbing select-none"
+                                >
                                     <GripVertical className="w-4 h-4 text-muted-foreground" />
                                 </div>
 
@@ -296,6 +298,19 @@ const Reminders = () => {
                                     </button>
                                 ) : (
                                     <div className="mt-2 flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center" />
+                                )}
+
+                                {/* Card title badge */}
+                                {item.cardId && item.cardTitle && (
+                                    <button
+                                        onClick={() => {
+                                            const card = findCard(item.cardId!);
+                                            if (card) setEditingCard(card);
+                                        }}
+                                        className="mt-1.5 flex-shrink-0 text-[11px] font-medium text-primary/70 bg-primary/8 hover:bg-primary/15 px-1.5 py-0.5 rounded transition-colors cursor-pointer whitespace-nowrap"
+                                    >
+                                        [{item.cardTitle}]
+                                    </button>
                                 )}
 
                                 {/* Content input */}
