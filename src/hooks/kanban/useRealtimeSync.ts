@@ -15,7 +15,7 @@ import {
     DocumentData
 } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
-import { Trip, Dashboard, Card } from '@/types/kanban';
+import { Trip, Dashboard, Card, Reminder } from '@/types/kanban';
 import { Group } from '@/types/group';
 import { Expense } from '@/types/finance';
 
@@ -25,6 +25,7 @@ interface RealtimeSyncState {
     groups: Group[];
     cards: Card[];
     expenses: Expense[];
+    reminders: Reminder[];
     isLoading: boolean;
     error: Error | null;
 }
@@ -40,6 +41,8 @@ interface UseRealtimeSyncReturn extends RealtimeSyncState {
     deleteCard: (tripId: string, cardId: string) => Promise<void>;
     saveExpense: (tripId: string, expense: Expense) => Promise<void>;
     deleteExpense: (tripId: string, expenseId: string) => Promise<void>;
+    saveReminder: (tripId: string, reminder: Reminder) => Promise<void>;
+    deleteReminder: (tripId: string, reminderId: string) => Promise<void>;
 }
 
 
@@ -56,6 +59,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         groups: [],
         cards: [],
         expenses: [],
+        reminders: [],
         isLoading: true,
         error: null,
     });
@@ -65,6 +69,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
     const groupUnsubscribersRef = useRef<Map<string, Unsubscribe>>(new Map());
     const cardUnsubscribersRef = useRef<Map<string, Unsubscribe>>(new Map());
     const expenseUnsubscribersRef = useRef<Map<string, Unsubscribe>>(new Map());
+    const reminderUnsubscribersRef = useRef<Map<string, Unsubscribe>>(new Map());
 
     // Clean up all listeners
     const cleanupListeners = useCallback(() => {
@@ -78,6 +83,8 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         cardUnsubscribersRef.current.clear();
         expenseUnsubscribersRef.current.forEach(unsub => unsub());
         expenseUnsubscribersRef.current.clear();
+        reminderUnsubscribersRef.current.forEach(unsub => unsub());
+        reminderUnsubscribersRef.current.clear();
     }, []);
 
     // Subscribe to a trip's dashboards
@@ -197,6 +204,31 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         expenseUnsubscribersRef.current.set(tripId, unsub);
     }, []);
 
+    // Subscribe to a trip's reminders
+    const subscribeToReminders = useCallback((tripId: string) => {
+        if (reminderUnsubscribersRef.current.has(tripId)) return;
+
+        const remindersRef = collection(db, `trips/${tripId}/reminders`);
+        const unsub = onSnapshot(remindersRef, (snapshot) => {
+            const remindersData = snapshot.docs.map(doc => ({
+                ...doc.data(),
+                id: doc.id,
+            })) as Reminder[];
+
+            setState(prev => {
+                const otherReminders = prev.reminders.filter(r => r.tripId !== tripId);
+                return {
+                    ...prev,
+                    reminders: [...otherReminders, ...remindersData],
+                };
+            });
+        }, (error) => {
+            console.error(`Error subscribing to reminders for trip ${tripId}:`, error);
+        });
+
+        reminderUnsubscribersRef.current.set(tripId, unsub);
+    }, []);
+
     // Unsubscribe from a trip's subcollections
     const unsubscribeFromTrip = useCallback((tripId: string) => {
         const dashboardUnsub = dashboardUnsubscribersRef.current.get(tripId);
@@ -221,6 +253,12 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         if (expenseUnsub) {
             expenseUnsub();
             expenseUnsubscribersRef.current.delete(tripId);
+        }
+
+        const reminderUnsub = reminderUnsubscribersRef.current.get(tripId);
+        if (reminderUnsub) {
+            reminderUnsub();
+            reminderUnsubscribersRef.current.delete(tripId);
         }
     }, []);
 
@@ -265,6 +303,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
                     subscribeToGroups(trip.id);
                     subscribeToCards(trip.id);
                     subscribeToExpenses(trip.id);
+                    subscribeToReminders(trip.id);
                 });
 
                 return {
@@ -299,6 +338,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
                     subscribeToGroups(trip.id);
                     subscribeToCards(trip.id);
                     subscribeToExpenses(trip.id);
+                    subscribeToReminders(trip.id);
                 });
 
                 return {
@@ -317,7 +357,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         return () => {
             cleanupListeners();
         };
-    }, [user?.email, user?.uid, cleanupListeners, subscribeToDashboards, subscribeToGroups, subscribeToCards, subscribeToExpenses]);
+    }, [user?.email, user?.uid, cleanupListeners, subscribeToDashboards, subscribeToGroups, subscribeToCards, subscribeToExpenses, subscribeToReminders]);
 
     // CRUD operations
     const saveTrip = useCallback(async (trip: Trip) => {
@@ -379,6 +419,13 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         const expensesRef = collection(db, `trips/${tripId}/expenses`);
         const expensesSnapshot = await getDocs(expensesRef);
         expensesSnapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        // 5. Delete all reminders
+        const remindersRef = collection(db, `trips/${tripId}/reminders`);
+        const remindersSnapshot = await getDocs(remindersRef);
+        remindersSnapshot.docs.forEach(doc => {
             batch.delete(doc.ref);
         });
 
@@ -476,7 +523,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
     const saveExpense = useCallback(async (tripId: string, expense: Expense) => {
         const { id: _, ...expenseRest } = expense;
         const expenseData = expenseRest as Record<string, unknown>;
-        
+
         // Ensure tripId is set in the data
         expenseData.tripId = tripId;
 
@@ -485,6 +532,17 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
 
     const deleteExpense = useCallback(async (tripId: string, expenseId: string) => {
         await deleteDoc(doc(db, `trips/${tripId}/expenses`, expenseId));
+    }, []);
+
+    const saveReminder = useCallback(async (tripId: string, reminder: Reminder) => {
+        const { id: _, ...reminderRest } = reminder;
+        const reminderData = reminderRest as Record<string, unknown>;
+        reminderData.tripId = tripId;
+        await setDoc(doc(db, `trips/${tripId}/reminders`, reminder.id), reminderData, { merge: true });
+    }, []);
+
+    const deleteReminder = useCallback(async (tripId: string, reminderId: string) => {
+        await deleteDoc(doc(db, `trips/${tripId}/reminders`, reminderId));
     }, []);
 
     return {
@@ -499,5 +557,7 @@ export const useRealtimeSync = (): UseRealtimeSyncReturn => {
         deleteCard,
         saveExpense,
         deleteExpense,
+        saveReminder,
+        deleteReminder,
     };
 };

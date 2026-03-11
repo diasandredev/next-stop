@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { Card, Trip, Dashboard, AccountSettings } from '@/types/kanban';
+import { Card, Trip, Dashboard, AccountSettings, Reminder } from '@/types/kanban';
 import { Group } from '@/types/group';
 import { Expense } from '@/types/finance';
 
@@ -40,6 +40,10 @@ export interface KanbanContextType {
 
   saveExpense: (tripId: string, expense: Expense) => Promise<void>;
   deleteExpense: (tripId: string, expenseId: string) => Promise<void>;
+
+  reminders: Reminder[];
+  saveReminder: (tripId: string, reminder: Reminder) => Promise<void>;
+  deleteReminder: (tripId: string, reminderId: string) => Promise<void>;
 }
 
 

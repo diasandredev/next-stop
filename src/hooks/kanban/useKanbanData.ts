@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Trip, Dashboard, AccountSettings } from '@/types/kanban';
+import { Card, Trip, Dashboard, AccountSettings, Reminder } from '@/types/kanban';
 import { Group } from '@/types/group';
 import { Expense } from '@/types/finance';
 import { useAuth } from '../../contexts/AuthContext';
@@ -28,7 +28,10 @@ export const useKanbanData = () => {
         saveCard,
         deleteCard,
         saveExpense,
-        deleteExpense
+        deleteExpense,
+        reminders: syncReminders,
+        saveReminder,
+        deleteReminder
     } = useRealtimeSync();
 
     const [isLoading, setIsLoading] = useState(true);
@@ -39,6 +42,7 @@ export const useKanbanData = () => {
     const [dashboards, setDashboards] = useState<Dashboard[]>([]);
     const [groups, setGroups] = useState<Group[]>([]);
     const [expenses, setExpenses] = useState<Expense[]>([]);
+    const [reminders, setReminders] = useState<Reminder[]>([]);
 
     const [accountSettings, setAccountSettings] = useState<AccountSettings | null>(null);
     const [currentTripId, setCurrentTripId] = useState<string>('1');
@@ -54,6 +58,7 @@ export const useKanbanData = () => {
                 const dbDashboards = await db.getDashboards();
                 const dbGroups = await db.getGroups();
                 const dbExpenses = await db.getExpenses();
+                const dbReminders = await db.getReminders();
                 const dbSettings = await db.getAccountSettings();
                 const dbCurrentTripId = await db.getLastTripId();
 
@@ -70,9 +75,13 @@ export const useKanbanData = () => {
                 if (dbGroups.length > 0) {
                     setGroups(dbGroups);
                 }
-                
+
                 if (dbExpenses.length > 0) {
                     setExpenses(dbExpenses);
+                }
+
+                if (dbReminders.length > 0) {
+                    setReminders(dbReminders);
                 }
 
                 if (dbSettings) {
@@ -111,6 +120,7 @@ export const useKanbanData = () => {
             setGroups(syncGroups);
             setCards(syncCards);
             setExpenses(syncExpenses);
+            setReminders(syncReminders);
 
             // Persist to IndexedDB for offline support
             const persistToLocal = async () => {
@@ -125,14 +135,17 @@ export const useKanbanData = () => {
 
                 // Cards
                 await db.syncCards(syncCards);
-                
+
                 // Expenses
                 await db.syncExpenses(syncExpenses);
+
+                // Reminders
+                await db.syncReminders(syncReminders);
             };
 
             persistToLocal();
         }
-    }, [syncTrips, syncDashboards, syncGroups, syncCards, syncExpenses, isSyncLoading, user]);
+    }, [syncTrips, syncDashboards, syncGroups, syncCards, syncExpenses, syncReminders, isSyncLoading, user]);
 
     // Persistence Effects for AccountSettings (Local DB + Firestore)
 
@@ -185,7 +198,10 @@ export const useKanbanData = () => {
         deleteCard,
         expenses,
         saveExpense,
-        deleteExpense
+        deleteExpense,
+        reminders,
+        saveReminder,
+        deleteReminder
     };
 };
 

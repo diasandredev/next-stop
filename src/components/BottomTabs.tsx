@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Map, Wallet, PanelRight, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Map, Wallet, PanelRight, ChevronDown, ListChecks } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BottomTabsProps {
@@ -16,6 +16,7 @@ export function BottomTabs({ currentTripId, onOpenTripSelector, onOpenDashboardS
   const isOnMap = location.pathname === '/map';
   const isOnBoard = location.pathname === '/board';
   const isOnExpenses = location.pathname === '/expenses';
+  const isOnReminders = location.pathname === '/reminders';
 
 
   const handleBoardClick = () => {
@@ -103,13 +104,34 @@ export function BottomTabs({ currentTripId, onOpenTripSelector, onOpenDashboardS
           <span className="text-[10px] font-medium">Groups</span>
         </button>
 
-        {/* Expenses Tab - Disabled */}
+        {/* Reminders Tab */}
         <button
-          disabled
-          className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-muted-foreground/30 cursor-not-allowed"
+          onClick={() => {
+            if (!currentTripId && onOpenTripSelector) {
+              onOpenTripSelector();
+            } else {
+              navigate('/reminders');
+            }
+          }}
+          className={cn(
+            'flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors relative',
+            isOnReminders && currentTripId
+              ? 'text-primary'
+              : !currentTripId
+                ? 'text-amber-500'
+                : 'text-muted-foreground'
+          )}
         >
-          <Wallet className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Expenses</span>
+          <div className="relative">
+            <ListChecks className="w-5 h-5" />
+            {!currentTripId && (
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full" />
+            )}
+          </div>
+          <span className="text-[10px] font-medium">Reminders</span>
+          {isOnReminders && (
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />
+          )}
         </button>
 
 

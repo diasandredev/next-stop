@@ -12,7 +12,8 @@ import {
     LayoutDashboard,
     Wallet,
     Utensils,
-    Compass
+    Compass,
+    ListChecks
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -311,17 +312,41 @@ export function Sidebar({
                                             )}
                                         </div>
 
-                                        {/* Expenses - Disabled State */}
-                                        <div className="relative group/disabled">
-                                            <button
-                                                disabled
-                                                className="w-full flex items-center gap-3 p-2 rounded-lg text-sm text-muted-foreground/30 cursor-not-allowed"
-                                            >
-                                                <Wallet className="w-4 h-4" />
-                                                <span className="flex-1 text-left">Expenses</span>
-                                            </button>
-                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] uppercase tracking-widest text-muted-foreground/40 border border-white/5 px-1 rounded bg-black/20">Soon</span>
-                                        </div>
+                                        {/* Reminders */}
+                                        <button
+                                            onClick={() => {
+                                                setCurrentTripId(trip.id);
+                                                navigate('/reminders');
+                                                onClose?.();
+                                            }}
+                                            className={cn(
+                                                "w-full flex items-center gap-3 p-2 rounded-lg text-sm transition-all duration-200",
+                                                location.pathname === '/reminders' && isTripActive
+                                                    ? "text-foreground font-medium bg-accent"
+                                                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                                            )}
+                                        >
+                                            <ListChecks className="w-4 h-4" />
+                                            Reminders
+                                        </button>
+
+                                        {/* Expenses */}
+                                        <button
+                                            onClick={() => {
+                                                setCurrentTripId(trip.id);
+                                                navigate('/expenses');
+                                                onClose?.();
+                                            }}
+                                            className={cn(
+                                                "w-full flex items-center gap-3 p-2 rounded-lg text-sm transition-all duration-200",
+                                                location.pathname === '/expenses' && isTripActive
+                                                    ? "text-foreground font-medium bg-accent"
+                                                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                                            )}
+                                        >
+                                            <Wallet className="w-4 h-4" />
+                                            Expenses
+                                        </button>
 
                                         {/* Restaurants - Disabled State */}
                                         <div className="relative group/disabled">

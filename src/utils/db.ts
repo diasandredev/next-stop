@@ -1,5 +1,5 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
-import { Card, Trip, Dashboard, AccountSettings } from '@/types/kanban';
+import { Card, Trip, Dashboard, AccountSettings, Reminder } from '@/types/kanban';
 import { Group } from '@/types/group';
 import { Expense } from '@/types/finance';
 import { v4 as uuidv4 } from 'uuid';
@@ -25,6 +25,10 @@ interface NextStopDB extends DBSchema {
         key: string;
         value: Expense;
     };
+    reminders: {
+        key: string;
+        value: Reminder;
+    };
     // Legacy store for migration, will be deleted or ignored
     // tables removed
 
@@ -39,7 +43,7 @@ interface NextStopDB extends DBSchema {
 }
 
 const DB_NAME = 'next-stop-db';
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 let _dbPromise: Promise<IDBPDatabase<NextStopDB>> | null = null;
 
@@ -81,6 +85,11 @@ function getDB() {
                 if (oldVersion < 5) {
                     // Add expenses store
                     db.createObjectStore('expenses', { keyPath: 'id' });
+                }
+
+                if (oldVersion < 6) {
+                    // Add reminders store
+                    db.createObjectStore('reminders', { keyPath: 'id' });
                 }
             },
             terminated() {
@@ -247,6 +256,37 @@ export const db = {
 
         for (const e of expenses) {
             await store.put(e);
+        }
+
+        await tx.done;
+    },
+
+    // Reminders
+    async getReminders(): Promise<Reminder[]> {
+        return (await getDB()).getAll('reminders');
+    },
+    async saveReminder(reminder: Reminder): Promise<void> {
+        await (await getDB()).put('reminders', reminder);
+    },
+    async deleteReminder(id: string): Promise<void> {
+        await (await getDB()).delete('reminders', id);
+    },
+    async syncReminders(reminders: Reminder[]): Promise<void> {
+        const db = await getDB();
+        const tx = db.transaction('reminders', 'readwrite');
+        const store = tx.objectStore('reminders');
+
+        const existingKeys = await store.getAllKeys();
+        const incomingIds = new Set(reminders.map(r => r.id));
+
+        for (const key of existingKeys) {
+            if (!incomingIds.has(key)) {
+                await store.delete(key);
+            }
+        }
+
+        for (const r of reminders) {
+            await store.put(r);
         }
 
         await tx.done;

@@ -18,7 +18,7 @@ export interface Card {
   completed?: boolean; // Task completion status
   completedAt?: string; // ISO date string when task was completed
   time?: string; // Optional time for the card (HH:mm)
-  
+
   // Cost tracking
   cost?: number;
   currency?: string;
@@ -48,6 +48,25 @@ export interface ChecklistItem {
   id: string;
   text: string;
   completed: boolean;
+}
+
+export interface ReminderItem {
+  id: string;
+  type: 'text' | 'check';
+  content: string;
+  completed?: boolean;
+  // Card linkage (optional)
+  cardId?: string;
+  cardTitle?: string;
+  dashboardId?: string;
+}
+
+export interface Reminder {
+  id: string;
+  tripId: string;
+  items: ReminderItem[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface WeekData {

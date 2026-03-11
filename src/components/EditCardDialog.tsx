@@ -5,8 +5,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Card, ChecklistItem } from "@/types/kanban";
+import { Card, ChecklistItem, Reminder, ReminderItem } from "@/types/kanban";
 import { useKanban } from "@/contexts/KanbanContext";
+import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,8 @@ import {
   CheckSquare,
   Plus,
   X,
+  Bell,
+  BellRing,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -64,7 +67,7 @@ export const EditCardDialog = ({
   onOpenChange,
   card,
 }: EditCardDialogProps) => {
-  const { updateCard, deleteCard } = useKanban();
+  const { updateCard, deleteCard, saveReminder, reminders, currentTripId } = useKanban();
   const [title, setTitle] = useState(card.title);
   const [icon, setIcon] = useState(card.icon);
   const [description, setDescription] = useState(card.description || "");
@@ -157,6 +160,44 @@ export const EditCardDialog = ({
   const deleteChecklistItem = (itemId: string) => {
     setChecklist(checklist.filter((item) => item.id !== itemId));
     dirtyRef.current = true;
+  };
+
+  const sendToReminders = (item: ChecklistItem) => {
+    const now = new Date().toISOString();
+    const tripReminder = reminders.find(r => r.tripId === currentTripId);
+    const newReminderItem: ReminderItem = {
+      id: crypto.randomUUID(),
+      type: 'check',
+      content: item.text,
+      completed: item.completed,
+      cardId: card.id,
+      cardTitle: title || card.title,
+      dashboardId: card.dashboardId,
+    };
+
+    if (tripReminder) {
+      saveReminder(currentTripId, {
+        ...tripReminder,
+        items: [...tripReminder.items, newReminderItem],
+        updatedAt: now,
+      });
+    } else {
+      saveReminder(currentTripId, {
+        id: crypto.randomUUID(),
+        tripId: currentTripId,
+        items: [newReminderItem],
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+  };
+
+  const isInReminders = (item: ChecklistItem) => {
+    const tripReminder = reminders.find(r => r.tripId === currentTripId);
+    if (!tripReminder) return false;
+    return tripReminder.items.some(
+      ri => ri.cardId === card.id && ri.content === item.text
+    );
   };
 
   const handleDiscardChanges = () => {
@@ -497,6 +538,24 @@ export const EditCardDialog = ({
                     >
                       {item.text}
                     </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => sendToReminders(item)}
+                      disabled={isInReminders(item)}
+                      className={cn(
+                        "h-6 w-6 transition-opacity",
+                        isInReminders(item)
+                          ? "text-primary opacity-100 cursor-default"
+                          : "text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100"
+                      )}
+                    >
+                      {isInReminders(item) ? (
+                        <BellRing className="w-3.5 h-3.5" />
+                      ) : (
+                        <Bell className="w-3.5 h-3.5" />
+                      )}
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"

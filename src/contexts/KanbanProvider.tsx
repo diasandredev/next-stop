@@ -23,7 +23,9 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode }> = ({ children
         saveDashboard, deleteDashboard,
         saveGroup, deleteGroup,
         saveCard, deleteCard,
-        saveExpense, deleteExpense
+        saveExpense, deleteExpense,
+        reminders,
+        saveReminder, deleteReminder
     } = useKanbanData();
 
 
@@ -143,7 +145,10 @@ const KanbanInnerProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCards, // Still exposed in context?
         expenses,
         saveExpense,
-        deleteExpense
+        deleteExpense,
+        reminders,
+        saveReminder,
+        deleteReminder
     };
 
     return (

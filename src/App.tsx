@@ -14,6 +14,7 @@ const Login = React.lazy(() => import("./pages/Login"));
 const Board = React.lazy(() => import("./pages/Board"));
 const TripMap = React.lazy(() => import("./pages/TripMap"));
 const Expenses = React.lazy(() => import("./pages/Expenses"));
+const Reminders = React.lazy(() => import("./pages/Reminders"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 // Removed Index as requested in plan
 
@@ -38,7 +39,7 @@ const App = () => (
                 {/* Public Routes */}
                 <Route path="/" element={<Login />} />
                 <Route path="/login" element={<Navigate to="/" replace />} />
-                
+
                 {/* Protected Routes */}
                 <Route element={
                   <ProtectedRoute>
@@ -48,6 +49,7 @@ const App = () => (
                   <Route path="/board" element={<Board />} />
                   <Route path="/map" element={<TripMap />} />
                   <Route path="/expenses" element={<Expenses />} />
+                  <Route path="/reminders" element={<Reminders />} />
                 </Route>
 
                 {/* Catch-all */}
