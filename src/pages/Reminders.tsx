@@ -10,6 +10,8 @@ import {
     GripVertical,
     Type,
     CheckSquare,
+    Clock,
+    MapPin,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -21,7 +23,7 @@ import {
 } from '@/components/ui/tooltip';
 
 const Reminders = () => {
-    const { currentTripId, reminders, saveReminder, cards } = useKanban();
+    const { currentTripId, reminders, saveReminder, cards, dashboards } = useKanban();
 
     // Find the reminder doc for the current trip
     const reminder = useMemo(
@@ -194,6 +196,26 @@ const Reminders = () => {
         [cards]
     );
 
+    // Get dashboard name (city) for a reminder item
+    const getDashboardName = useCallback(
+        (dashboardId?: string) => {
+            if (!dashboardId) return null;
+            const dashboard = dashboards.find(d => d.id === dashboardId);
+            return dashboard?.name || null;
+        },
+        [dashboards]
+    );
+
+    // Get card time for a reminder item
+    const getCardTime = useCallback(
+        (cardId?: string) => {
+            if (!cardId) return null;
+            const card = cards.find(c => c.id === cardId);
+            return card?.time || null;
+        },
+        [cards]
+    );
+
     // Check if item is the first 'check' item after a 'text' heading (for indentation)
     const isUnderHeading = useCallback(
         (index: number) => {
@@ -300,18 +322,36 @@ const Reminders = () => {
                                     <div className="mt-2 flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center" />
                                 )}
 
-                                {/* Card title badge */}
-                                {item.cardId && item.cardTitle && (
-                                    <button
-                                        onClick={() => {
-                                            const card = findCard(item.cardId!);
-                                            if (card) setEditingCard(card);
-                                        }}
-                                        className="mt-1.5 flex-shrink-0 text-[11px] font-medium text-primary/70 bg-primary/8 hover:bg-primary/15 px-1.5 py-0.5 rounded transition-colors cursor-pointer whitespace-nowrap"
-                                    >
-                                        [{item.cardTitle}]
-                                    </button>
-                                )}
+                                {/* Card info badges: city, title, time */}
+                                {item.cardId && item.cardTitle && (() => {
+                                    const cityName = getDashboardName(item.dashboardId);
+                                    const cardTime = getCardTime(item.cardId);
+                                    return (
+                                        <div className="mt-1.5 flex items-center gap-1 flex-shrink-0">
+                                            {cityName && (
+                                                <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground/70 bg-muted/40 px-1.5 py-0.5 rounded whitespace-nowrap">
+                                                    <MapPin className="w-2.5 h-2.5" />
+                                                    {cityName}
+                                                </span>
+                                            )}
+                                            <button
+                                                onClick={() => {
+                                                    const card = findCard(item.cardId!);
+                                                    if (card) setEditingCard(card);
+                                                }}
+                                                className="text-[11px] font-medium text-primary/70 bg-primary/8 hover:bg-primary/15 px-1.5 py-0.5 rounded transition-colors cursor-pointer whitespace-nowrap"
+                                            >
+                                                [{item.cardTitle}]
+                                            </button>
+                                            {cardTime && (
+                                                <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground/60 whitespace-nowrap">
+                                                    <Clock className="w-2.5 h-2.5" />
+                                                    {cardTime}
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                                })()}
 
                                 {/* Content input */}
                                 <input
