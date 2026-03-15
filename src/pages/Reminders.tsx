@@ -12,8 +12,11 @@ import {
     CheckSquare,
     Clock,
     MapPin,
+    Calendar,
+    Navigation,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { format, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import {
     Tooltip,
@@ -216,6 +219,31 @@ const Reminders = () => {
         [cards]
     );
 
+    // Get card date for a reminder item
+    const getCardDate = useCallback(
+        (cardId?: string) => {
+            if (!cardId) return null;
+            const card = cards.find(c => c.id === cardId);
+            if (!card?.date) return null;
+            try {
+                return format(parseISO(card.date), 'dd/MM');
+            } catch {
+                return null;
+            }
+        },
+        [cards]
+    );
+
+    // Get card Google location for a reminder item
+    const getCardLocation = useCallback(
+        (cardId?: string) => {
+            if (!cardId) return null;
+            const card = cards.find(c => c.id === cardId);
+            return card?.location || null;
+        },
+        [cards]
+    );
+
     // Check if item is the first 'check' item after a 'text' heading (for indentation)
     const isUnderHeading = useCallback(
         (index: number) => {
@@ -322,12 +350,14 @@ const Reminders = () => {
                                     <div className="mt-2 flex-shrink-0 w-[18px] h-[18px] flex items-center justify-center" />
                                 )}
 
-                                {/* Card info badges: city, title, time */}
+                                {/* Card info badges: city, title, location, date, time */}
                                 {item.cardId && item.cardTitle && (() => {
                                     const cityName = getDashboardName(item.dashboardId);
                                     const cardTime = getCardTime(item.cardId);
+                                    const cardDate = getCardDate(item.cardId);
+                                    const cardLocation = getCardLocation(item.cardId);
                                     return (
-                                        <div className="mt-1.5 flex items-center gap-1 flex-shrink-0">
+                                        <div className="mt-1.5 flex items-center gap-1 flex-shrink-0 flex-wrap">
                                             {cityName && (
                                                 <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground/70 bg-muted/40 px-1.5 py-0.5 rounded whitespace-nowrap">
                                                     <MapPin className="w-2.5 h-2.5" />
@@ -343,6 +373,18 @@ const Reminders = () => {
                                             >
                                                 [{item.cardTitle}]
                                             </button>
+                                            {cardLocation && (
+                                                <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-emerald-600/70 bg-emerald-500/8 px-1.5 py-0.5 rounded whitespace-nowrap">
+                                                    <Navigation className="w-2.5 h-2.5" />
+                                                    {cardLocation.name}
+                                                </span>
+                                            )}
+                                            {cardDate && (
+                                                <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground/60 whitespace-nowrap">
+                                                    <Calendar className="w-2.5 h-2.5" />
+                                                    {cardDate}
+                                                </span>
+                                            )}
                                             {cardTime && (
                                                 <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground/60 whitespace-nowrap">
                                                     <Clock className="w-2.5 h-2.5" />
