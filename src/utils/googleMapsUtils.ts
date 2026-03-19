@@ -6,6 +6,8 @@ interface Location {
     lat: number;
     lng: number;
     placeId?: string;
+    name?: string;
+    address?: string;
 }
 
 /**
@@ -13,7 +15,7 @@ interface Location {
  * @param locations Array of locations with lat/lng coordinates and optional placeId
  * @returns Google Maps directions URL or null if no locations provided
  */
-export function createGoogleMapsRouteUrl(locations: Array<{ lat: number; lng: number; placeId?: string }>): string | null {
+export function createGoogleMapsRouteUrl(locations: Array<Location>): string | null {
     if (!locations || locations.length === 0) {
         return null;
     }
@@ -21,10 +23,12 @@ export function createGoogleMapsRouteUrl(locations: Array<{ lat: number; lng: nu
     // Single location - use placeId if available for better display
     if (locations.length === 1) {
         const loc = locations[0];
+        const queryText = loc.name || loc.address || `${loc.lat},${loc.lng}`;
+        
         if (loc.placeId) {
-            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('Google')}&query_place_id=${loc.placeId}`;
+            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryText)}&query_place_id=${loc.placeId}`;
         }
-        return `https://www.google.com/maps/search/?api=1&query=${loc.lat}%2C${loc.lng}`;
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryText)}`;
     }
 
     // Multiple locations - create a route using coordinates
@@ -53,11 +57,13 @@ export function createGoogleMapsRouteUrl(locations: Array<{ lat: number; lng: nu
  * @returns Google Maps location URL
  */
 export function createGoogleMapsLocationUrl(location: Location): string {
+    const queryText = location.name || location.address || `${location.lat},${location.lng}`;
+
     // Prefer placeId for more accurate results
     if (location.placeId) {
-        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('Google')}&query_place_id=${location.placeId}`;
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryText)}&query_place_id=${location.placeId}`;
     }
 
     // Fallback to coordinates
-    return `https://www.google.com/maps/search/?api=1&query=${location.lat}%2C${location.lng}`;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryText)}`;
 }

@@ -43,21 +43,34 @@ export const generateTripPDF = (trip: Trip, dashboards: Dashboard[], cards: Card
       const tableBody = cardList.map(card => {
           addToTotals(card);
           
-          const checklistInfo = card.checklist && card.checklist.length > 0
-              ? `\nChecklist: ${card.checklist.filter(i => i.completed).length}/${card.checklist.length}` 
-              : '';
+          let activityText = card.title;
+
+          if (card.location?.name) {
+              activityText += `\nLocation: ${card.location.name}`;
+          }
+
+          if (card.description) {
+              activityText += `\nDescription: ${card.description}`;
+          }
+          
+          if (card.checklist && card.checklist.length > 0) {
+              activityText += `\nChecklist (${card.checklist.filter(i => i.completed).length}/${card.checklist.length}):`;
+              card.checklist.forEach(item => {
+                  activityText += `\n  - ${item.completed ? '[x]' : '[ ]'} ${item.text}`;
+              });
+          }
           
           return [
               card.time || '-',
-              card.title + checklistInfo,
+              activityText,
               card.cost ? `${card.currency || '$'} ${card.cost}` : '-',
-              card.notes || ''
+              card.notes || '-'
           ];
        });
 
        autoTable(doc, {
           startY: yPos,
-          head: [['Time', 'Activity', 'Cost', 'Notes']],
+          head: [['Time', 'Activity Details', 'Cost', 'Notes']],
           body: tableBody,
           theme: 'grid',
           styles: { fontSize: 10 },
@@ -65,7 +78,7 @@ export const generateTripPDF = (trip: Trip, dashboards: Dashboard[], cards: Card
           columnStyles: {
               0: { cellWidth: 20 },
               1: { cellWidth: 'auto' }, // Activity
-              2: { cellWidth: 30 }, // Cost
+              2: { cellWidth: 25 }, // Cost
               3: { cellWidth: 50 }  // Notes
           },
           margin: { top: 10 },
